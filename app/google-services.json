@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "1071341294431",
+    "firebase_url": "https://project-25f73.firebaseio.com",
+    "project_id": "project-25f73",
+    "storage_bucket": "project-25f73.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1071341294431:android:813420e8026562adee9cea",
+        "android_client_info": {
+          "package_name": "com.shotball.project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1071341294431-q8h7hddqpaj6pvi2g06r91ns77ojkkgb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shotball.project",
+            "certificate_hash": "3bef8e93523f72eb2dc806d00e76deb703e94c83"
+          }
+        },
+        {
+          "client_id": "1071341294431-6mh9h2u6k5jg2gaaat0cbb6buq7vpvdf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shotball.project",
+            "certificate_hash": "39103d0496c562fd5f37da40e4adad9c14ece3af"
+          }
+        },
+        {
+          "client_id": "1071341294431-548uss2ksig8btupafc65u2dhg9pcm84.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCt7R-aS55L9dI7vMXrU9P2UA94r1xlXT4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1071341294431-548uss2ksig8btupafc65u2dhg9pcm84.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

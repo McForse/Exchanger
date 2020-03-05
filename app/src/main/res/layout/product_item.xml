@@ -1,0 +1,43 @@
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/product"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/product_grid_item_margin"
+    android:orientation="vertical"
+    app:cardElevation="@dimen/cardview_default_elevation"
+    tools:ignore="PrivateResource">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/product_card_inner_padding">
+
+        <com.android.volley.toolbox.NetworkImageView
+            android:id="@+id/productImage"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/product_image_height"
+            android:layout_gravity="center"
+            android:scaleType="fitCenter"/>
+
+        <!--<ImageView
+            android:id="@+id/productImage"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/product_image_height"
+            android:layout_gravity="center"
+            android:scaleType="fitCenter" />-->
+
+        <TextView
+            android:id="@+id/productName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:textColor="@color/colorAccent"
+            android:text="Name" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
