@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.shotball.project.R;
-import com.shotball.project.Utils.ImageRequester;
 import com.shotball.project.adapters.ProductAdapter;
 import com.shotball.project.models.Product;
 
@@ -33,7 +32,6 @@ import java.util.List;
 import static com.android.volley.VolleyLog.TAG;
 
 public class HomeFragment extends Fragment {
-    private ImageRequester imageRequester;
     private List<Product> productsList;
 
     RecyclerView recyclerView;
@@ -50,14 +48,12 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
-        Log.w("HOMEFRAGMENT", "Created");
-        imageRequester = ImageRequester.getInstance(getActivity());
         initProductList();
         //initItemGrid();
         recyclerView = view.findViewById(R.id.productGrid);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 2));
-        recyclerView.setAdapter(new ProductAdapter(getActivity(), productsList, imageRequester));
+        recyclerView.setAdapter(new ProductAdapter(getActivity(), productsList));
 
         return view;
     }

@@ -3,6 +3,7 @@ package com.shotball.project.activities;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,7 +13,6 @@ import android.view.MenuItem;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.shotball.project.R;
-import com.shotball.project.ViewPagers.BottomNavigationViewPager;
 import com.shotball.project.adapters.FragmentViewPagerAdapter;
 import com.shotball.project.fragments.AccountFragment;
 import com.shotball.project.fragments.FavoritesFragment;
@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private BottomNavigationViewPager viewPager;
+    private ViewPager2 viewPager;
     private FragmentViewPagerAdapter adapter;
 
     @Override
@@ -38,13 +38,15 @@ public class MainActivity extends AppCompatActivity {
         bottomNav.setOnNavigationItemSelectedListener(navListener);
 
         viewPager = findViewById(R.id.view_pager);
-        adapter = new FragmentViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new HomeFragment(), "HomeFragment");
-        adapter.addFragment(new FavoritesFragment(), "FavoritesFragment");
-        adapter.addFragment(new MessagesFragment(), "MessagesFragment");
-        adapter.addFragment(new AccountFragment(), "AccountFragment");
+        adapter = new FragmentViewPagerAdapter(getSupportFragmentManager(), getLifecycle());
+        adapter.addFragment(new HomeFragment());
+        adapter.addFragment(new FavoritesFragment());
+        adapter.addFragment(new MessagesFragment());
+        adapter.addFragment(new AccountFragment());
+        viewPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
         viewPager.setAdapter(adapter);
-        viewPager.setCurrentItem(0);
+        viewPager.setUserInputEnabled(false);
+        viewPager.setCurrentItem(0, false);
     }
 
     private void initToolbar() {
@@ -58,16 +60,16 @@ public class MainActivity extends AppCompatActivity {
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                     switch (item.getItemId()) {
                         case R.id.nav_home:
-                            viewPager.setCurrentItem(0);
+                            viewPager.setCurrentItem(0, false);
                             break;
                         case R.id.nav_favorites:
-                            viewPager.setCurrentItem(1);
+                            viewPager.setCurrentItem(1, false);
                             break;
                         case R.id.nav_messages:
-                            viewPager.setCurrentItem(2);
+                            viewPager.setCurrentItem(2, false);
                             break;
                         case R.id.nav_account:
-                            viewPager.setCurrentItem(3);
+                            viewPager.setCurrentItem(3, false);
                             break;
                     }
 

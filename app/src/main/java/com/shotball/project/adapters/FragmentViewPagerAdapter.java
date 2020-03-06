@@ -1,68 +1,50 @@
 package com.shotball.project.adapters;
 
-import android.util.SparseArray;
-import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.lifecycle.Lifecycle;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import java.lang.ref.WeakReference;
+import com.shotball.project.fragments.AccountFragment;
+import com.shotball.project.fragments.FavoritesFragment;
+import com.shotball.project.fragments.HomeFragment;
+import com.shotball.project.fragments.MessagesFragment;
+
 import java.util.ArrayList;
-import java.util.List;
 
-public class FragmentViewPagerAdapter extends FragmentPagerAdapter {
+public class FragmentViewPagerAdapter extends FragmentStateAdapter {
 
-    private final SparseArray<WeakReference<Fragment>> instantiatedFragments = new SparseArray<>();
-    private final List<Fragment> mFragmentList = new ArrayList<>();
-    private final List<String> mFragmentTitleList = new ArrayList<>();
+    private ArrayList<Fragment> mFragmentList = new ArrayList<>();
 
-    public FragmentViewPagerAdapter(@NonNull FragmentManager fm) {
-        super(fm);
+    public FragmentViewPagerAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle) {
+        super(fragmentManager, lifecycle);
+    }
+
+    public void addFragment(Fragment fragment) {
+        mFragmentList.add(fragment);
     }
 
     @Override
-    public Fragment getItem(int position) {
-        return mFragmentList.get(position);
-    }
-
-    @Override
-    public int getCount() {
+    public int getItemCount() {
         return mFragmentList.size();
     }
 
-    public void addFragment(Fragment fragment, String title) {
-        mFragmentList.add(fragment);
-        mFragmentTitleList.add(title);
-    }
-
+    @NonNull
     @Override
-    public Object instantiateItem(ViewGroup container, int position) {
-        final Fragment fragment = (Fragment) super.instantiateItem(container, position);
-        instantiatedFragments.put(position, new WeakReference<>(fragment));
-        return fragment;
-    }
+    public Fragment createFragment(int position) {
+        switch (position) {
+            case 0:
+                return new HomeFragment();
+            case 1:
+                return new FavoritesFragment();
+            case 2:
+                return new MessagesFragment();
+            case 3:
+                return new AccountFragment();
 
-    @Override
-    public void destroyItem(ViewGroup container, int position, Object object) {
-        instantiatedFragments.remove(position);
-        super.destroyItem(container, position, object);
-    }
-
-    @Nullable
-    Fragment getFragment(final int position) {
-        final WeakReference<Fragment> wr = instantiatedFragments.get(position);
-        if (wr != null) {
-            return wr.get();
-        } else {
-            return null;
         }
-    }
 
-    @Override
-    public CharSequence getPageTitle(int position) {
-        return mFragmentTitleList.get(position);
+        return null;
     }
 }
