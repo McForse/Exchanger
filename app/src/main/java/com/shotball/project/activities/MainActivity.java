@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -21,9 +22,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private ViewPager2 viewPager;
-    private FragmentViewPagerAdapter adapter;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,11 +32,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initComponents() {
-        BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-        bottomNav.setOnNavigationItemSelectedListener(navListener);
-
-        viewPager = findViewById(R.id.view_pager);
-        adapter = new FragmentViewPagerAdapter(getSupportFragmentManager(), getLifecycle());
+        ViewPager2 viewPager = findViewById(R.id.view_pager);
+        FragmentViewPagerAdapter adapter = new FragmentViewPagerAdapter(getSupportFragmentManager(), getLifecycle());
         adapter.addFragment(new HomeFragment());
         adapter.addFragment(new FavoritesFragment());
         adapter.addFragment(new MessagesFragment());
@@ -47,30 +42,9 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setUserInputEnabled(false);
         viewPager.setAdapter(adapter);
         viewPager.setCurrentItem(0, false);
+
+        new BottomNavigationHandler(this, viewPager);
     }
-
-    private BottomNavigationView.OnNavigationItemSelectedListener navListener =
-            new BottomNavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                    switch (item.getItemId()) {
-                        case R.id.nav_home:
-                            viewPager.setCurrentItem(0, false);
-                            break;
-                        case R.id.nav_favorites:
-                            viewPager.setCurrentItem(1, false);
-                            break;
-                        case R.id.nav_messages:
-                            viewPager.setCurrentItem(2, false);
-                            break;
-                        case R.id.nav_account:
-                            viewPager.setCurrentItem(3, false);
-                            break;
-                    }
-
-                    return true;
-                }
-            };
 
     private void checkAuthState() {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
@@ -80,4 +54,35 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+}
+
+class BottomNavigationHandler implements BottomNavigationView.OnNavigationItemSelectedListener {
+
+    private ViewPager2 viewPager;
+
+    BottomNavigationHandler(Activity activity, ViewPager2 viewPager) {
+        this.viewPager = viewPager;
+        BottomNavigationView bottomNav = activity.findViewById(R.id.bottom_navigation);
+        bottomNav.setOnNavigationItemSelectedListener(this);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.nav_home:
+                viewPager.setCurrentItem(0, false);
+                break;
+            case R.id.nav_favorites:
+                viewPager.setCurrentItem(1, false);
+                break;
+            case R.id.nav_messages:
+                viewPager.setCurrentItem(2, false);
+                break;
+            case R.id.nav_account:
+                viewPager.setCurrentItem(3, false);
+                break;
+        }
+
+        return true;
+    }
 }
