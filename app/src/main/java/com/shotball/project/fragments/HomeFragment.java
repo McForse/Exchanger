@@ -1,20 +1,29 @@
 package com.shotball.project.fragments;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.shotball.project.R;
+import com.shotball.project.activities.SignInActivity;
 import com.shotball.project.adapters.ProductAdapter;
 import com.shotball.project.models.Product;
 
@@ -34,20 +43,16 @@ import static com.android.volley.VolleyLog.TAG;
 public class HomeFragment extends Fragment {
     private List<Product> productsList;
 
-    RecyclerView recyclerView;
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null) {
-            //Restore the fragment's state here
-        }
-    }
+    private RecyclerView recyclerView;
+    private View view;
+    private Activity activity;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_home, container, false);
+        view = inflater.inflate(R.layout.fragment_home, container, false);
+        activity = getActivity();
+        initToolbar();
         initProductList();
         //initItemGrid();
         recyclerView = view.findViewById(R.id.productGrid);
@@ -56,6 +61,12 @@ public class HomeFragment extends Fragment {
         recyclerView.setAdapter(new ProductAdapter(getActivity(), productsList));
 
         return view;
+    }
+
+    private void initToolbar() {
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        ((AppCompatActivity)activity).setSupportActionBar(toolbar);
+        setHasOptionsMenu(true);
     }
 
     private void initProductList() {
@@ -85,5 +96,27 @@ public class HomeFragment extends Fragment {
 
     private void initItemGrid() {
 
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        activity.getMenuInflater().inflate(R.menu.menu_main, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int i = item.getItemId();
+
+        if (i == R.id.action_logout) {
+            FirebaseAuth.getInstance().signOut();
+            startActivity(new Intent(getActivity(), SignInActivity.class));
+            activity.finish();
+            return true;
+        } else if (i == R.id.action_filter) {
+            //TODO
+            return super.onOptionsItemSelected(item);
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
     }
 }
