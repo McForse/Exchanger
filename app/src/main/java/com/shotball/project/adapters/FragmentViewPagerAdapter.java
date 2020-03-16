@@ -6,11 +6,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.shotball.project.fragments.AccountFragment;
-import com.shotball.project.fragments.FavoritesFragment;
-import com.shotball.project.fragments.HomeFragment;
-import com.shotball.project.fragments.MessagesFragment;
-
 import java.util.ArrayList;
 
 public class FragmentViewPagerAdapter extends FragmentStateAdapter {
@@ -33,18 +28,6 @@ public class FragmentViewPagerAdapter extends FragmentStateAdapter {
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        switch (position) {
-            case 0:
-                return new HomeFragment();
-            case 1:
-                return new FavoritesFragment();
-            case 2:
-                return new MessagesFragment();
-            case 3:
-                return new AccountFragment();
-
-        }
-
-        return null;
+        return mFragmentList.get(position);
     }
 }

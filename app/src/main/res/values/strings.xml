@@ -31,4 +31,5 @@
     <string name="email_not_verify">Please verify your email address</string>
     <string name="required">Required</string>
     <string name="menu_filter">Filter</string>
+    <string name="filter_title">Filters</string>
 </resources>

@@ -16,4 +16,19 @@
         <item name="android:textColorPrimary">@color/grey_60</item>
     </style>
 
+    <style name="Widget.Shrine.SectionItem" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingTop">@dimen/spacing_medium</item>
+        <item name="android:paddingBottom">@dimen/spacing_medium</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="Widget.Shrine.SectionItem.Container">
+        <item name="android:layout_marginBottom">@dimen/spacing_small</item>
+        <item name="android:paddingLeft">@dimen/spacing_medium</item>
+        <item name="android:paddingRight">@dimen/spacing_medium</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
 </resources>

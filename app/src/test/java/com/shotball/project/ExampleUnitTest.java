@@ -1,5 +1,7 @@
 package com.shotball.project;
 
+import com.shotball.project.models.Product;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -13,5 +15,11 @@ public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() {
         assertEquals(4, 2 + 2);
+    }
+
+    @Test
+    public void productInit() {
+        Product product = new Product("Name", "url", "desc", "user");
+
     }
 }

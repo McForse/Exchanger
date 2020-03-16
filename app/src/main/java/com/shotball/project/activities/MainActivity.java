@@ -39,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
         adapter.addFragment(new MessagesFragment());
         adapter.addFragment(new AccountFragment());
         viewPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
+        viewPager.setSaveFromParentEnabled(false);
+        viewPager.setOffscreenPageLimit(adapter.getItemCount() - 1);
         viewPager.setUserInputEnabled(false);
         viewPager.setAdapter(adapter);
         viewPager.setCurrentItem(0, false);

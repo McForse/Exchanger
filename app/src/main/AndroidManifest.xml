@@ -14,6 +14,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".activities.ProductActivity"></activity>
+        <activity android:name=".activities.FilterActivity" />
         <activity android:name=".activities.SignUpActivity" />
         <activity android:name=".activities.SignInActivity" />
         <activity android:name=".activities.MainActivity">
