@@ -1,5 +1,6 @@
 package com.shotball.project.fragments;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -53,6 +54,7 @@ public class HomeFragment extends Fragment {
     private View rootView;
     private List<Product> productList;
 
+    private Activity mActivity;
     private DatabaseReference mDatabase;
     private DatabaseReference refLocation;
     private DatabaseReference refProducts;
@@ -65,6 +67,7 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_home, container, false);
+        mActivity = getActivity();
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         initToolbar();
@@ -79,17 +82,23 @@ public class HomeFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        final LinearLayout lyt_progress = (LinearLayout) getActivity().findViewById(R.id.lyt_progress);
+        final LinearLayout lyt_progress = mActivity.findViewById(R.id.lyt_progress);
 
-        mManager = new GridLayoutManager(getActivity(), 2);
+        mManager = new GridLayoutManager(mActivity, 2);
         mRecycler.setLayoutManager(mManager);
 
         setReferences();
         productList = new ArrayList<>();
 
         searchNearby(55.93633, 37.494045, 1.0);
-        mAdapter = new ProductAdapter(getActivity(), productList);
+        mAdapter = new ProductAdapter(mActivity, productList);
         mRecycler.setAdapter(mAdapter);
+    }
+
+    private void initToolbar() {
+        Toolbar toolbar = rootView.findViewById(R.id.toolbar);
+        ((AppCompatActivity) mActivity).setSupportActionBar(toolbar);
+        setHasOptionsMenu(true);
     }
 
     private void setReferences() {
@@ -224,14 +233,8 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    private void initToolbar() {
-        Toolbar toolbar = rootView.findViewById(R.id.toolbar);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-        setHasOptionsMenu(true);
-    }
-
     private void displayContent() {
-        final LinearLayout lyt_progress = getActivity().findViewById(R.id.lyt_progress);
+        final LinearLayout lyt_progress = mActivity.findViewById(R.id.lyt_progress);
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -265,15 +268,15 @@ public class HomeFragment extends Fragment {
 
         if (i == R.id.action_logout) {
             FirebaseAuth.getInstance().signOut();
-            startActivity(new Intent(getActivity(), SignInActivity.class));
-            getActivity().finish();
+            startActivity(new Intent(mActivity, SignInActivity.class));
+            mActivity.finish();
             return true;
         } else if (i == R.id.action_filter) {
-            startActivity(new Intent(getActivity(), FilterActivity.class));
-            return super.onOptionsItemSelected(item);
-        } else {
+            startActivity(new Intent(mActivity, FilterActivity.class));
             return super.onOptionsItemSelected(item);
         }
+
+        return super.onOptionsItemSelected(item);
     }
 
 }

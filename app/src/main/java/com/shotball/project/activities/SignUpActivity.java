@@ -229,7 +229,7 @@ public class SignUpActivity extends BaseActivity {
     }
 
     private void writeNewUser(String userId, String name, String email) {
-        User user = new User(name, email);
+        User user = new User(name, email, "");
 
         mDatabase.child("users").child(userId).setValue(user);
     }

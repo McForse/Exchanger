@@ -6,12 +6,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Product {
+    @Exclude
     public String key = "";
     public String title = "";
     public String image = "";
     public String description = "";
     public String userId = "";
+    @Exclude
     public Geo geo;
+
+    public int likeCount = 0;
+    public Map<String, Boolean> likes = new HashMap<>();
 
     public Product() {
         geo = new Geo();
@@ -49,6 +54,8 @@ public class Product {
         result.put("image", image);
         result.put("description", description);
         result.put("userId", userId);
+        result.put("likeCount", likeCount);
+        result.put("likes", likes);
 
         return result;
     }

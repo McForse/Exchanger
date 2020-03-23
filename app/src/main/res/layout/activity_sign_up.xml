@@ -8,18 +8,19 @@
     tools:context=".activities.SignUpActivity">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
+        android:id="@+id/appbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            android:fitsSystemWindows="false"
+            android:background="@android:color/white"
+            android:theme="@style/Toolbar.Light"
+            app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light"
+            android:fitsSystemWindows="true"
             android:elevation="16dp" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -27,7 +28,7 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/appBarLayout"
+        android:layout_below="@id/appbar"
         android:clipToPadding="false"
         android:padding="@dimen/spacing_large"
         android:scrollbars="none"
@@ -46,6 +47,8 @@
                 android:layout_height="wrap_content"
                 android:hint="Email"
                 app:startIconDrawable="@drawable/ic_mail"
+                app:errorEnabled="true"
+                app:helperTextEnabled="true"
                 app:helperText="@string/required">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -70,6 +73,8 @@
                 android:layout_height="wrap_content"
                 android:hint="Password"
                 app:startIconDrawable="@drawable/ic_vpn_key"
+                app:errorEnabled="true"
+                app:helperTextEnabled="true"
                 app:helperText="@string/required"
                 app:endIconMode="clear_text">
 
@@ -94,6 +99,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Re-type Password"
+                app:errorEnabled="true"
+                app:helperTextEnabled="true"
                 app:helperText="@string/required"
                 app:endIconMode="clear_text">
 
@@ -119,6 +126,7 @@
                 android:layout_height="wrap_content"
                 android:hint="Username"
                 app:startIconDrawable="@drawable/ic_person"
+                app:helperTextEnabled="true"
                 app:helperText="Optional">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -142,7 +150,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
         android:layout_margin="@dimen/spacing_large"
         android:clickable="true"
         android:tint="@android:color/white"

@@ -7,14 +7,30 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import com.shotball.project.R;
 
 public class MessagesFragment extends Fragment {
+
+    private static final String TAG = "MessagesFragment";
+
+    private View rootView;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_messages, container, false);
+        rootView = inflater.inflate(R.layout.fragment_messages, container, false);
+        initToolbar();
+
+        return rootView;
+    }
+
+    private void initToolbar() {
+        Toolbar toolbar = rootView.findViewById(R.id.toolbar);
+        toolbar.setTitle("Messages");
+        //((AppCompatActivity) mActivity).setSupportActionBar(toolbar);
+        //setHasOptionsMenu(true);
     }
 }

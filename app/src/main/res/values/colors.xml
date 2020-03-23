@@ -4,6 +4,8 @@
     <color name="colorPrimaryDark">#4B00D1</color>
     <color name="colorAccent">@color/deep_purple_A700</color>
 
+    <color name="home_background">#F1EFF1</color>
+
     <color name="overlay_dark_10">#1A000000</color>
     <color name="overlay_dark_20">#33000000</color>
     <color name="overlay_dark_30">#4D000000</color>
