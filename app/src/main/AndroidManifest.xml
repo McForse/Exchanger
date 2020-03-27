@@ -36,14 +36,14 @@
 
         <activity
             android:name=".activities.MapsActivity"
-            android:label="@string/title_activity_maps"></activity>
+            android:label="@string/title_activity_maps" />
         <activity android:name=".activities.ProductActivity" />
         <activity android:name=".activities.FilterActivity" />
         <activity
-            android:name=".activities.SignUpActivity"
-            android:windowSoftInputMode="stateHidden|adjustResize" />
+            android:name=".activities.SignUpActivity" />
         <activity android:name=".activities.SignInActivity" />
-        <activity android:name=".activities.MainActivity">
+        <activity android:name=".activities.MainActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

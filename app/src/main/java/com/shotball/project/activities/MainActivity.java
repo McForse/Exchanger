@@ -8,17 +8,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.view.Window;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.transition.MaterialContainerTransformSharedElementCallback;
 import com.google.firebase.auth.FirebaseAuth;
 import com.shotball.project.R;
 import com.shotball.project.adapters.FragmentViewPagerAdapter;
-import com.shotball.project.fragments.AccountFragment;
-import com.shotball.project.fragments.FavoritesFragment;
-import com.shotball.project.fragments.HomeFragment;
-import com.shotball.project.fragments.MessagesFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,9 +20,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        getWindow().requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS);
-        setExitSharedElementCallback(new MaterialContainerTransformSharedElementCallback());
-        getWindow().setSharedElementsUseOverlay(false);
         super.onCreate(savedInstanceState);
         checkAuthState();
         setContentView(R.layout.activity_main);
@@ -39,13 +30,8 @@ public class MainActivity extends AppCompatActivity {
     private void initComponents() {
         ViewPager2 viewPager = findViewById(R.id.view_pager);
         FragmentViewPagerAdapter adapter = new FragmentViewPagerAdapter(getSupportFragmentManager(), getLifecycle());
-        adapter.addFragment(new HomeFragment());
-        adapter.addFragment(new FavoritesFragment());
-        adapter.addFragment(new MessagesFragment());
-        adapter.addFragment(new AccountFragment());
         viewPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
-        viewPager.setSaveFromParentEnabled(false);
-        viewPager.setOffscreenPageLimit(adapter.getItemCount() - 1);
+        viewPager.setOffscreenPageLimit(1);
         viewPager.setUserInputEnabled(false);
         viewPager.setAdapter(adapter);
         viewPager.setCurrentItem(0, false);

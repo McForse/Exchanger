@@ -31,7 +31,7 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
     public void bindToPost(Context context, Product product, int position, View.OnClickListener likeClickListener) {
         title.setText(product.title);
         //TODO: placeholder and error
-        Glide.with(context).load(product.image).into(image);
+        Glide.with(context).load(product.image).centerCrop().into(image);
         //Glide.with(context).load(product.imageurl).placeholder(R.mipmap.ic_launcher).error(R.mipmap.ic_launcher).into(productImageView);
         like.setOnClickListener(likeClickListener);
     }

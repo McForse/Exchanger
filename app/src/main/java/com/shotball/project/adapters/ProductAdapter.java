@@ -1,12 +1,9 @@
 package com.shotball.project.adapters;
 
-import android.app.Activity;
-import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,7 +44,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder> {
     @Override
     public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
-        return new ProductViewHolder(inflater.inflate(R.layout.item_test, viewGroup, false));
+        return new ProductViewHolder(inflater.inflate(R.layout.item_product, viewGroup, false));
     }
 
     @Override
@@ -67,8 +64,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder> {
 
         if (productsList.get(position).likes.containsKey(getUid())) {
             viewHolder.like.setImageResource(R.drawable.ic_favorite);
+            viewHolder.like.setColorFilter(mContext.getColor(R.color.red_400));
+
         } else {
             viewHolder.like.setImageResource(R.drawable.ic_favorite_border);
+            viewHolder.like.setColorFilter(mContext.getColor(R.color.black));
         }
 
         viewHolder.bindToPost(mContext, productsList.get(position), position, new View.OnClickListener() {
@@ -76,8 +76,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder> {
             public void onClick(View v) {
                 if (productsList.get(position).likes.containsKey(getUid())) {
                     viewHolder.like.setImageResource(R.drawable.ic_favorite_border);
+                    viewHolder.like.setColorFilter(mContext.getColor(R.color.black));
+                    productsList.get(position).likes.remove(getUid());
                 } else {
                     viewHolder.like.setImageResource(R.drawable.ic_favorite);
+                    viewHolder.like.setColorFilter(mContext.getColor(R.color.red_400));
+                    productsList.get(position).likes.put(getUid(), true);
                 }
                 // Need to write to both places the post is stored
                 DatabaseReference globalPostRef = FirebaseDatabase.getInstance().getReference().child("products").child(productsList.get(position).key);
@@ -92,6 +96,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder> {
     @Override
     public int getItemCount() {
         return productsList.size();
+    }
+
+    public void clear() {
+        productsList.clear();
+        notifyDataSetChanged();
+    }
+
+    public void addAll(List<Product> list) {
+        productsList.addAll(list);
+        notifyDataSetChanged();
     }
 
     private void onLikeClicked(DatabaseReference postRef) {

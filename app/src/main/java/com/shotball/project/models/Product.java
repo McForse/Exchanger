@@ -7,11 +7,12 @@ import java.util.Map;
 
 public class Product {
     @Exclude
-    public String key = "";
-    public String title = "";
-    public String image = "";
-    public String description = "";
-    public String userId = "";
+    public String key;
+    public String title;
+    public String image;
+    public String description;
+    public String user;
+    public boolean available;
     @Exclude
     public Geo geo;
 
@@ -22,19 +23,21 @@ public class Product {
         geo = new Geo();
     }
 
-    public Product(String title, String image, String description, String userId) {
+    public Product(String title, String image, String description, String user, boolean available) {
         this.title = title;
         this.image = image;
         this.description = description;
-        this.userId = userId;
+        this.user = user;
+        this.available = available;
         geo = new Geo();
     }
 
-    public Product(String title, String image, String description, String userId, Geo geo) {
+    public Product(String title, String image, String description, String user, boolean available, Geo geo) {
         this.title = title;
         this.image = image;
         this.description = description;
-        this.userId = userId;
+        this.user = user;
+        this.available = available;
         this.geo = geo;
     }
 
@@ -53,7 +56,7 @@ public class Product {
         result.put("title", title);
         result.put("image", image);
         result.put("description", description);
-        result.put("userId", userId);
+        result.put("user", user);
         result.put("likeCount", likeCount);
         result.put("likes", likes);
 

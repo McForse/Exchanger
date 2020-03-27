@@ -123,7 +123,7 @@ public class ProductActivity extends AppCompatActivity {
             }
         };
 
-        refUsers.child(mProduct.userId).addListenerForSingleValueEvent(dataListener);
+        refUsers.child(mProduct.user).addListenerForSingleValueEvent(dataListener);
     }
 
     private void initProduct() {
