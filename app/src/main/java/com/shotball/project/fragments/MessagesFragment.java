@@ -30,6 +30,12 @@ public class MessagesFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart");
+    }
+
     private void initToolbar() {
         Toolbar toolbar = rootView.findViewById(R.id.toolbar);
         toolbar.setTitle("Messages");

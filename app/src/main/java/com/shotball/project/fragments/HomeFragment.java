@@ -3,6 +3,7 @@ package com.shotball.project.fragments;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
@@ -40,52 +41,60 @@ import com.shotball.project.Utils.ViewAnimation;
 import com.shotball.project.activities.FilterActivity;
 import com.shotball.project.activities.SignInActivity;
 import com.shotball.project.adapters.ProductAdapter;
+import com.shotball.project.listeners.EndlessRecyclerViewScrollListener;
 import com.shotball.project.models.Product;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 public class HomeFragment extends Fragment {
 
     private static final String TAG = "HomeFragment";
     private static final String TAG_GEO = "GeoListener";
 
-    private ProductAdapter mAdapter;
-    private RecyclerView recyclerView;
-    private GridLayoutManager gridLayoutManager;
-
     private View rootView;
-    private List<Product> productList;
-
     private Activity mActivity;
+
     private DatabaseReference mDatabase;
     private DatabaseReference refLocation;
     private DatabaseReference refProducts;
-
     private GeoFire geoFire;
     private GeoQuery geoQuery;
     private GeoQueryEventListener geoQueryEventListener;
 
+    private RecyclerView recyclerView;
+    private SwipeRefreshLayout swipeContainer;
+    private GridLayoutManager gridLayoutManager;
+    private EndlessRecyclerViewScrollListener scrollListener;
+    private ProductAdapter mAdapter;
+    private List<Product> productList;
+    private HashSet<String> productsKeys;
+
     private final String KEY_RECYCLER_STATE = "recycler_state";
     private static Bundle mBundleRecyclerViewState;
-    private Parcelable mListState = null;
+    private Parcelable mListState;
 
-    private SwipeRefreshLayout swipeContainer;
+    private static final int ITEMS_PER_PAGE = 4;
+    private int counter = 0;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_home, container, false);
+        mActivity = getActivity();
         Log.d(TAG, "onCreateView");
 
-        mActivity = getActivity();
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-
         initToolbar();
-
+        mDatabase = FirebaseDatabase.getInstance().getReference();
         recyclerView = rootView.findViewById(R.id.product_grid);
-        recyclerView.setVisibility(View.GONE);
-        recyclerView.setHasFixedSize(true);
+        swipeContainer = rootView.findViewById(R.id.swipe_container);
+        productList = new ArrayList<>();
+        productsKeys = new HashSet<>();
+        mAdapter = new ProductAdapter(rootView.getContext(), productList);
+        setReferences();
+
         return rootView;
     }
 
@@ -93,31 +102,188 @@ public class HomeFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        final LinearLayout lyt_progress = mActivity.findViewById(R.id.lyt_progress);
-
-        if (mActivity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
-            gridLayoutManager = new GridLayoutManager(mActivity, 2);
+        if (rootView.getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            gridLayoutManager = new GridLayoutManager(rootView.getContext(), 2);
         } else {
-            gridLayoutManager = new GridLayoutManager(mActivity, 3);
+            gridLayoutManager = new GridLayoutManager(rootView.getContext(), 3);
         }
 
-        swipeContainer = mActivity.findViewById(R.id.swipe_container);
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mAdapter.clear();
-                searchNearby(55.93633, 37.494045, 1.0);
+                reset();
+                loadData();
             }
         });
 
+        scrollListener = new EndlessRecyclerViewScrollListener(gridLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                Log.d(TAG, "onLoadMore");
+                loadData();
+            }
+        };
+
+        //recyclerView.setVisibility(View.GONE);
         recyclerView.setLayoutManager(gridLayoutManager);
-
-        setReferences();
-        productList = new ArrayList<>();
-
-        searchNearby(55.93633, 37.494045, 1.0);
-        mAdapter = new ProductAdapter(mActivity, productList);
+        recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(mAdapter);
+        recyclerView.addOnScrollListener(scrollListener);
+
+        loadData();
+    }
+
+    private void initToolbar() {
+        Toolbar toolbar = rootView.findViewById(R.id.toolbar);
+        ((AppCompatActivity) rootView.getContext()).setSupportActionBar(toolbar);
+        setHasOptionsMenu(true);
+    }
+
+    private void setReferences() {
+        refProducts = mDatabase.child("products");
+        refLocation = mDatabase.child("locations");
+        geoFire = new GeoFire(refLocation);
+
+        geoQueryEventListener = new GeoQueryEventListener() {
+
+            @Override
+            public void onKeyEntered(final String key, final GeoLocation location) {
+                String loc = String.valueOf(location.latitude) + ", " + String.valueOf(location.longitude);
+
+                //if (counter < ITEMS_PER_PAGE) {
+                    Log.d(TAG_GEO, "onKeyEntered: " + key + " @ " + loc);
+                    counter++;
+                    Log.d(TAG_GEO, "Counter: " + counter);
+
+                    refProducts.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            Log.d(TAG_GEO, "onDataChange: " + dataSnapshot.toString());
+                            final Product product = dataSnapshot.getValue(Product.class);
+
+                            if (product != null) {
+                                product.setKey(dataSnapshot.getKey());
+
+                                if (!productsKeys.contains(product.key) && product.available) {
+                                    productsKeys.add(product.key);
+
+                                    product.setGeo(location.latitude, location.longitude);
+
+                                    Location locationA = new Location("point A");
+
+                                    locationA.setLatitude(product.geo.getLatitude());
+                                    locationA.setLongitude(product.geo.getLongitude());
+
+                                    Location locationB = new Location("point B");
+
+                                    locationB.setLatitude(55.980798);
+                                    locationB.setLongitude(37.506966);
+
+                                    int distance = (int) locationA.distanceTo(locationB);
+                                    product.setDistance(distance);
+
+                                    productList.add(product);
+                                    mAdapter.notifyDataSetChanged();
+                                    //setLocationToProduct(product.key, 55.980798, 37.506966);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError firebaseError) {
+                            Log.e(TAG_GEO, "onCancelled: " + firebaseError.getMessage());
+                        }
+                    });
+                /*} else {
+                    counter = 0;
+                    stopGeoQueryListener();
+                }*/
+            }
+
+            @Override
+            public void onKeyExited(String key) {
+                Log.d(TAG_GEO, "onKeyExited: " + key);
+            }
+
+            @Override
+            public void onKeyMoved(String key, GeoLocation location) {
+                Log.d(TAG_GEO, "onKeyMoved: " + key);
+            }
+
+            @Override
+            public void onGeoQueryReady() {
+                Log.d(TAG_GEO, "onGeoQueryReady");
+                noMoreProducts();
+                //displayContent();
+            }
+
+            @Override
+            public void onGeoQueryError(DatabaseError error) {
+                Log.e(TAG_GEO, "onGeoQueryError: " + error.getMessage());
+            }
+        };
+    }
+
+    private void loadData() {
+        searchNearby(55.980798, 37.506966, 1000.0);
+    }
+
+    private void searchNearby(double latitude, double longitude, double radius) {
+        this.searchNearby(new GeoLocation(latitude, longitude), radius);
+    }
+
+    private void searchNearby(GeoLocation location, double radius) {
+        geoQuery = geoFire.queryAtLocation(location, radius);
+        geoQuery.addGeoQueryEventListener(geoQueryEventListener);
+    }
+
+    private void stopGeoQueryListener() {
+        geoQuery.removeAllListeners();
+        swipeContainer.setRefreshing(false);
+    }
+
+    private void reset() {
+        Log.d(TAG, "reset");
+        mAdapter.clear();
+        productList.clear();
+        productsKeys.clear();
+        recyclerView.addOnScrollListener(scrollListener);
+    }
+
+    private void noMoreProducts() {
+        Log.d(TAG, "noMoreProducts");
+        stopGeoQueryListener();
+        recyclerView.removeOnScrollListener(scrollListener);
+    }
+
+    private void setLocationToProduct(String key, double latitude, double longitude) {
+        GeoFire geoFire = new GeoFire(refProducts);
+
+        geoFire.setLocation(key, new GeoLocation(latitude, longitude));
+    }
+
+    private void displayContent() {
+        final LinearLayout lyt_progress = rootView.findViewById(R.id.lyt_progress);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                ViewAnimation.fadeOut(lyt_progress);
+            }
+        }, 100);
+
+        recyclerView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop");
     }
 
     @Override
@@ -126,7 +292,7 @@ public class HomeFragment extends Fragment {
         Log.d(TAG, "onPause");
 
         mBundleRecyclerViewState = new Bundle();
-        mListState = recyclerView.getLayoutManager().onSaveInstanceState();
+        mListState = Objects.requireNonNull(recyclerView.getLayoutManager()).onSaveInstanceState();
         mBundleRecyclerViewState.putParcelable(KEY_RECYCLER_STATE, mListState);
     }
 
@@ -141,8 +307,7 @@ public class HomeFragment extends Fragment {
                 @Override
                 public void run() {
                     mListState = mBundleRecyclerViewState.getParcelable(KEY_RECYCLER_STATE);
-                    recyclerView.getLayoutManager().onRestoreInstanceState(mListState);
-
+                    Objects.requireNonNull(recyclerView.getLayoutManager()).onRestoreInstanceState(mListState);
                 }
             }, 50);
         }
@@ -159,7 +324,7 @@ public class HomeFragment extends Fragment {
                 @Override
                 public void run() {
                     mListState = mBundleRecyclerViewState.getParcelable(KEY_RECYCLER_STATE);
-                    recyclerView.getLayoutManager().onRestoreInstanceState(mListState);
+                    Objects.requireNonNull(recyclerView.getLayoutManager()).onRestoreInstanceState(mListState);
 
                 }
             }, 50);
@@ -179,119 +344,8 @@ public class HomeFragment extends Fragment {
         super.onSaveInstanceState(outState);
         Log.d(TAG, "onSaveInstanceState");
 
-        mListState = recyclerView.getLayoutManager().onSaveInstanceState();
+        mListState = Objects.requireNonNull(recyclerView.getLayoutManager()).onSaveInstanceState();
         mBundleRecyclerViewState.putParcelable(KEY_RECYCLER_STATE, mListState);
-    }
-
-    private void initToolbar() {
-        Toolbar toolbar = rootView.findViewById(R.id.toolbar);
-        ((AppCompatActivity) mActivity).setSupportActionBar(toolbar);
-        setHasOptionsMenu(true);
-    }
-
-    private void setReferences() {
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-        refProducts = mDatabase.child("products");
-        refLocation = mDatabase.child("locations");
-        geoFire = new GeoFire(refLocation);
-
-        geoQueryEventListener = new GeoQueryEventListener() {
-            @Override
-            public void onKeyEntered(String key, GeoLocation location) {
-                String loc = String.valueOf(location.latitude) + ", " + String.valueOf(location.longitude);
-                Log.d(TAG_GEO, "onKeyEntered: " + key + " @ " + loc);
-
-                refProducts.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        Log.d(TAG_GEO, "onDataChange: " + dataSnapshot.toString());
-                        Product product = dataSnapshot.getValue(Product.class);
-                        if (product.available) {
-                            product.setKey(dataSnapshot.getKey());
-                            //product.setGeo((Double) dataSnapshot.child("geo/l/0").getValue(), (Double) dataSnapshot.child("geo/l/1").getValue());
-                            productList.add(product);
-                            mAdapter.notifyDataSetChanged();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError firebaseError) {
-                        Log.e(TAG_GEO, "onCancelled: " + firebaseError.getMessage());
-                    }
-                });
-            }
-
-            @Override
-            public void onKeyExited(String key) {
-                Log.d(TAG_GEO, "onKeyExited: " + key);
-            }
-
-            @Override
-            public void onKeyMoved(String key, GeoLocation location) {
-                Log.d(TAG_GEO, "onKeyMoved: " + key);
-            }
-
-            @Override
-            public void onGeoQueryReady() {
-                Log.d(TAG_GEO, "onGeoQueryReady");
-                Log.d(TAG_GEO, "Products list size is " + productList.size());
-                stopGeoQueryListener();
-                Log.d(TAG_GEO, "geoQueryEventListener stopped");
-                displayContent();
-            }
-
-            @Override
-            public void onGeoQueryError(DatabaseError error) {
-                Log.e(TAG_GEO, "onGeoQueryError: " + error.getMessage());
-            }
-        };
-    }
-
-    private void searchNearby(double latitude, double longitude, double radius) {
-        this.searchNearby(new GeoLocation(latitude, longitude), radius);
-    }
-
-    private void searchNearby(GeoLocation location, double radius) {
-        geoQuery = geoFire.queryAtLocation(location, radius);
-        geoQuery.addGeoQueryEventListener(geoQueryEventListener);
-    }
-
-    private void stopGeoQueryListener() {
-        geoQuery.removeGeoQueryEventListener(geoQueryEventListener);
-        swipeContainer.setRefreshing(false);
-    }
-
-    private void setLocationToProduct(String key) {
-        GeoFire geoFire = new GeoFire(refLocation);
-
-        geoFire.setLocation(key, new GeoLocation(65.936330, 37.494045), new GeoFire.CompletionListener() {
-            @Override
-            public void onComplete(String key, DatabaseError error) {
-                Log.e(TAG_GEO, "setLocationToProduct: " + error);
-            }
-        });
-    }
-
-    private void displayContent() {
-        final LinearLayout lyt_progress = mActivity.findViewById(R.id.lyt_progress);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                ViewAnimation.fadeOut(lyt_progress);
-            }
-        }, 100);
-
-        recyclerView.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
     }
 
     @Override

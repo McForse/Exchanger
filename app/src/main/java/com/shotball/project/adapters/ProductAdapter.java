@@ -2,11 +2,11 @@ package com.shotball.project.adapters;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -42,55 +42,57 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder> {
 
     @NonNull
     @Override
-    public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+    public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
-        return new ProductViewHolder(inflater.inflate(R.layout.item_product, viewGroup, false));
+        View view = inflater.inflate(R.layout.item_product, viewGroup, false);
+        return new ProductViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final ProductViewHolder viewHolder, final int position) {
-        viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+    public void onBindViewHolder(@NonNull final ProductViewHolder view, final int position) {
+            final ProductViewHolder viewHolder = (ProductViewHolder) view;
+            viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
                 /*ActivityOptions option = ActivityOptions.makeSceneTransitionAnimation((Activity) mContext,
                                 Pair.create(viewHolder.itemView, "product_image"),
                                 Pair.create(viewHolder.itemView, "product_title"));*/
-                Intent intent = new Intent(mContext, ProductActivity.class);
-                intent.putExtra(ProductActivity.EXTRA_PRODUCT_KEY, productsList.get(position).key);
-                //mContext.startActivity(intent, option.toBundle());
-                mContext.startActivity(intent);
-            }
-        });
-
-        if (productsList.get(position).likes.containsKey(getUid())) {
-            viewHolder.like.setImageResource(R.drawable.ic_favorite);
-            viewHolder.like.setColorFilter(mContext.getColor(R.color.red_400));
-
-        } else {
-            viewHolder.like.setImageResource(R.drawable.ic_favorite_border);
-            viewHolder.like.setColorFilter(mContext.getColor(R.color.black));
-        }
-
-        viewHolder.bindToPost(mContext, productsList.get(position), position, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (productsList.get(position).likes.containsKey(getUid())) {
-                    viewHolder.like.setImageResource(R.drawable.ic_favorite_border);
-                    viewHolder.like.setColorFilter(mContext.getColor(R.color.black));
-                    productsList.get(position).likes.remove(getUid());
-                } else {
-                    viewHolder.like.setImageResource(R.drawable.ic_favorite);
-                    viewHolder.like.setColorFilter(mContext.getColor(R.color.red_400));
-                    productsList.get(position).likes.put(getUid(), true);
+                    Intent intent = new Intent(mContext, ProductActivity.class);
+                    intent.putExtra(ProductActivity.EXTRA_PRODUCT_KEY, productsList.get(position).key);
+                    //mContext.startActivity(intent, option.toBundle());
+                    mContext.startActivity(intent);
                 }
-                // Need to write to both places the post is stored
-                DatabaseReference globalPostRef = FirebaseDatabase.getInstance().getReference().child("products").child(productsList.get(position).key);
+            });
 
-                // Run two transactions
-                onLikeClicked(globalPostRef);
+            if (productsList.get(position).likes.containsKey(getUid())) {
+                viewHolder.like.setImageResource(R.drawable.ic_favorite);
+                viewHolder.like.setColorFilter(mContext.getColor(R.color.red_400));
+
+            } else {
+                viewHolder.like.setImageResource(R.drawable.ic_favorite_border);
+                viewHolder.like.setColorFilter(mContext.getColor(R.color.black));
             }
-        });
-        setAnimation(viewHolder.itemView, position);
+
+            viewHolder.bindToPost(mContext, productsList.get(position), position, new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (productsList.get(position).likes.containsKey(getUid())) {
+                        viewHolder.like.setImageResource(R.drawable.ic_favorite_border);
+                        viewHolder.like.setColorFilter(mContext.getColor(R.color.black));
+                        productsList.get(position).likes.remove(getUid());
+                    } else {
+                        viewHolder.like.setImageResource(R.drawable.ic_favorite);
+                        viewHolder.like.setColorFilter(mContext.getColor(R.color.red_400));
+                        productsList.get(position).likes.put(getUid(), true);
+                    }
+                    // Need to write to both places the post is stored
+                    DatabaseReference globalPostRef = FirebaseDatabase.getInstance().getReference().child("products").child(productsList.get(position).key);
+
+                    // Run two transactions
+                    onLikeClicked(globalPostRef);
+                }
+            });
+            //setAnimation(viewHolder.itemView, position);
     }
 
     @Override
@@ -144,6 +146,21 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductViewHolder> {
         if (position > lastPosition) {
             ItemAnimation.animate(view, position, ItemAnimation.FADE_IN);
             lastPosition = position;
+        }
+    }
+
+    private void showLoadingView(LoadingViewHolder viewHolder, int position) {
+        //ProgressBar would be displayed
+
+    }
+
+    private class LoadingViewHolder extends RecyclerView.ViewHolder {
+
+        ProgressBar progressBar;
+
+        public LoadingViewHolder(@NonNull View itemView) {
+            super(itemView);
+            progressBar = itemView.findViewById(R.id.progress_bar);
         }
     }
 

@@ -178,6 +178,7 @@ public class FavoritesFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        Log.d(TAG, "onStart");
         Log.d(TAG, "Listener waiting");
         if (mAdapter != null) {
             mAdapter.startListening();

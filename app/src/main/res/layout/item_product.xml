@@ -94,11 +94,19 @@
                         android:textColor="?android:attr/textColorSecondary" />
 
                     <TextView
+                        android:id="@+id/product_distance"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="500 meters"
+                        android:text="500"
                         android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
 
+                    <TextView
+                        android:id="@+id/product_distance_unit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="@dimen/spacing_small"
+                        android:text="meters"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
 
                 </LinearLayout>
 

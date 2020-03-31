@@ -61,6 +61,12 @@ public class AccountFragment extends Fragment {
         getUser();
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart");
+    }
+
     private void setReferences() {
         mDatabase = FirebaseDatabase.getInstance().getReference();
         refUsers = mDatabase.child("users");

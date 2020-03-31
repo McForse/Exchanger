@@ -51,7 +51,8 @@
             android:layout_marginTop="@dimen/spacing_medium"
             android:layout_marginEnd="@dimen/spacing_medium"
             android:layout_marginBottom="@dimen/spacing_medium"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <ProgressBar
                 style="@style/Widget.AppCompat.ProgressBar"

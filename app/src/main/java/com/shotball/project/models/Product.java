@@ -2,6 +2,7 @@ package com.shotball.project.models;
 
 import com.google.firebase.database.Exclude;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,12 +10,15 @@ public class Product {
     @Exclude
     public String key;
     public String title;
-    public String image;
+    public ArrayList<String> images;
     public String description;
     public String user;
     public boolean available;
     @Exclude
     public Geo geo;
+
+    @Exclude
+    public int distance;
 
     public int likeCount = 0;
     public Map<String, Boolean> likes = new HashMap<>();
@@ -23,22 +27,24 @@ public class Product {
         geo = new Geo();
     }
 
-    public Product(String title, String image, String description, String user, boolean available) {
+    public Product(String title, ArrayList<String> images, String description, String user, boolean available, int distance) {
         this.title = title;
-        this.image = image;
+        this.images = images;
         this.description = description;
         this.user = user;
         this.available = available;
         geo = new Geo();
+        this.distance = distance;
     }
 
-    public Product(String title, String image, String description, String user, boolean available, Geo geo) {
+    public Product(String title, ArrayList<String> image, String description, String user, boolean available, int distance, Geo geo) {
         this.title = title;
-        this.image = image;
+        this.images = images;
         this.description = description;
         this.user = user;
         this.available = available;
         this.geo = geo;
+        this.distance = distance;
     }
 
     public void setKey(String key) {
@@ -50,31 +56,20 @@ public class Product {
         this.geo.longitude = longitude;
     }
 
+    public void setDistance(int distance) {
+        this.distance = distance;
+    }
+
     @Exclude
     public Map<String, Object> toMap() {
         HashMap<String, Object> result = new HashMap<>();
         result.put("title", title);
-        result.put("image", image);
+        result.put("images", images);
         result.put("description", description);
         result.put("user", user);
         result.put("likeCount", likeCount);
         result.put("likes", likes);
 
         return result;
-    }
-}
-
-class Geo {
-    public Double latitude;
-    public Double longitude;
-
-    public Geo() {
-        this.latitude = 0.0;
-        this.longitude = 0.0;
-    }
-
-    public Geo(double latitude, double longitude) {
-        this.latitude = latitude;
-        this.longitude = longitude;
     }
 }
