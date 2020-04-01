@@ -28,6 +28,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
+import com.firebase.geofire.GeoQueryDataEventListener;
 import com.firebase.geofire.GeoQueryEventListener;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -35,21 +36,22 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.shotball.project.R;
 import com.shotball.project.Utils.ViewAnimation;
 import com.shotball.project.activities.FilterActivity;
+import com.shotball.project.activities.ProductActivity;
 import com.shotball.project.activities.SignInActivity;
 import com.shotball.project.adapters.ProductAdapter;
 import com.shotball.project.listeners.EndlessRecyclerViewScrollListener;
 import com.shotball.project.models.Product;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements ProductAdapter.OnProductSelectedListener {
 
     private static final String TAG = "HomeFragment";
     private static final String TAG_GEO = "GeoListener";
@@ -62,22 +64,21 @@ public class HomeFragment extends Fragment {
     private DatabaseReference refProducts;
     private GeoFire geoFire;
     private GeoQuery geoQuery;
-    private GeoQueryEventListener geoQueryEventListener;
+    private GeoQueryDataEventListener geoQueryListener;
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeContainer;
     private GridLayoutManager gridLayoutManager;
     private EndlessRecyclerViewScrollListener scrollListener;
     private ProductAdapter mAdapter;
-    private List<Product> productList;
-    private HashSet<String> productsKeys;
 
     private final String KEY_RECYCLER_STATE = "recycler_state";
     private static Bundle mBundleRecyclerViewState;
     private Parcelable mListState;
 
-    private static final int ITEMS_PER_PAGE = 4;
-    private int counter = 0;
+    private static final int ITEMS_PER_PAGE = 5;
+
+    private static final double[] MY_LOCATION = { 55.936354, 37.494034 };
 
     @Nullable
     @Override
@@ -90,9 +91,7 @@ public class HomeFragment extends Fragment {
         mDatabase = FirebaseDatabase.getInstance().getReference();
         recyclerView = rootView.findViewById(R.id.product_grid);
         swipeContainer = rootView.findViewById(R.id.swipe_container);
-        productList = new ArrayList<>();
-        productsKeys = new HashSet<>();
-        mAdapter = new ProductAdapter(rootView.getContext(), productList);
+        mAdapter = new ProductAdapter(rootView.getContext(), this);
         setReferences();
 
         return rootView;
@@ -111,16 +110,16 @@ public class HomeFragment extends Fragment {
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                reset();
-                loadData();
+                //reset();
+                //startSearch();
             }
         });
 
         scrollListener = new EndlessRecyclerViewScrollListener(gridLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                Log.d(TAG, "onLoadMore");
-                loadData();
+                Log.d(TAG, "onLoadMore, page=" + page);
+                //f (page > 1) loadData(page);
             }
         };
 
@@ -130,7 +129,7 @@ public class HomeFragment extends Fragment {
         recyclerView.setAdapter(mAdapter);
         recyclerView.addOnScrollListener(scrollListener);
 
-        loadData();
+        startSearch();
     }
 
     private void initToolbar() {
@@ -142,111 +141,77 @@ public class HomeFragment extends Fragment {
     private void setReferences() {
         refProducts = mDatabase.child("products");
         refLocation = mDatabase.child("locations");
-        geoFire = new GeoFire(refLocation);
+        geoFire = new GeoFire(refProducts);
 
-        geoQueryEventListener = new GeoQueryEventListener() {
-
+        geoQueryListener = new GeoQueryDataEventListener() {
             @Override
-            public void onKeyEntered(final String key, final GeoLocation location) {
-                String loc = String.valueOf(location.latitude) + ", " + String.valueOf(location.longitude);
+            public void onDataEntered(DataSnapshot dataSnapshot, GeoLocation location) {
+                Log.d(TAG_GEO, "onDataEntered: " + dataSnapshot.toString());
+                final Product product = dataSnapshot.getValue(Product.class);
 
-                //if (counter < ITEMS_PER_PAGE) {
-                    Log.d(TAG_GEO, "onKeyEntered: " + key + " @ " + loc);
-                    counter++;
-                    Log.d(TAG_GEO, "Counter: " + counter);
+                if (product != null && product.available) {
+                    product.setKey(dataSnapshot.getKey());
 
-                    refProducts.child(key).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            Log.d(TAG_GEO, "onDataChange: " + dataSnapshot.toString());
-                            final Product product = dataSnapshot.getValue(Product.class);
+                    Location locationA = new Location("point A");
 
-                            if (product != null) {
-                                product.setKey(dataSnapshot.getKey());
+                    locationA.setLatitude(product.getLatitude());
+                    locationA.setLongitude(product.getLongitude());
+                    Location locationB = new Location("point B");
+                    locationB.setLatitude(MY_LOCATION[0]);
+                    locationB.setLongitude(MY_LOCATION[1]);
+                    int distance = (int) locationA.distanceTo(locationB);
 
-                                if (!productsKeys.contains(product.key) && product.available) {
-                                    productsKeys.add(product.key);
-
-                                    product.setGeo(location.latitude, location.longitude);
-
-                                    Location locationA = new Location("point A");
-
-                                    locationA.setLatitude(product.geo.getLatitude());
-                                    locationA.setLongitude(product.geo.getLongitude());
-
-                                    Location locationB = new Location("point B");
-
-                                    locationB.setLatitude(55.980798);
-                                    locationB.setLongitude(37.506966);
-
-                                    int distance = (int) locationA.distanceTo(locationB);
-                                    product.setDistance(distance);
-
-                                    productList.add(product);
-                                    mAdapter.notifyDataSetChanged();
-                                    //setLocationToProduct(product.key, 55.980798, 37.506966);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError firebaseError) {
-                            Log.e(TAG_GEO, "onCancelled: " + firebaseError.getMessage());
-                        }
-                    });
-                /*} else {
-                    counter = 0;
-                    stopGeoQueryListener();
-                }*/
+                    product.setDistance(distance);
+                    mAdapter.add(product);
+                }
             }
 
             @Override
-            public void onKeyExited(String key) {
-                Log.d(TAG_GEO, "onKeyExited: " + key);
-            }
+            public void onDataExited(DataSnapshot dataSnapshot) { }
 
             @Override
-            public void onKeyMoved(String key, GeoLocation location) {
-                Log.d(TAG_GEO, "onKeyMoved: " + key);
-            }
+            public void onDataMoved(DataSnapshot dataSnapshot, GeoLocation location) { }
+
+            @Override
+            public void onDataChanged(DataSnapshot dataSnapshot, GeoLocation location) { }
 
             @Override
             public void onGeoQueryReady() {
                 Log.d(TAG_GEO, "onGeoQueryReady");
-                noMoreProducts();
-                //displayContent();
             }
 
             @Override
             public void onGeoQueryError(DatabaseError error) {
-                Log.e(TAG_GEO, "onGeoQueryError: " + error.getMessage());
+                Log.e(TAG_GEO, "onGeoQueryError: " + error);
             }
         };
     }
 
-    private void loadData() {
-        searchNearby(55.980798, 37.506966, 1000.0);
+    private void startSearch() {
+        searchNearby(MY_LOCATION[0], MY_LOCATION[1], 1.0);
+    }
+
+    private void loadData(int page) {
+        //if (page < productsLocations.size()) getProduct(productsLocations.get(page), page);
     }
 
     private void searchNearby(double latitude, double longitude, double radius) {
-        this.searchNearby(new GeoLocation(latitude, longitude), radius);
+        searchNearby(new GeoLocation(latitude, longitude), radius);
     }
 
     private void searchNearby(GeoLocation location, double radius) {
         geoQuery = geoFire.queryAtLocation(location, radius);
-        geoQuery.addGeoQueryEventListener(geoQueryEventListener);
+        geoQuery.addGeoQueryDataEventListener(geoQueryListener);
     }
 
     private void stopGeoQueryListener() {
-        geoQuery.removeAllListeners();
+        //geoQuery.removeAllListeners();
         swipeContainer.setRefreshing(false);
     }
 
     private void reset() {
         Log.d(TAG, "reset");
         mAdapter.clear();
-        productList.clear();
-        productsKeys.clear();
         recyclerView.addOnScrollListener(scrollListener);
     }
 
@@ -257,7 +222,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void setLocationToProduct(String key, double latitude, double longitude) {
-        GeoFire geoFire = new GeoFire(refProducts);
+        GeoFire geoFire = new GeoFire(refLocation);
 
         geoFire.setLocation(key, new GeoLocation(latitude, longitude));
     }
@@ -370,6 +335,49 @@ public class HomeFragment extends Fragment {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onProductSelected(Product product) {
+        Intent intent = new Intent(mActivity, ProductActivity.class);
+        intent.putExtra(ProductActivity.EXTRA_PRODUCT_KEY, product.getKey());
+        mActivity.startActivity(intent);
+    }
+
+    @Override
+    public void onLikeClicked(String productKey) {
+        DatabaseReference reference = mDatabase.child("products").child(productKey);
+
+        reference.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                Product product = mutableData.getValue(Product.class);
+                if (product == null) {
+                    return Transaction.success(mutableData);
+                }
+
+                if (product.likes.containsKey(getUid())) {
+                    product.likeCount = product.likeCount - 1;
+                    product.likes.remove(getUid());
+                } else {
+                    product.likeCount = product.likeCount + 1;
+                    product.likes.put(getUid(), true);
+                }
+
+                mutableData.setValue(product);
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                Log.d(TAG, "productTransaction:onComplete:" + databaseError);
+            }
+        });
+    }
+
+    private String getUid() {
+        return Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
     }
 
 }

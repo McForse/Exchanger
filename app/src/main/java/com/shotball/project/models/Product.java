@@ -4,6 +4,7 @@ import com.google.firebase.database.Exclude;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Product {
@@ -14,18 +15,15 @@ public class Product {
     public String description;
     public String user;
     public boolean available;
-    @Exclude
-    public Geo geo;
+    public String g;
+    public List<Double> l;
+    public int likeCount;
+    public Map<String, Boolean> likes = new HashMap<>();
 
     @Exclude
     public int distance;
 
-    public int likeCount = 0;
-    public Map<String, Boolean> likes = new HashMap<>();
-
-    public Product() {
-        geo = new Geo();
-    }
+    public Product() { }
 
     public Product(String title, ArrayList<String> images, String description, String user, boolean available, int distance) {
         this.title = title;
@@ -33,17 +31,6 @@ public class Product {
         this.description = description;
         this.user = user;
         this.available = available;
-        geo = new Geo();
-        this.distance = distance;
-    }
-
-    public Product(String title, ArrayList<String> image, String description, String user, boolean available, int distance, Geo geo) {
-        this.title = title;
-        this.images = images;
-        this.description = description;
-        this.user = user;
-        this.available = available;
-        this.geo = geo;
         this.distance = distance;
     }
 
@@ -51,13 +38,24 @@ public class Product {
         this.key = key;
     }
 
-    public void setGeo(double latitude, double longitude) {
-        this.geo.latitude = latitude;
-        this.geo.longitude = longitude;
+    public String getKey() {
+        return key;
     }
 
     public void setDistance(int distance) {
         this.distance = distance;
+    }
+
+    public double getLatitude() {
+        return l.get(0);
+    }
+
+    public double getLongitude() {
+        return l.get(1);
+    }
+
+    public Map<String, Boolean> getLikes() {
+        return likes;
     }
 
     @Exclude

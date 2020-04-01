@@ -72,7 +72,6 @@ public class FavoritesFragment extends Fragment {
         mManager = new GridLayoutManager(mActivity, 2);
         mRecycler.setLayoutManager(mManager);
 
-        setReferences();
         productList = new ArrayList<>();
 
         mRecycler.setAdapter(mAdapter);
@@ -85,113 +84,15 @@ public class FavoritesFragment extends Fragment {
         //setHasOptionsMenu(true);
     }
 
-    private void setReferences() {
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-        refProducts = mDatabase.child("products");
-
-        Query postsQuery = refProducts;
-
-        FirebaseRecyclerOptions options = new FirebaseRecyclerOptions.Builder<Product>()
-                .setQuery(postsQuery, Product.class)
-                .build();
-
-        mAdapter = new FirebaseRecyclerAdapter<Product, ProductViewHolder>(options) {
-
-            @Override
-            public ProductViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-                LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
-                return new ProductViewHolder(inflater.inflate(R.layout.item_product, viewGroup, false));
-            }
-
-            @Override
-            protected void onBindViewHolder(ProductViewHolder viewHolder, int position, final Product model) {
-                final DatabaseReference postRef = getRef(position);
-
-                // Set click listener for the whole post view
-                final String postKey = postRef.getKey();
-                viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // Launch PostDetailActivity
-                        Intent intent = new Intent(getActivity(), ProductActivity.class);
-                        intent.putExtra(ProductActivity.EXTRA_PRODUCT_KEY, postKey);
-                        startActivity(intent);
-                    }
-                });
-
-                // Determine if the current user has liked this post and set UI accordingly
-                if (model.likes.containsKey(getUid())) {
-                    viewHolder.like.setImageResource(R.drawable.ic_favorite);
-                } else {
-                    viewHolder.like.setImageResource(R.drawable.ic_favorite_border);
-                }
-
-                // Bind Post to ViewHolder, setting OnClickListener for the star button
-                viewHolder.bindToPost(mActivity, model, position, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View starView) {
-                        // Need to write to both places the post is stored
-                        DatabaseReference globalPostRef = mDatabase.child("products").child(postRef.getKey());
-
-                        // Run two transactions
-                        onStarClicked(globalPostRef);
-                    }
-                });
-            }
-        };
-        mRecycler.setAdapter(mAdapter);
-    }
-
-    private void onStarClicked(DatabaseReference postRef) {
-        postRef.runTransaction(new Transaction.Handler() {
-            @Override
-            public Transaction.Result doTransaction(MutableData mutableData) {
-                Product p = mutableData.getValue(Product.class);
-                if (p == null) {
-                    return Transaction.success(mutableData);
-                }
-
-                if (p.likes.containsKey(getUid())) {
-                    // Unstar the post and remove self from stars
-                    p.likeCount = p.likeCount - 1;
-                    p.likes.remove(getUid());
-                } else {
-                    // Star the post and add self to stars
-                    p.likeCount = p.likeCount + 1;
-                    p.likes.put(getUid(), true);
-                }
-
-                // Set value and report transaction success
-                mutableData.setValue(p);
-                return Transaction.success(mutableData);
-            }
-
-            @Override
-            public void onComplete(DatabaseError databaseError, boolean b,
-                                   DataSnapshot dataSnapshot) {
-                // Transaction completed
-                Log.d(TAG, "postTransaction:onComplete:" + databaseError);
-            }
-        });
-    }
-
     @Override
     public void onStart() {
         super.onStart();
         Log.d(TAG, "onStart");
-        Log.d(TAG, "Listener waiting");
-        if (mAdapter != null) {
-            mAdapter.startListening();
-            Log.d(TAG, "Listener start");
-        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (mAdapter != null) {
-            mAdapter.stopListening();
-        }
     }
 
     private String getUid() {

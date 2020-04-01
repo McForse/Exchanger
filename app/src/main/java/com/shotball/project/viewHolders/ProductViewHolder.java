@@ -9,33 +9,32 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
 import com.shotball.project.R;
+import com.shotball.project.adapters.ProductAdapter;
 import com.shotball.project.models.Product;
+
+import java.util.Objects;
 
 public class ProductViewHolder extends RecyclerView.ViewHolder {
 
-    private static final String TAG = "ProductViewHolder";
-
-    private View view;
     private TextView title;
     private ImageView image;
     private TextView distance;
     private TextView distanceUnit;
-    public ImageButton like;
-
+    private ImageButton likeButton;
 
     public ProductViewHolder(View itemView) {
         super(itemView);
 
-        view = itemView.findViewById(R.id.product);
         title = itemView.findViewById(R.id.product_title);
         image = itemView.findViewById(R.id.product_image);
         distance = itemView.findViewById(R.id.product_distance);
         distanceUnit = itemView.findViewById(R.id.product_distance_unit);
-        like = itemView.findViewById(R.id.product_like);
+        likeButton = itemView.findViewById(R.id.product_like);
     }
 
-    public void bindToPost(Context context, Product product, int position, View.OnClickListener likeClickListener) {
+    public void bind(final Context context, final Product product, final ProductAdapter.OnProductSelectedListener listener) {
         title.setText(product.title);
         //TODO: placeholder and error
         Glide.with(context).load(product.images.get(0)).centerCrop().into(image);
@@ -52,6 +51,52 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
 
         }
 
-        like.setOnClickListener(likeClickListener);
+        setLikeButton(context, product, false);
+
+        itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (listener != null) {
+                    listener.onProductSelected(product);
+                }
+            }
+        });
+
+        likeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listener != null) {
+                    setLikeButton(context, product, true);
+                    listener.onLikeClicked(product.getKey());
+                }
+            }
+        });
     }
+
+    private void setLikeButton(Context context, Product product, boolean update) {
+        if (update) {
+            if (product.getLikes().containsKey(getUid())) {
+                likeButton.setImageResource(R.drawable.ic_favorite_border);
+                likeButton.setColorFilter(context.getColor(R.color.black));
+                product.getLikes().remove(getUid());
+            } else {
+                likeButton.setImageResource(R.drawable.ic_favorite);
+                likeButton.setColorFilter(context.getColor(R.color.red_400));
+                product.getLikes().put(getUid(), true);
+            }
+        } else {
+            if (product.getLikes().containsKey(getUid())) {
+                likeButton.setImageResource(R.drawable.ic_favorite);
+                likeButton.setColorFilter(context.getColor(R.color.red_400));
+            } else {
+                likeButton.setImageResource(R.drawable.ic_favorite_border);
+                likeButton.setColorFilter(context.getColor(R.color.black));
+            }
+        }
+    }
+
+    private String getUid() {
+        return Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+    }
+
 }

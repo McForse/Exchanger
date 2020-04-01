@@ -7,7 +7,6 @@ import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 
 import android.graphics.PorterDuff;
-import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -19,14 +18,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,7 +30,6 @@ import com.shotball.project.models.Product;
 import com.shotball.project.models.User;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ProductActivity extends AppCompatActivity {
 
@@ -56,7 +47,6 @@ public class ProductActivity extends AppCompatActivity {
     private Product mProduct;
     private User mSeller;
     private DatabaseReference refProducts;
-    private DatabaseReference refLocations;
     private DatabaseReference refUsers;
     private ValueEventListener dataListener;
 
@@ -91,13 +81,12 @@ public class ProductActivity extends AppCompatActivity {
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         refProducts = mDatabase.child("products");
-        refLocations = mDatabase.child("locations");
         refUsers = mDatabase.child("users");
 
         getProduct();
 
-        layout_dots = (LinearLayout) findViewById(R.id.layout_dots);
-        viewPager = (ViewPager) findViewById(R.id.pager);
+        layout_dots = findViewById(R.id.layout_dots);
+        viewPager = findViewById(R.id.pager);
         adapterImageSlider = new AdapterImageSlider(this, new ArrayList<String>());
 
 
@@ -215,9 +204,7 @@ public class ProductActivity extends AppCompatActivity {
                 layout_dots.addView(dots[i]);
             }
 
-            if (dots.length > 0) {
-                dots[current].setColorFilter(ContextCompat.getColor(this, R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
-            }
+            dots[current].setColorFilter(ContextCompat.getColor(this, R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
         }
     }
 
