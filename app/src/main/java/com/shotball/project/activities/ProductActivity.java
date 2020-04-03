@@ -18,7 +18,14 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -54,8 +61,6 @@ public class ProductActivity extends AppCompatActivity {
     private LinearLayout layout_dots;
     private AdapterImageSlider adapterImageSlider;
 
-    private SupportMapFragment googleMap;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,7 +93,6 @@ public class ProductActivity extends AppCompatActivity {
         layout_dots = findViewById(R.id.layout_dots);
         viewPager = findViewById(R.id.pager);
         adapterImageSlider = new AdapterImageSlider(this, new ArrayList<String>());
-
 
     }
 
@@ -164,6 +168,7 @@ public class ProductActivity extends AppCompatActivity {
             });
 
             getSeller();
+            initMapFragment();
         } else {
             //TODO: error
         }
@@ -206,6 +211,35 @@ public class ProductActivity extends AppCompatActivity {
 
             dots[current].setColorFilter(ContextCompat.getColor(this, R.color.colorPrimary), PorterDuff.Mode.SRC_ATOP);
         }
+    }
+
+    private void initMapFragment() {
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(final GoogleMap googleMap) {
+                googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                googleMap.getUiSettings().setZoomControlsEnabled(true);
+                googleMap.getUiSettings().setScrollGesturesEnabled(true);
+                MarkerOptions markerOptions = new MarkerOptions().position(new LatLng(mProduct.getLatitude(), mProduct.getLongitude()));
+                googleMap.addMarker(markerOptions);
+                googleMap.moveCamera(zoomingLocation());
+                googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+                        try {
+                            googleMap.animateCamera(zoomingLocation());
+                        } catch (Exception e) {
+                        }
+                        return true;
+                    }
+                });
+            }
+        });
+    }
+
+    private CameraUpdate zoomingLocation() {
+        return CameraUpdateFactory.newLatLngZoom(new LatLng(mProduct.getLatitude(), mProduct.getLongitude()), 13);
     }
 
     @Override
