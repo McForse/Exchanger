@@ -46,4 +46,5 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
     implementation 'com.firebaseui:firebase-ui-database:6.2.0'
     implementation 'com.firebase:geofire-android:3.0.0'
+    implementation 'com.google.android:flexbox:2.0.1'
 }

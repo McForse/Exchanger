@@ -14,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -29,7 +30,6 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryDataEventListener;
-import com.firebase.geofire.GeoQueryEventListener;
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.google.firebase.database.DataSnapshot;
@@ -38,7 +38,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
-import com.google.firebase.database.ValueEventListener;
 import com.shotball.project.R;
 import com.shotball.project.Utils.ViewAnimation;
 import com.shotball.project.activities.FilterActivity;
@@ -46,12 +45,12 @@ import com.shotball.project.activities.ProductActivity;
 import com.shotball.project.activities.SignInActivity;
 import com.shotball.project.adapters.ProductAdapter;
 import com.shotball.project.listeners.EndlessRecyclerViewScrollListener;
+import com.shotball.project.models.Filters;
 import com.shotball.project.models.Product;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
-public class HomeFragment extends Fragment implements ProductAdapter.OnProductSelectedListener {
+public class HomeFragment extends Fragment implements ProductAdapter.OnProductSelectedListener, FilterActivity.FilterListener {
 
     private static final String TAG = "HomeFragment";
     private static final String TAG_GEO = "GeoListener";
@@ -374,6 +373,11 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
                 Log.d(TAG, "productTransaction:onComplete:" + databaseError);
             }
         });
+    }
+
+    @Override
+    public void onFilter(Filters filters) {
+
     }
 
     private String getUid() {
