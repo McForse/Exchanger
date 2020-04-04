@@ -27,6 +27,7 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
@@ -182,12 +183,25 @@
                     android:layout_marginTop="@dimen/spacing_large"
                     android:background="@color/grey_10" />
 
+                <RelativeLayout
+                    android:id="@+id/map_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp">
+
                 <fragment
                     android:id="@+id/map"
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
+                    android:layout_height="match_parent"
                     tools:context=".MapsActivity"
                     android:name="com.google.android.gms.maps.SupportMapFragment" />
+
+                    <ImageView
+                        android:id="@+id/transparent_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@android:color/transparent" />
+
+                </RelativeLayout>
 
             </LinearLayout>
 
