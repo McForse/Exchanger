@@ -14,7 +14,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -30,6 +29,8 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryDataEventListener;
+import com.firebase.geofire.core.GeoHash;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.google.firebase.database.DataSnapshot;
@@ -48,9 +49,11 @@ import com.shotball.project.listeners.EndlessRecyclerViewScrollListener;
 import com.shotball.project.models.Filters;
 import com.shotball.project.models.Product;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-public class HomeFragment extends Fragment implements ProductAdapter.OnProductSelectedListener, FilterActivity.FilterListener {
+public class HomeFragment extends Fragment implements ProductAdapter.OnProductSelectedListener {
 
     private static final String TAG = "HomeFragment";
     private static final String TAG_GEO = "GeoListener";
@@ -59,8 +62,6 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     private Activity mActivity;
 
     private DatabaseReference mDatabase;
-    private DatabaseReference refLocation;
-    private DatabaseReference refProducts;
     private GeoFire geoFire;
     private GeoQuery geoQuery;
     private GeoQueryDataEventListener geoQueryListener;
@@ -74,6 +75,9 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     private final String KEY_RECYCLER_STATE = "recycler_state";
     private static Bundle mBundleRecyclerViewState;
     private Parcelable mListState;
+
+    private static Filters mFilters;
+    private static boolean filtersUpdated;
 
     private static final int ITEMS_PER_PAGE = 5;
 
@@ -91,6 +95,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         recyclerView = rootView.findViewById(R.id.product_grid);
         swipeContainer = rootView.findViewById(R.id.swipe_container);
         mAdapter = new ProductAdapter(rootView.getContext(), this);
+        mFilters = Filters.getDefault();
         setReferences();
 
         return rootView;
@@ -128,6 +133,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         recyclerView.setAdapter(mAdapter);
         recyclerView.addOnScrollListener(scrollListener);
 
+        setLocationToProduct("M2HxGtwbdIVUOmmGAXU", 55.948900, 37.491523);
         startSearch();
     }
 
@@ -138,9 +144,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     }
 
     private void setReferences() {
-        refProducts = mDatabase.child("products");
-        refLocation = mDatabase.child("locations");
-        geoFire = new GeoFire(refProducts);
+        geoFire = new GeoFire(mDatabase.child("products"));
 
         geoQueryListener = new GeoQueryDataEventListener() {
             @Override
@@ -187,29 +191,23 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     }
 
     private void startSearch() {
-        searchNearby(MY_LOCATION[0], MY_LOCATION[1], 1.0);
-    }
-
-    private void loadData(int page) {
-        //if (page < productsLocations.size()) getProduct(productsLocations.get(page), page);
+        Log.d(TAG, "startSearch");
+        searchNearby(MY_LOCATION[0], MY_LOCATION[1], (double) mFilters.getDistance() / 1000);
     }
 
     private void searchNearby(double latitude, double longitude, double radius) {
-        searchNearby(new GeoLocation(latitude, longitude), radius);
-    }
-
-    private void searchNearby(GeoLocation location, double radius) {
-        geoQuery = geoFire.queryAtLocation(location, radius);
+        geoQuery = geoFire.queryAtLocation(new GeoLocation(latitude, longitude), radius);
         geoQuery.addGeoQueryDataEventListener(geoQueryListener);
     }
 
     private void stopGeoQueryListener() {
-        //geoQuery.removeAllListeners();
+        geoQuery.removeAllListeners();
         swipeContainer.setRefreshing(false);
     }
 
-    private void reset() {
-        Log.d(TAG, "reset");
+    private void resetRecycleView() {
+        Log.d(TAG, "resetRecycleView");
+        filtersUpdated = false;
         mAdapter.clear();
         recyclerView.addOnScrollListener(scrollListener);
     }
@@ -218,12 +216,6 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         Log.d(TAG, "noMoreProducts");
         stopGeoQueryListener();
         recyclerView.removeOnScrollListener(scrollListener);
-    }
-
-    private void setLocationToProduct(String key, double latitude, double longitude) {
-        GeoFire geoFire = new GeoFire(refLocation);
-
-        geoFire.setLocation(key, new GeoLocation(latitude, longitude));
     }
 
     private void displayContent() {
@@ -236,6 +228,66 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         }, 100);
 
         recyclerView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onProductSelected(Product product) {
+        Intent intent = new Intent(mActivity, ProductActivity.class);
+        intent.putExtra(ProductActivity.EXTRA_PRODUCT_KEY, product.getKey());
+        mActivity.startActivity(intent);
+    }
+
+    @Override
+    public void onLikeClicked(String productKey) {
+        DatabaseReference reference = mDatabase.child("products").child(productKey);
+
+        reference.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                Product product = mutableData.getValue(Product.class);
+                if (product == null) {
+                    return Transaction.success(mutableData);
+                }
+
+                if (product.likes.containsKey(getUid())) {
+                    product.likeCount = product.likeCount - 1;
+                    product.likes.remove(getUid());
+                } else {
+                    product.likeCount = product.likeCount + 1;
+                    product.likes.put(getUid(), true);
+                }
+
+                mutableData.setValue(product);
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                Log.d(TAG, "productTransaction:onComplete:" + databaseError);
+            }
+        });
+    }
+
+    private static FilterActivity.FilterListener mFilterListener = new FilterActivity.FilterListener() {
+        @Override
+        public void onFilter(Filters filters) {
+            Log.d(TAG, "onFilter: " + filters.toString());
+
+            if (!mFilters.equals(filters)) {
+                mFilters = filters;
+                filtersUpdated = true;
+            }
+        }
+
+        @Override
+        public Filters getCurrentFilters() {
+            return mFilters;
+        }
+    };
+
+    private String getUid() {
+        return Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
     }
 
     @Override
@@ -275,6 +327,27 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
                 }
             }, 50);
         }
+
+        if (filtersUpdated) {
+            resetRecycleView();
+            startSearch();
+        }
+    }
+
+    private void setLocationToProduct(String key, double latitude, double longitude) {
+        GeoHash geoHash = new GeoHash(new GeoLocation(latitude, longitude));
+        List<Double> location = new ArrayList<>();
+        location.add(latitude);
+        location.add(longitude);
+        DatabaseReference databaseReference = mDatabase.child("products").child(key);
+
+        databaseReference.child("g").setValue(geoHash.getGeoHashString()).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG, "newLocation writed");
+            }
+        });
+        databaseReference.child("l").setValue(location);
     }
 
     @Override
@@ -329,59 +402,13 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
             mActivity.finish();
             return true;
         } else if (i == R.id.action_filter) {
-            startActivity(new Intent(mActivity, FilterActivity.class));
+            Intent intent = new Intent(mActivity, FilterActivity.class);
+            intent.putExtra("interface", mFilterListener);
+            startActivity(intent);
             return super.onOptionsItemSelected(item);
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onProductSelected(Product product) {
-        Intent intent = new Intent(mActivity, ProductActivity.class);
-        intent.putExtra(ProductActivity.EXTRA_PRODUCT_KEY, product.getKey());
-        mActivity.startActivity(intent);
-    }
-
-    @Override
-    public void onLikeClicked(String productKey) {
-        DatabaseReference reference = mDatabase.child("products").child(productKey);
-
-        reference.runTransaction(new Transaction.Handler() {
-            @NonNull
-            @Override
-            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
-                Product product = mutableData.getValue(Product.class);
-                if (product == null) {
-                    return Transaction.success(mutableData);
-                }
-
-                if (product.likes.containsKey(getUid())) {
-                    product.likeCount = product.likeCount - 1;
-                    product.likes.remove(getUid());
-                } else {
-                    product.likeCount = product.likeCount + 1;
-                    product.likes.put(getUid(), true);
-                }
-
-                mutableData.setValue(product);
-                return Transaction.success(mutableData);
-            }
-
-            @Override
-            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-                Log.d(TAG, "productTransaction:onComplete:" + databaseError);
-            }
-        });
-    }
-
-    @Override
-    public void onFilter(Filters filters) {
-
-    }
-
-    private String getUid() {
-        return Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
     }
 
 }

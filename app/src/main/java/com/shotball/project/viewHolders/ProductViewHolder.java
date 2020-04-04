@@ -40,13 +40,12 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
         Glide.with(context).load(product.images.get(0)).centerCrop().into(image);
         //Glide.with(context).load(product.imageurl).placeholder(R.mipmap.ic_launcher).error(R.mipmap.ic_launcher).into(productImageView);
 
-        int product_distance = product.distance;
+        int product_distance = round10(product.distance);
 
         if (product_distance < 1000) {
             distance.setText(String.valueOf(product_distance));
         } else {
-            product_distance /= 1000;
-            distance.setText(String.valueOf(product_distance));
+            distance.setText(String.valueOf((float) product_distance / 1000));
             distanceUnit.setText(R.string.kilometers);
 
         }
@@ -93,6 +92,10 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
                 likeButton.setColorFilter(context.getColor(R.color.black));
             }
         }
+    }
+
+    private int round10(int value) {
+        return value / 10 * 10;
     }
 
     private String getUid() {

@@ -4,9 +4,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.viewpager.widget.ViewPager;
 
+import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -26,6 +31,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -37,12 +43,15 @@ import com.shotball.project.models.Product;
 import com.shotball.project.models.User;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class ProductActivity extends AppCompatActivity {
 
     private static final String TAG = "ProductActivity";
     public static final String EXTRA_PRODUCT_KEY = "product_key";
     private String PRODUCT_KEY;
+
+    private Toolbar toolbar;
 
     private ImageView image;
     private TextView title;
@@ -97,10 +106,17 @@ public class ProductActivity extends AppCompatActivity {
     }
 
     private void initToolbar() {
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(null);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Drawable drawable = toolbar.getOverflowIcon();
+        if (drawable != null) {
+            drawable = DrawableCompat.wrap(drawable);
+            DrawableCompat.setTint(drawable.mutate(), getColor(R.color.red_400));
+            toolbar.setOverflowIcon(drawable);
+            toolbar.getOverflowIcon().setColorFilter(new PorterDuffColorFilter(getColor(R.color.red_400), PorterDuff.Mode.SRC_ATOP));
+        }
     }
 
     private void getProduct() {
@@ -169,6 +185,7 @@ public class ProductActivity extends AppCompatActivity {
 
             getSeller();
             initMapFragment();
+            invalidateOptionsMenu();
         } else {
             //TODO: error
         }
@@ -242,6 +259,10 @@ public class ProductActivity extends AppCompatActivity {
         return CameraUpdateFactory.newLatLngZoom(new LatLng(mProduct.getLatitude(), mProduct.getLongitude()), 13);
     }
 
+    private String getUid() {
+        return Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+    }
+
     @Override
     protected void onStop() {
         super.onStop();
@@ -251,6 +272,14 @@ public class ProductActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_product, menu);
+
+        if (mProduct != null) {
+            if (mProduct.likes.containsKey(getUid()));
+            MenuItem likeItem = menu.findItem(R.id.action_like);
+            likeItem.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_favorite));
+
+        }
+
         return super.onCreateOptionsMenu(menu);
     }
 

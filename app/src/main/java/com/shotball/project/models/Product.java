@@ -65,6 +65,9 @@ public class Product {
         result.put("images", images);
         result.put("description", description);
         result.put("user", user);
+        result.put("available", available);
+        result.put("g", g);
+        result.put("l", l);
         result.put("likeCount", likeCount);
         result.put("likes", likes);
 

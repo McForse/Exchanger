@@ -15,10 +15,13 @@ import android.widget.TextView;
 import com.shotball.project.R;
 import com.shotball.project.models.Filters;
 
+import java.io.Serializable;
+
 public class FilterActivity extends AppCompatActivity implements View.OnClickListener {
 
-    public interface FilterListener {
+    public interface FilterListener extends Serializable {
         void onFilter(Filters filters);
+        Filters getCurrentFilters();
     }
 
     private SeekBar seekBar;
@@ -53,16 +56,17 @@ public class FilterActivity extends AppCompatActivity implements View.OnClickLis
         clearButton.setOnClickListener(this);
         applyButton.setOnClickListener(this);
 
+        mFilterListener = (FilterListener) getIntent().getSerializableExtra("interface");
+
+        if (mFilterListener != null && mFilterListener.getCurrentFilters() != null) {
+            initFilters(mFilterListener.getCurrentFilters());
+        }
+
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                int distance = progress * 100;
-                if (distance <= 1000) {
-                    distanceMaxTextView.setText(String.valueOf(distance) + " meters");
-                } else {
-                    distanceMaxTextView.setText(String.valueOf((float)distance / 1000) + " km");
-                }
+                setSeekBarProgress(progress);
             }
 
             @Override
@@ -97,13 +101,35 @@ public class FilterActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
+    private void initFilters(Filters filter) {
+        int progress = filter.getDistance() / 100;
+        seekBar.setProgress(progress);
+        setSeekBarProgress(progress);
+    }
+
+    private void setSeekBarProgress(int progress) {
+        int distance = progress * 100;
+        if (distance <= 1000) {
+            distanceMaxTextView.setText(String.valueOf(distance) + " meters");
+        } else {
+            distanceMaxTextView.setText(String.valueOf((float)distance / 1000) + " km");
+        }
+    }
+
     private void onClearClicked() {
+        if (mFilterListener != null) {
+            mFilterListener.onFilter(Filters.getDefault());
+        }
+
+        finish();
     }
 
     private void onApplyClicked() {
         if (mFilterListener != null) {
             mFilterListener.onFilter(getFilters());
         }
+
+        finish();
     }
 
     private int getSelectedDistance() {
