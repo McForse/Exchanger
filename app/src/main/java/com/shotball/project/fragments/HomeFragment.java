@@ -21,8 +21,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.firebase.geofire.GeoFire;
@@ -45,11 +45,11 @@ import com.shotball.project.activities.FilterActivity;
 import com.shotball.project.activities.ProductActivity;
 import com.shotball.project.activities.SignInActivity;
 import com.shotball.project.adapters.ProductAdapter;
-import com.shotball.project.listeners.EndlessRecyclerViewScrollListener;
 import com.shotball.project.models.Filters;
 import com.shotball.project.models.Product;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
@@ -68,8 +68,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeContainer;
-    private GridLayoutManager gridLayoutManager;
-    private EndlessRecyclerViewScrollListener scrollListener;
+    private StaggeredGridLayoutManager gridLayoutManager;
     private ProductAdapter mAdapter;
 
     private final String KEY_RECYCLER_STATE = "recycler_state";
@@ -79,7 +78,10 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     private static Filters mFilters;
     private static boolean filtersUpdated;
 
-    private static final int ITEMS_PER_PAGE = 5;
+    private static final int item_per_display = 8;
+    private final List<Product> productsList = new ArrayList<>();
+    private HashSet<String> productsKeys;
+    private int counter = 0;
 
     private static final double[] MY_LOCATION = { 55.936354, 37.494034 };
 
@@ -94,8 +96,9 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         mDatabase = FirebaseDatabase.getInstance().getReference();
         recyclerView = rootView.findViewById(R.id.product_grid);
         swipeContainer = rootView.findViewById(R.id.swipe_container);
-        mAdapter = new ProductAdapter(rootView.getContext(), this);
+        mAdapter = new ProductAdapter(rootView.getContext(), item_per_display,this);
         mFilters = Filters.getDefault();
+        productsKeys = new HashSet<>();
         setReferences();
 
         return rootView;
@@ -106,32 +109,30 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         super.onActivityCreated(savedInstanceState);
 
         if (rootView.getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-            gridLayoutManager = new GridLayoutManager(rootView.getContext(), 2);
+            gridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         } else {
-            gridLayoutManager = new GridLayoutManager(rootView.getContext(), 3);
+            gridLayoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.HORIZONTAL);
         }
 
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                //reset();
-                //startSearch();
+                resetRecycleView();
+                startSearch();
             }
         });
 
-        scrollListener = new EndlessRecyclerViewScrollListener(gridLayoutManager) {
+        mAdapter.setOnLoadMoreListener(new ProductAdapter.OnLoadMoreListener() {
             @Override
-            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                Log.d(TAG, "onLoadMore, page=" + page);
-                //f (page > 1) loadData(page);
+            public void onLoadMore(int current_page) {
+                loadNextData();
             }
-        };
+        });
 
         //recyclerView.setVisibility(View.GONE);
         recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(mAdapter);
-        recyclerView.addOnScrollListener(scrollListener);
 
         setLocationToProduct("M2HxGtwbdIVUOmmGAXU", 55.948900, 37.491523);
         startSearch();
@@ -149,23 +150,32 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         geoQueryListener = new GeoQueryDataEventListener() {
             @Override
             public void onDataEntered(DataSnapshot dataSnapshot, GeoLocation location) {
-                Log.d(TAG_GEO, "onDataEntered: " + dataSnapshot.toString());
-                final Product product = dataSnapshot.getValue(Product.class);
+                if (counter < item_per_display) {
+                    Log.d(TAG_GEO, "onDataEntered: " + dataSnapshot.toString());
+                    final Product product = dataSnapshot.getValue(Product.class);
 
-                if (product != null && product.available) {
-                    product.setKey(dataSnapshot.getKey());
+                    if (product != null && product.available) {
+                        String key = dataSnapshot.getKey();
+                        if (!productsKeys.contains(key)) {
+                            productsKeys.add(key);
+                            product.setKey(key);
 
-                    Location locationA = new Location("point A");
+                            Location locationA = new Location("point A");
 
-                    locationA.setLatitude(product.getLatitude());
-                    locationA.setLongitude(product.getLongitude());
-                    Location locationB = new Location("point B");
-                    locationB.setLatitude(MY_LOCATION[0]);
-                    locationB.setLongitude(MY_LOCATION[1]);
-                    int distance = (int) locationA.distanceTo(locationB);
+                            locationA.setLatitude(product.getLatitude());
+                            locationA.setLongitude(product.getLongitude());
+                            Location locationB = new Location("point B");
+                            locationB.setLatitude(MY_LOCATION[0]);
+                            locationB.setLongitude(MY_LOCATION[1]);
+                            int distance = (int) locationA.distanceTo(locationB);
 
-                    product.setDistance(distance);
-                    mAdapter.add(product);
+                            product.setDistance(distance);
+                            productsList.add(product);
+                            counter++;
+                        }
+                    }
+                } else {
+                    stopGeoQueryListener();
                 }
             }
 
@@ -181,6 +191,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
             @Override
             public void onGeoQueryReady() {
                 Log.d(TAG_GEO, "onGeoQueryReady");
+                noMoreProducts();
             }
 
             @Override
@@ -188,6 +199,13 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
                 Log.e(TAG_GEO, "onGeoQueryError: " + error);
             }
         };
+    }
+
+    private void loadNextData() {
+        Log.d(TAG, "loadNextData");
+        mAdapter.setLoading();
+        counter = 0;
+        startSearch();
     }
 
     private void startSearch() {
@@ -201,21 +219,30 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     }
 
     private void stopGeoQueryListener() {
+        Log.d(TAG, "stopGeoQueryListener: " + productsList.size());
         geoQuery.removeAllListeners();
         swipeContainer.setRefreshing(false);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.insertData(productsList);
+                productsList.clear();
+                counter = 0;
+            }
+        }, 1500);
     }
 
     private void resetRecycleView() {
         Log.d(TAG, "resetRecycleView");
+        counter = 0;
+        productsKeys.clear();
         filtersUpdated = false;
         mAdapter.clear();
-        recyclerView.addOnScrollListener(scrollListener);
     }
 
     private void noMoreProducts() {
         Log.d(TAG, "noMoreProducts");
         stopGeoQueryListener();
-        recyclerView.removeOnScrollListener(scrollListener);
     }
 
     private void displayContent() {

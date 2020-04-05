@@ -20,10 +20,16 @@ public class Product {
     public int likeCount;
     public Map<String, Boolean> likes = new HashMap<>();
 
+    public boolean progress = false;
+
     @Exclude
     public int distance;
 
     public Product() { }
+
+    public Product(boolean progress) {
+        this.progress = progress;
+    }
 
     public Product(String title, ArrayList<String> images, String description, String user, boolean available, int distance) {
         this.title = title;
