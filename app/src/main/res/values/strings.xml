@@ -36,4 +36,14 @@
     <string name="menu_like">Add to favourite</string>
     <string name="title_activity_maps">Map</string>
     <string name="kilometers">kilometers</string>
+    <string name="menu_add">Add product</string>
+    <string name="menu_done">Upload product</string>
+    <string name="add_product_title">Add New Product</string>
+    <string name="no_location_selected">No location selected</string>
+    <string name="error_publish_product">Error publishing product! Try it again</string>
+    <string name="dialog_product_publication">Product publication</string>
+    <string name="wait">Please wait…</string>
+    <string name="dialog_success">Success</string>
+    <string name="dialog_publication_success">Product published successfully!</string>
+    <string name="go_to_product">Go to product</string>
 </resources>

@@ -6,9 +6,13 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.MenuItem;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.shotball.project.R;
@@ -16,7 +20,11 @@ import com.shotball.project.adapters.FragmentViewPagerAdapter;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = "MainActivity";
+
+    private FusedLocationProviderClient fusedLocationClient;
+
+    public static Location location;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,12 +32,27 @@ public class MainActivity extends AppCompatActivity {
         checkAuthState();
         setContentView(R.layout.activity_main);
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if (location != null) {
+                            setLocation(location);
+                        }
+                    }
+                });
+    }
+
+    private void setLocation(Location location) {
+        MainActivity.location = location;
         initComponents();
     }
 
     private void initComponents() {
         ViewPager2 viewPager = findViewById(R.id.view_pager);
-        FragmentViewPagerAdapter adapter = new FragmentViewPagerAdapter(getSupportFragmentManager(), getLifecycle());
+        FragmentViewPagerAdapter adapter = new FragmentViewPagerAdapter(getSupportFragmentManager(), getLifecycle(), this);
         viewPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
         viewPager.setOffscreenPageLimit(1);
         viewPager.setUserInputEnabled(false);

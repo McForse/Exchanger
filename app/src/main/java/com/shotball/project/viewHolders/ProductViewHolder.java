@@ -99,7 +99,11 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
     }
 
     private String getUid() {
-        return Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            return FirebaseAuth.getInstance().getCurrentUser().getUid();
+        } else {
+            return null;
+        }
     }
 
 }

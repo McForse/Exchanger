@@ -14,7 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -40,8 +40,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.shotball.project.R;
-import com.shotball.project.Utils.ViewAnimation;
+import com.shotball.project.activities.AddProductActivity;
 import com.shotball.project.activities.FilterActivity;
+import com.shotball.project.activities.MainActivity;
 import com.shotball.project.activities.ProductActivity;
 import com.shotball.project.activities.SignInActivity;
 import com.shotball.project.adapters.ProductAdapter;
@@ -66,6 +67,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     private GeoQuery geoQuery;
     private GeoQueryDataEventListener geoQueryListener;
 
+    private ProgressBar progressBar;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeContainer;
     private StaggeredGridLayoutManager gridLayoutManager;
@@ -78,6 +80,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     private static Filters mFilters;
     private static boolean filtersUpdated;
 
+    private static boolean loading = false;
     private static final int item_per_display = 8;
     private final List<Product> productsList = new ArrayList<>();
     private HashSet<String> productsKeys;
@@ -94,9 +97,10 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
 
         initToolbar();
         mDatabase = FirebaseDatabase.getInstance().getReference();
+        progressBar = rootView.findViewById(R.id.progress_bar);
         recyclerView = rootView.findViewById(R.id.product_grid);
         swipeContainer = rootView.findViewById(R.id.swipe_container);
-        mAdapter = new ProductAdapter(rootView.getContext(), item_per_display,this);
+        mAdapter = new ProductAdapter(rootView.getContext(), item_per_display);
         mFilters = Filters.getDefault();
         productsKeys = new HashSet<>();
         setReferences();
@@ -111,7 +115,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         if (rootView.getContext().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             gridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         } else {
-            gridLayoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.HORIZONTAL);
+            gridLayoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         }
 
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -122,6 +126,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
             }
         });
 
+        mAdapter.setOnProductSelectedListener(this);
         mAdapter.setOnLoadMoreListener(new ProductAdapter.OnLoadMoreListener() {
             @Override
             public void onLoadMore(int current_page) {
@@ -134,7 +139,6 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(mAdapter);
 
-        setLocationToProduct("M2HxGtwbdIVUOmmGAXU", 55.948900, 37.491523);
         startSearch();
     }
 
@@ -151,22 +155,22 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
             @Override
             public void onDataEntered(DataSnapshot dataSnapshot, GeoLocation location) {
                 if (counter < item_per_display) {
-                    Log.d(TAG_GEO, "onDataEntered: " + dataSnapshot.toString());
                     final Product product = dataSnapshot.getValue(Product.class);
 
                     if (product != null && product.available) {
                         String key = dataSnapshot.getKey();
                         if (!productsKeys.contains(key)) {
+                            Log.d(TAG_GEO, "onDataEntered: " + dataSnapshot.toString());
                             productsKeys.add(key);
                             product.setKey(key);
 
                             Location locationA = new Location("point A");
 
-                            locationA.setLatitude(product.getLatitude());
-                            locationA.setLongitude(product.getLongitude());
+                            locationA.setLatitude(MY_LOCATION[0]);
+                            locationA.setLongitude(MY_LOCATION[1]);
                             Location locationB = new Location("point B");
-                            locationB.setLatitude(MY_LOCATION[0]);
-                            locationB.setLongitude(MY_LOCATION[1]);
+                            locationB.setLatitude(MainActivity.location.getLatitude());
+                            locationB.setLongitude(MainActivity.location.getLongitude());
                             int distance = (int) locationA.distanceTo(locationB);
 
                             product.setDistance(distance);
@@ -191,7 +195,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
             @Override
             public void onGeoQueryReady() {
                 Log.d(TAG_GEO, "onGeoQueryReady");
-                noMoreProducts();
+                stopGeoQueryListener();
             }
 
             @Override
@@ -209,7 +213,9 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     }
 
     private void startSearch() {
-        Log.d(TAG, "startSearch");
+        //Log.d(TAG, "startSearch: " + MainActivity.location.getLatitude() + " " + MainActivity.location.getLongitude());
+        loading = true;
+        //searchNearby(location.getLatitude(), location.getLongitude(), (double) mFilters.getDistance() / 1000);
         searchNearby(MY_LOCATION[0], MY_LOCATION[1], (double) mFilters.getDistance() / 1000);
     }
 
@@ -219,42 +225,33 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     }
 
     private void stopGeoQueryListener() {
-        Log.d(TAG, "stopGeoQueryListener: " + productsList.size());
-        geoQuery.removeAllListeners();
-        swipeContainer.setRefreshing(false);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mAdapter.insertData(productsList);
-                productsList.clear();
-                counter = 0;
-            }
-        }, 1500);
+        if (loading) {
+            loading = false;
+            progressBar.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+            Log.d(TAG, "stopGeoQueryListener: " + productsList.size());
+            geoQuery.removeAllListeners();
+            swipeContainer.setRefreshing(false);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mAdapter.insertData(productsList);
+                    productsList.clear();
+                    counter = 0;
+                }
+            }, 1500);
+        }
     }
 
     private void resetRecycleView() {
         Log.d(TAG, "resetRecycleView");
+        recyclerView.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
         counter = 0;
         productsKeys.clear();
         filtersUpdated = false;
         mAdapter.clear();
-    }
-
-    private void noMoreProducts() {
-        Log.d(TAG, "noMoreProducts");
-        stopGeoQueryListener();
-    }
-
-    private void displayContent() {
-        final LinearLayout lyt_progress = rootView.findViewById(R.id.lyt_progress);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                ViewAnimation.fadeOut(lyt_progress);
-            }
-        }, 100);
-
-        recyclerView.setVisibility(View.VISIBLE);
+        loading = false;
     }
 
     @Override
@@ -291,7 +288,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
 
             @Override
             public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-                Log.d(TAG, "productTransaction:onComplete:" + databaseError);
+                Log.d(TAG, "productTransaction:onComplete: " + databaseError);
             }
         });
     }
@@ -314,7 +311,11 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     };
 
     private String getUid() {
-        return Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            return FirebaseAuth.getInstance().getCurrentUser().getUid();
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -432,7 +433,11 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
             Intent intent = new Intent(mActivity, FilterActivity.class);
             intent.putExtra("interface", mFilterListener);
             startActivity(intent);
-            return super.onOptionsItemSelected(item);
+            return true;
+        } else if  (i == R.id.action_add) {
+            Intent intent = new Intent(mActivity, AddProductActivity.class);
+            startActivity(intent);
+            return true;
         }
 
         return super.onOptionsItemSelected(item);

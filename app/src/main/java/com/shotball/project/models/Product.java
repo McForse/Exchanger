@@ -16,10 +16,11 @@ public class Product {
     public String user;
     public boolean available;
     public String g;
-    public List<Double> l;
+    public ArrayList<Double> l;
     public int likeCount;
     public Map<String, Boolean> likes = new HashMap<>();
 
+    @Exclude
     public boolean progress = false;
 
     @Exclude
@@ -31,13 +32,11 @@ public class Product {
         this.progress = progress;
     }
 
-    public Product(String title, ArrayList<String> images, String description, String user, boolean available, int distance) {
+    public Product(String title, ArrayList<String> images, String description, String user) {
         this.title = title;
         this.images = images;
         this.description = description;
         this.user = user;
-        this.available = available;
-        this.distance = distance;
     }
 
     public void setKey(String key) {
@@ -52,10 +51,12 @@ public class Product {
         this.distance = distance;
     }
 
+    @Exclude
     public double getLatitude() {
         return l.get(0);
     }
 
+    @Exclude
     public double getLongitude() {
         return l.get(1);
     }

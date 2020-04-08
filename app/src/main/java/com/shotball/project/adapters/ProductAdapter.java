@@ -1,19 +1,16 @@
 package com.shotball.project.adapters;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.shotball.project.R;
-import com.shotball.project.Utils.ItemAnimation;
 import com.shotball.project.models.Product;
 import com.shotball.project.viewHolders.ProductViewHolder;
 
@@ -31,24 +28,21 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         void onLoadMore(int current_page);
     }
 
-    private static final String TAG = "ProductAdapter";
-
     private final int VIEW_ITEM = 1;
     private final int VIEW_PROGRESS = 0;
 
-    private Context mContext;
-    private final List<Product> productsList;
-    private int item_per_display = 0;
+    private final List<Product> items;
+
+    private Context ctx;
+    private int item_per_display;
 
     private boolean loading;
-    private OnLoadMoreListener onLoadMoreListener = null;
+    private OnLoadMoreListener onLoadMoreListener;
+    private OnProductSelectedListener onProductSelectedListener;
 
-    private OnProductSelectedListener mListener;
-
-    public ProductAdapter(Context context, int item_per_display, OnProductSelectedListener listener) {
-        mContext = context;
-        mListener = listener;
-        productsList = new ArrayList<>();
+    public ProductAdapter(Context context, int item_per_display) {
+        ctx = context;
+        items = new ArrayList<>();
         this.item_per_display = item_per_display;
     }
 
@@ -69,16 +63,15 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        //setAnimation(viewHolder.itemView, position);
-        final Product s = productsList.get(position);
+        final Product product = items.get(position);
         if (holder instanceof ProductViewHolder) {
             ProductViewHolder view = (ProductViewHolder) holder;
-            view.bind(mContext, productsList.get(position), mListener);
+            view.bind(ctx, items.get(position), onProductSelectedListener);
         } else {
             ((ProgressViewHolder) holder).progress_bar.setIndeterminate(true);
         }
 
-        if (s.progress) {
+        if (product.progress) {
             StaggeredGridLayoutManager.LayoutParams layoutParams = (StaggeredGridLayoutManager.LayoutParams) holder.itemView.getLayoutParams();
             layoutParams.setFullSpan(true);
         } else {
@@ -87,35 +80,43 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
+    public void setOnProductSelectedListener(OnProductSelectedListener onProductSelectedListener) {
+        this.onProductSelectedListener = onProductSelectedListener;
+    }
+
+    public void setOnLoadMoreListener(OnLoadMoreListener onLoadMoreListener) {
+        this.onLoadMoreListener = onLoadMoreListener;
+    }
+
     @Override
     public int getItemCount() {
-        return productsList.size();
+        return items.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        return this.productsList.get(position).progress ? VIEW_PROGRESS : VIEW_ITEM;
+        return this.items.get(position).progress ? VIEW_PROGRESS : VIEW_ITEM;
     }
 
     @Override
-    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         lastItemViewDetector(recyclerView);
         super.onAttachedToRecyclerView(recyclerView);
     }
 
     public void insertData(List<Product> items) {
         setLoaded();
-        int positionStart = getItemCount();
-        int itemCount = items.size();
-        productsList.addAll(items);
+        final int positionStart = getItemCount();
+        final int itemCount = items.size();
+        this.items.addAll(items);
         notifyItemRangeInserted(positionStart, itemCount);
     }
 
-    public void setLoaded() {
+    private void setLoaded() {
         loading = false;
-        for (int i = 0; i < getItemCount(); i++) {
-            if (productsList.get(i).progress) {
-                productsList.remove(i);
+        for (int i = getItemCount() - 1; i >= 0 ; i--) {
+            if (items.get(i).progress) {
+                items.remove(i);
                 notifyItemRemoved(i);
             }
         }
@@ -123,29 +124,16 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     public void setLoading() {
         if (getItemCount() != 0) {
-            this.productsList.add(new Product(true));
+            items.add(new Product(true));
+            // Triggers a warning
             notifyItemInserted(getItemCount() - 1);
             loading = true;
         }
     }
 
     public void clear() {
-        productsList.clear();
+        items.clear();
         notifyDataSetChanged();
-    }
-
-    public void add(Product product) {
-        productsList.add(product);
-        notifyDataSetChanged();
-    }
-
-    public void addAll(List<Product> list) {
-        productsList.addAll(list);
-        notifyDataSetChanged();
-    }
-
-    public void setOnLoadMoreListener(OnLoadMoreListener onLoadMoreListener) {
-        this.onLoadMoreListener = onLoadMoreListener;
     }
 
     private void lastItemViewDetector(RecyclerView recyclerView) {
@@ -174,19 +162,10 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         return last_idx;
     }
 
-    private int lastPosition = -1;
-
-    public void setAnimation(View view, int position) {
-        if (position > lastPosition) {
-            ItemAnimation.animate(view, position, ItemAnimation.FADE_IN);
-            lastPosition = position;
-        }
-    }
-
     public static class ProgressViewHolder extends RecyclerView.ViewHolder {
-        public ProgressBar progress_bar;
+        ProgressBar progress_bar;
 
-        public ProgressViewHolder(View v) {
+        ProgressViewHolder(View v) {
             super(v);
             progress_bar = v.findViewById(R.id.progress_bar);
         }
