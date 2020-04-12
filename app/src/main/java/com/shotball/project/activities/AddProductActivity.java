@@ -24,6 +24,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageView;
 
@@ -39,6 +41,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -47,6 +50,9 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.sangcomz.fishbun.FishBun;
 import com.sangcomz.fishbun.adapter.image.impl.GlideAdapter;
 import com.sangcomz.fishbun.define.Define;
@@ -64,6 +70,7 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
     private static final String TAG = "AddProductActivity";
 
     private DatabaseReference mDatabase;
+    private StorageReference mStorage;
     private GoogleMap mMap;
     private Marker mMarker;
     private FusedLocationProviderClient mFusedLocationProviderClient;
@@ -73,13 +80,17 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
     private boolean mLocationPermissionGranted;
 
     private NestedScrollView mainContainer;
-    private List<Image> items;
+    private List<Image> imagesList;
     private AdapterSnapGeneric mAdapter;
 
+    private TextInputLayout productCategoryInputLayout;
     private TextInputLayout productTitleInputLayout;
     private TextInputLayout productDescriptionInputLayout;
+    private AutoCompleteTextView productCategory;
     private EditText productTitle;
     private EditText productDescription;
+
+    private Product mProduct;
 
     private AlertDialog mDialog;
 
@@ -113,6 +124,8 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
     @SuppressLint("ClickableViewAccessibility")
     private void initComponent() {
         mDatabase = FirebaseDatabase.getInstance().getReference();
+        mStorage = FirebaseStorage.getInstance().getReference();
+        mProduct = new Product();
 
         RecyclerView recyclerView = findViewById(R.id.images_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -124,6 +137,11 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
         new StartSnapHelper().attachToRecyclerView(recyclerView);
         mAdapter.addButton();
 
+        ArrayAdapter adapter = new ArrayAdapter<CharSequence>(this, R.layout.dropdown_product_category, getResources().getStringArray(R.array.product_categories));
+        productCategory = findViewById(R.id.product_category);
+        productCategory.setAdapter(adapter);
+
+        productCategoryInputLayout = findViewById(R.id.product_category_input_layout);
         productTitleInputLayout = findViewById(R.id.product_title_input_layout);
         productDescriptionInputLayout = findViewById(R.id.product_description_input_layout);
         productTitle = findViewById(R.id.product_title);
@@ -183,11 +201,24 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
         }
 
         mDialog.show();
-        writeNewProduct();
+        upload();
     }
 
     private boolean validateForm() {
         boolean valid = true;
+
+        if (imagesList == null || imagesList.size() == 0) {
+            valid = false;
+        }
+
+        String category = productCategory.getText().toString();
+        if (TextUtils.isEmpty(category)) {
+            productCategoryInputLayout.setError(getString(R.string.required));
+            productCategoryInputLayout.requestFocus();
+            valid = false;
+        } else {
+            productCategoryInputLayout.setError(null);
+        }
 
         String title = productTitle.getText().toString();
         if (TextUtils.isEmpty(title)) {
@@ -215,28 +246,61 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
         return valid;
     }
 
-    private void writeNewProduct() {
+    private void upload() {
         String key = mDatabase.child("products").push().getKey();
 
         if (key == null) {
+            mDialog.dismiss();
             Snackbar.make(mainContainer, R.string.error_publish_product, Snackbar.LENGTH_SHORT).show();
             return;
+        } else {
+            uploadImages(key);
         }
+    }
 
-        ArrayList<String> images = new ArrayList<>();
-        images.add("https://lh3.googleusercontent.com/FDlLqxdGjraCR8J0QzcuCh7eRHvnXNyWwP9mOTMviY2IX4WglCbAobxBD8tfYvUk-gZeOwvv02IC5vhbgEAk7F7gV2XwLJpAaw");
+    private void uploadImages(final String key) {
+        StorageReference imagesRef = mStorage.child("images").child(key);
+        final ArrayList<String> productImages = new ArrayList<>();
 
+        for (int i = 0; i < imagesList.size(); i++) {
+            productImages.add(String.valueOf(i));
+            Uri file = imagesList.get(i).image;
+            StorageReference riversRef = imagesRef.child(String.valueOf(i));
+            UploadTask uploadTask = riversRef.putFile(file);
+
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    mDialog.dismiss();
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    mProduct.setImages(productImages);
+                }
+            }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    writeNewProduct(key);
+                }
+            });
+        }
+    }
+
+    private void writeNewProduct(String key) {
         GeoHash geoHash = new GeoHash(new GeoLocation(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()));
         ArrayList<Double> location = new ArrayList<>();
         location.add(mLastKnownLocation.getLatitude());
         location.add( mLastKnownLocation.getLongitude());
 
-        final Product product = new Product(productTitle.getText().toString(), images, productDescription.getText().toString(), getUid());
-        product.setKey(key);
-        product.g = geoHash.getGeoHashString();
-        product.l = location;
+        mProduct.setTitle(productTitle.getText().toString());
+        mProduct.setDescription(productDescription.getText().toString());
+        mProduct.setUser(getUid());
+        mProduct.setKey(key);
+        mProduct.g = geoHash.getGeoHashString();
+        mProduct.l = location;
 
-        mDatabase.child("products").child(key).setValue(product.toMap()).addOnSuccessListener(new OnSuccessListener<Void>() {
+        mDatabase.child("products").child(key).setValue(mProduct.toMap()).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "Product was successfully recorded in the database!");
@@ -250,7 +314,7 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 Intent intent = new Intent(AddProductActivity.this, ProductActivity.class);
-                                intent.putExtra(ProductActivity.EXTRA_PRODUCT_KEY, product.getKey());
+                                intent.putExtra(ProductActivity.EXTRA_PRODUCT_KEY, mProduct.getKey());
                                 startActivity(intent);
                                 finish();
                             }
@@ -376,15 +440,15 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Define.ALBUM_REQUEST_CODE) {
             if (resultCode == RESULT_OK && data != null) {
-                items = new ArrayList<>();
+                imagesList = new ArrayList<>();
                 ArrayList<Uri> path = data.getParcelableArrayListExtra(Define.INTENT_PATH);
 
                 if (path != null) {
                     for (Uri image : path) {
-                        items.add(new Image(image));
+                        imagesList.add(new Image(image));
                     }
 
-                    mAdapter.insertData(items);
+                    mAdapter.insertData(imagesList);
                 }
             }
         }

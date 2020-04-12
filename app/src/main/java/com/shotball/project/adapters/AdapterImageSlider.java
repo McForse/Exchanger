@@ -3,6 +3,7 @@ package com.shotball.project.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.media.Image;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +15,10 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.shotball.project.R;
+import com.shotball.project.Utils.TextUtil;
 
 import java.util.List;
 
@@ -22,6 +26,7 @@ public class AdapterImageSlider extends PagerAdapter {
 
     private Activity act;
     private List<String> items;
+    private String key;
 
     private OnItemClickListener onItemClickListener;
 
@@ -34,9 +39,10 @@ public class AdapterImageSlider extends PagerAdapter {
     }
 
     // constructor
-    public AdapterImageSlider(Activity activity, List<String> items) {
+    public AdapterImageSlider(Activity activity, List<String> items, String key) {
         this.act = activity;
         this.items = items;
+        this.key = key;
     }
 
     @Override
@@ -65,7 +71,15 @@ public class AdapterImageSlider extends PagerAdapter {
         View v = inflater.inflate(R.layout.item_slider_image, container, false);
 
         ImageView image = v.findViewById(R.id.image);
-        Glide.with(act).load(o).centerCrop().into(image);
+
+        if (TextUtil.isUrl(o)) {
+            //TODO: placeholder and error
+            Glide.with(act).load(o).centerCrop().into(image);
+        } else {
+            Log.d("HHH", String.valueOf("images/" + key + "/" + o));
+            StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("images/" + key + "/" + o);
+            Glide.with(act).load(storageReference).centerCrop().into(image);
+        }
 
         ((ViewPager) container).addView(v);
 

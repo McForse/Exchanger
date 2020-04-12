@@ -48,7 +48,7 @@ public class FragmentViewPagerAdapter extends FragmentStateAdapter {
         return new HomeFragment();
     }
 
-    private MaterialFadeThrough createTransition() {
+    /*private MaterialFadeThrough createTransition() {
         MaterialFadeThrough fadeThrough = MaterialFadeThrough.create(ctx);
 
         // Add targets for this transition to explicitly run transitions only on these views. Without
@@ -59,5 +59,5 @@ public class FragmentViewPagerAdapter extends FragmentStateAdapter {
         fadeThrough.addTarget(R.id.account_fragment);
 
         return fadeThrough;
-    }
+    }*/
 }

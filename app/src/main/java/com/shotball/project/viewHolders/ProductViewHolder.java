@@ -10,7 +10,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.shotball.project.R;
+import com.shotball.project.Utils.TextUtil;
 import com.shotball.project.adapters.ProductAdapter;
 import com.shotball.project.models.Product;
 
@@ -36,9 +39,17 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
 
     public void bind(final Context context, final Product product, final ProductAdapter.OnProductSelectedListener listener) {
         title.setText(product.title);
-        //TODO: placeholder and error
-        Glide.with(context).load(product.images.get(0)).centerCrop().into(image);
-        //Glide.with(context).load(product.imageurl).placeholder(R.mipmap.ic_launcher).error(R.mipmap.ic_launcher).into(productImageView);
+
+        String imageUrl = product.images.get(0);
+
+        if (TextUtil.isUrl(imageUrl)) {
+            //TODO: placeholder and error
+            Glide.with(context).load(product.images.get(0)).centerCrop().into(image);
+            //Glide.with(context).load(product.imageurl).placeholder(R.mipmap.ic_launcher).error(R.mipmap.ic_launcher).into(productImageView);
+        } else {
+            StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("images/" + product.getKey() + "/" + imageUrl);
+            Glide.with(context).load(storageReference).centerCrop().into(image);
+        }
 
         int product_distance = round10(product.distance);
 

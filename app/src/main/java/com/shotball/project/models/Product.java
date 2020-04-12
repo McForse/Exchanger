@@ -39,6 +39,22 @@ public class Product {
         this.user = user;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public void setImages(ArrayList<String> images) {
+        this.images = images;
+    }
+
     public void setKey(String key) {
         this.key = key;
     }

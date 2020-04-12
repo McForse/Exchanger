@@ -1,5 +1,8 @@
 package com.shotball.project.Utils;
 
+import android.webkit.URLUtil;
+
+import java.net.URL;
 import java.util.regex.Pattern;
 
 public class TextUtil {
@@ -12,4 +15,16 @@ public class TextUtil {
             return false;
         return pat.matcher(email).matches();
     }
+
+    public static boolean isUrl(String url) {
+        return URLUtil.isValidUrl(url);
+        /*try {
+            new URL(url).toURI();
+            return true;
+        }
+        catch (Exception e) {
+            return false;
+        }*/
+    }
+
 }

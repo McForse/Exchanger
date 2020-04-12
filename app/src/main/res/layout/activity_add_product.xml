@@ -36,18 +36,17 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingLeft="@dimen/spacing_mxlarge"
-            android:paddingTop="@dimen/spacing_medium"
-            android:paddingRight="@dimen/spacing_mxlarge"
-            android:paddingBottom="@dimen/spacing_xlarge">
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Product images"
                 android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                android:textColor="@color/grey_40" />
+                android:textColor="@color/grey_40"
+                android:paddingLeft="@dimen/spacing_large"
+                android:paddingTop="@dimen/spacing_medium"
+                android:paddingRight="@dimen/spacing_large" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -68,140 +67,120 @@
 
             </LinearLayout>
 
-            <View
-                android:layout_width="0dp"
-                android:layout_height="@dimen/spacing_mlarge" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/product_title_input_layout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Title"
-                app:errorEnabled="true"
-                app:helperTextEnabled="true"
-                app:helperText="@string/required">
+                android:orientation="vertical"
+                android:paddingLeft="@dimen/spacing_large"
+                android:paddingTop="@dimen/spacing_medium"
+                android:paddingRight="@dimen/spacing_large"
+                android:paddingBottom="@dimen/spacing_xlarge">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/product_title"
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/spacing_mlarge" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/product_category_input_layout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text"
-                    android:maxLength="50"
-                    android:maxLines="1"
-                    android:singleLine="true" />
+                    android:hint="Category"
+                    app:errorEnabled="true"
+                    app:helperTextEnabled="true"
+                    app:helperText="@string/required">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <AutoCompleteTextView
+                        android:id="@+id/product_category"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:editable="false"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_mlarge"
-                android:text="Category"
-                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                android:textColor="@color/grey_40" />
+                </com.google.android.material.textfield.TextInputLayout>
 
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/spacing_mlarge" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/spacing_xmlarge"
-                android:layout_marginTop="@dimen/spacing_middle"
-                android:background="@color/grey_3"
-                app:hintEnabled="false">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:hint="Platform, type, etc."
-                    android:textColorHint="@color/grey_20" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_mlarge"
-                android:text="Project Description"
-                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                android:textColor="@color/grey_40" />
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/product_description_input_layout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Product description"
-                app:errorEnabled="true"
-                app:helperTextEnabled="true"
-                app:helperText="@string/required"
-                app:counterEnabled="true"
-                app:counterMaxLength="200">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/product_description"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/product_title_input_layout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textMultiLine"
-                    android:lines="2"
-                    android:maxLines="4"
-                    android:maxLength="200"
-                    android:singleLine="true" />
+                    android:hint="Title"
+                    app:errorEnabled="true"
+                    app:helperTextEnabled="true"
+                    app:helperText="@string/required">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/product_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        android:maxLength="50"
+                        android:maxLines="1"
+                        android:singleLine="true" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_mlarge"
-                android:text="Tags"
-                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                android:textColor="@color/grey_40" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_middle"
-                android:background="@color/grey_3"
-                app:hintEnabled="false">
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/spacing_mlarge" />
 
-                <com.google.android.material.textfield.TextInputEditText
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/product_description_input_layout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="start"
-                    android:hint="Input tag separated with comma"
-                    android:inputType="textMultiLine"
-                    android:lines="3"
-                    android:textColorHint="@color/grey_20" />
+                    android:layout_height="wrap_content"
+                    android:hint="Product description"
+                    app:errorEnabled="true"
+                    app:helperTextEnabled="true"
+                    app:helperText="@string/required"
+                    app:counterEnabled="true"
+                    app:counterMaxLength="200">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/product_description"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textMultiLine"
+                        android:lines="4"
+                        android:maxLines="4"
+                        android:maxLength="200"
+                        android:singleLine="true" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/spacing_mlarge"
-                android:text="Product location"
-                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                android:textColor="@color/grey_40" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-            <RelativeLayout
-                android:id="@+id/map_layout"
-                android:layout_width="match_parent"
-                android:layout_height="300dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_mlarge"
+                    android:text="Product location"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                    android:textColor="@color/grey_40" />
 
-                <fragment
-                    android:id="@+id/map"
+                <RelativeLayout
+                    android:id="@+id/map_layout"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    tools:context=".MapsActivity"
-                    android:name="com.google.android.gms.maps.SupportMapFragment" />
+                    android:layout_height="300dp">
 
-                <ImageView
-                    android:id="@+id/transparent_image"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@android:color/transparent" />
+                    <fragment
+                        android:id="@+id/map"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        tools:context=".MapsActivity"
+                        android:name="com.google.android.gms.maps.SupportMapFragment" />
 
-            </RelativeLayout>
+                    <ImageView
+                        android:id="@+id/transparent_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@android:color/transparent" />
+
+                </RelativeLayout>
+
+            </LinearLayout>
 
         </LinearLayout>
 

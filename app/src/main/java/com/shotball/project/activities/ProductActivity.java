@@ -33,13 +33,19 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.ListResult;
+import com.google.firebase.storage.StorageReference;
 import com.shotball.project.R;
+import com.shotball.project.Utils.TextUtil;
 import com.shotball.project.adapters.AdapterImageSlider;
 import com.shotball.project.models.Product;
 import com.shotball.project.models.User;
@@ -104,7 +110,7 @@ public class ProductActivity extends AppCompatActivity {
 
         layout_dots = findViewById(R.id.layout_dots);
         viewPager = findViewById(R.id.pager);
-        adapterImageSlider = new AdapterImageSlider(this, new ArrayList<String>());
+        adapterImageSlider = new AdapterImageSlider(this, new ArrayList<String>(), PRODUCT_KEY);
 
         final NestedScrollView mainScrollView = findViewById(R.id.scroll_view);
         ImageView transparentImageView = findViewById(R.id.transparent_image);
@@ -155,6 +161,7 @@ public class ProductActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
                 mProduct = dataSnapshot.getValue(Product.class);
+                mProduct.setKey(dataSnapshot.getKey());
                 initProduct();
             }
 
