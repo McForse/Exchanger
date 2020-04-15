@@ -88,6 +88,8 @@ public class ProductActivity extends AppCompatActivity {
     private LinearLayout layout_dots;
     private AdapterImageSlider adapterImageSlider;
 
+    private String roomId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -251,31 +253,66 @@ public class ProductActivity extends AppCompatActivity {
                     .apply(RequestOptions.circleCropTransform())
                     .into(sellerImageView);
             sellerNameField.setText(mSeller.username);
-
+            findChatRoom(mSeller.getUid());
 
             sendMessageOnClickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Map<String, String> selectedUsers = new HashMap<>() ;
-                    selectedUsers.put(getUid(), "i");
-                    selectedUsers.put(mSeller.getUid(), "i");
-                    final String room_id = FirebaseDatabase.getInstance().getReference().child("rooms").push().getKey();
+                    Log.d(TAG, "roomId: " + roomId);
+                    if (roomId == null || roomId.equals("")) {
+                        Map<String, String> selectedUsers = new HashMap<>();
+                        selectedUsers.put(getUid(), "i");
+                        selectedUsers.put(mSeller.getUid(), "i");
+                        final String room_id = mDatabase.child("rooms").push().getKey();
 
-                    FirebaseDatabase.getInstance().getReference().child("rooms/"+room_id).child("users").setValue(selectedUsers).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Intent intent = new Intent(ProductActivity.this, ChatActivity.class);
-                            intent.putExtra("roomID", room_id);
-                            startActivity(intent);
-                            finish();
-                        }
-                    });
+                        mDatabase.child("rooms/" + room_id).child("users").setValue(selectedUsers).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Intent intent = new Intent(ProductActivity.this, ChatActivity.class);
+                                intent.putExtra("toUid", mSeller.getUid());
+                                intent.putExtra("roomID", room_id);
+                                intent.putExtra("roomTitle", mSeller.getUsername());
+                                intent.putExtra("roomImage", mSeller.getImage());
+                                Log.d(TAG, mSeller.getUsername());
+                            }
+                        });
+                    } else {
+                        Intent intent = new Intent(ProductActivity.this, ChatActivity.class);
+                        intent.putExtra("toUid", mSeller.getUid());
+                        intent.putExtra("roomID", roomId);
+                        intent.putExtra("roomTitle", mSeller.getUsername());
+                        intent.putExtra("roomImage", mSeller.getImage());
+                        startActivity(intent);
+                        finish();
+                    }
                 }
             };
             sendMessageButton.setOnClickListener(sendMessageOnClickListener);
         } else {
             //TODO: error
         }
+    }
+
+    private void findChatRoom(final String toUid) {
+        mDatabase.child("rooms").orderByChild("users/" + getUid()).equalTo("i").addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot item: dataSnapshot.getChildren()) {
+                    Map<String, String> users = (Map<String, String>) item.child("users").getValue();
+
+                    if (users.size() == 2 & users.get(toUid) != null) {
+                        roomId = item.getKey();
+                        break;
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled findChatRoom: " + databaseError.getMessage());
+            }
+        });
     }
 
     private void stopDataListener() {
@@ -353,7 +390,6 @@ public class ProductActivity extends AppCompatActivity {
             if (mProduct.likes.containsKey(getUid()));
             MenuItem likeItem = menu.findItem(R.id.action_like);
             likeItem.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_favorite));
-
         }
 
         return super.onCreateOptionsMenu(menu);

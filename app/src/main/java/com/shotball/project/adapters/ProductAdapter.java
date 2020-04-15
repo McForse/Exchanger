@@ -95,7 +95,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public int getItemViewType(int position) {
-        return this.items.get(position).progress ? VIEW_PROGRESS : VIEW_ITEM;
+        return items.get(position).progress ? VIEW_PROGRESS : VIEW_ITEM;
     }
 
     @Override

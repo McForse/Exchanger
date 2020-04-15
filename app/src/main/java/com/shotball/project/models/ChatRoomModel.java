@@ -6,7 +6,7 @@ public class ChatRoomModel {
     private String photo;
     private String lastMsg;
     private String lastDatetime;
-    private Integer userCount;
+    private String userUid;
     private Integer unreadCount;
 
     public String getRoomID() {
@@ -49,12 +49,12 @@ public class ChatRoomModel {
         this.lastDatetime = lastDatetime;
     }
 
-    public Integer getUserCount() {
-        return userCount;
+    public String getUserUid() {
+        return userUid;
     }
 
-    public void setUserCount(Integer userCount) {
-        this.userCount = userCount;
+    public void setUserUid(String userUid) {
+        this.userUid = userUid;
     }
 
     public Integer getUnreadCount() {

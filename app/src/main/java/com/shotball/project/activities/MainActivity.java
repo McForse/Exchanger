@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         Log.d(TAG, "onConfigurationChanged: " + current_page);
+        viewPager.setCurrentItem(current_page - 1, false);
         viewPager.setCurrentItem(current_page, false);
     }
 

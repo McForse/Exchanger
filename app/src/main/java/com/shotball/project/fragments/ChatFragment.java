@@ -1,6 +1,5 @@
 package com.shotball.project.fragments;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,10 +17,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
-import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,23 +26,19 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.shotball.project.R;
-import com.shotball.project.models.ChatModel;
+import com.shotball.project.adapters.ProductAdapter;
+import com.shotball.project.models.Message;
 import com.shotball.project.models.User;
+import com.shotball.project.viewHolders.ProductViewHolder;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.TimeZone;
-
-import static com.shotball.project.activities.MainActivity.location;
 
 public class ChatFragment extends Fragment {
 
@@ -61,7 +52,6 @@ public class ChatFragment extends Fragment {
     private ImageView sendButton;
 
     private DatabaseReference mDatabase;
-    private StorageReference mStorage;
     private DatabaseReference databaseReference;
     private ValueEventListener valueEventListener;
 
@@ -87,26 +77,16 @@ public class ChatFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_chat, container, false);
         initComponents();
+        myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        /*
-         two user: roomid or uid talking
-         multi user: roomid
-         */
-        if (!"".equals(toUid) && toUid != null) { // find existing room for two user
-            Log.d(TAG, "First option");
-            findChatRoom(toUid);
-        } else if (!"".equals(roomID) && roomID != null) { // existing room (multi user)
-            Log.d(TAG, "Second option");
-            usersCount = 2;
-            setChatRoom(roomID);
-        }
-
-        if (roomID == null) { // new room for two user
-            Log.d(TAG, "Third option");
+        if (!toUid.equals("") && !roomID.equals("")) {
             usersCount = 2;
             getUserInfoFromServer(myUid);
             getUserInfoFromServer(toUid);
         }
+
+        mAdapter = new RecyclerViewAdapter();
+        recyclerView.setAdapter(mAdapter);
 
         return rootView;
     }
@@ -125,11 +105,8 @@ public class ChatFragment extends Fragment {
         }
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
-        mStorage  = FirebaseStorage.getInstance().getReference();
 
         dateFormat = android.text.format.DateFormat.getDateFormat(getContext());
-
-        myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
     }
 
     void getUserInfoFromServer(String id) {
@@ -144,8 +121,7 @@ public class ChatFragment extends Fragment {
 
                 if (roomID != null & usersCount == usersList.size()) {
                     Log.d(TAG, "recyclerView.setAdapter");
-                    mAdapter = new RecyclerViewAdapter();
-                    recyclerView.setAdapter(mAdapter);
+
                 }
             }
 
@@ -156,56 +132,15 @@ public class ChatFragment extends Fragment {
         });
     }
 
-    void findChatRoom(final String toUid) {
-        mDatabase.child("rooms").orderByChild("users/" + myUid).equalTo("i").addListenerForSingleValueEvent(new ValueEventListener() {
-
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot item: dataSnapshot.getChildren()) {
-                    Map<String, String> users = (Map<String, String>) item.child("users").getValue();
-
-                    if (users.size() == 2 & users.get(toUid) != null) {
-                        setChatRoom(item.getKey());
-                        break;
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.d(TAG, "onCancelled findChatRoom: " + databaseError.getMessage());
-            }
-        });
-    }
-
-    void setChatRoom(String rid) {
-        roomID = rid;
-        mDatabase.child("rooms").child(roomID).child("users").addListenerForSingleValueEvent(new ValueEventListener() {
-
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot item: dataSnapshot.getChildren()) {
-                    //usersCount++;
-                    getUserInfoFromServer(item.getKey());
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.d(TAG, "onCancelled setChatRoom: " + databaseError.getMessage());
-            }
-        });
-    }
-
     private Button.OnClickListener sendButtonClickListener = new View.OnClickListener() {
         public void onClick(View view) {
             String message = messageInput.getText().toString();
-            sendMessage(message, "0");
+            sendMessage(message, 0);
             messageInput.setText("");
         }
     };
 
-    private void sendMessage(String msg, String msgtype) {
+    private void sendMessage(String msg, int msgtype) {
         sendButton.setEnabled(false);
 
         if (roomID == null) {
@@ -213,10 +148,10 @@ public class ChatFragment extends Fragment {
             Objects.requireNonNull(getActivity()).finish();
         }
 
-        ChatModel.Message messages = new ChatModel.Message();
+        Message messages = new Message();
         messages.uid = myUid;
         messages.msg = msg;
-        messages.msgtype= msgtype;
+        messages.msgtype = msgtype;
         messages.timestamp = ServerValue.TIMESTAMP;
 
         // save last message
@@ -272,9 +207,11 @@ public class ChatFragment extends Fragment {
     }
 
     class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-        final private RequestOptions requestOptions = new RequestOptions().transforms(new CenterCrop(), new RoundedCorners(90));
 
-        List<ChatModel.Message> messagesList;
+        private final int VIEW_MESSAGE = 0;
+        private final int VIEW_PRODUCT = 1;
+
+        List<Message> messagesList;
         String beforeDay;
         MessageViewHolder beforeViewHolder;
 
@@ -301,7 +238,7 @@ public class ChatFragment extends Fragment {
                     Map<String, Object> unreadMessages = new HashMap<>();
 
                     for (DataSnapshot item: dataSnapshot.getChildren()) {
-                        final ChatModel.Message message = item.getValue(ChatModel.Message.class);
+                        final Message message = item.getValue(Message.class);
 
                         if (!message.readUsers.containsKey(myUid)) {
                             message.readUsers.put(myUid, true);
@@ -344,19 +281,19 @@ public class ChatFragment extends Fragment {
 
         @Override
         public int getItemViewType(int position) {
-            ChatModel.Message message = messagesList.get(position);
-            if (myUid.equals(message.uid) ) {
-                switch (message.msgtype) {
-                    case "1": return R.layout.item_chatproduct_right;
-                    default:  return R.layout.item_chatmsg_right;
+            Message message = messagesList.get(position);
+
+            if (message.msgtype == VIEW_MESSAGE) {
+                if (message.uid.equals(myUid)) {
+                    return R.layout.item_chatmsg_right;
+                } else {
+                    return R.layout.item_chatmsg_left;
                 }
             } else {
-                switch (message.msgtype) {
-                    case "1": return R.layout.item_chatproduct_left;
-                    default:  return R.layout.item_chatmsg_left;
-                }
+                return R.layout.item_chatproduct;
             }
         }
+
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -367,7 +304,7 @@ public class ChatFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             final MessageViewHolder messageViewHolder = (MessageViewHolder) holder;
-            final ChatModel.Message message = messagesList.get(position);
+            final Message message = messagesList.get(position);
 
             setReadCounter(position, messageViewHolder.read_counter);
 
@@ -378,22 +315,6 @@ public class ChatFragment extends Fragment {
                 messageViewHolder.msg_item.setText(message.msg);
             } else if ("2".equals(message.msgtype)) {                                      // file transfer
                 //TODO
-            }
-
-            if (! myUid.equals(message.uid)) {
-                User userModel = usersList.get(message.uid);
-                messageViewHolder.msg_name.setText(userModel.getUsername());
-
-                if (userModel.getImage() == null) {
-                    Glide.with(rootView.getContext()).load(R.drawable.ic_account_circle)
-                            .apply(requestOptions)
-                            .into(messageViewHolder.user_photo);
-                } else {
-                    Glide.with(rootView.getContext())
-                            .load(userModel.getImage())
-                            .apply(requestOptions)
-                            .into(messageViewHolder.user_photo);
-                }
             }
 
             messageViewHolder.divider.setVisibility(View.INVISIBLE);
@@ -429,9 +350,7 @@ public class ChatFragment extends Fragment {
         }
 
         private class MessageViewHolder extends RecyclerView.ViewHolder {
-            ImageView user_photo;
             TextView msg_item;
-            TextView msg_name;
             TextView timestamp;
             TextView read_counter;
             LinearLayout divider;
@@ -439,10 +358,8 @@ public class ChatFragment extends Fragment {
 
             MessageViewHolder(View view) {
                 super(view);
-                user_photo = view.findViewById(R.id.user_photo);
                 msg_item = view.findViewById(R.id.msg_item);
                 timestamp = view.findViewById(R.id.timestamp);
-                msg_name = view.findViewById(R.id.msg_name);
                 read_counter = view.findViewById(R.id.read_counter);
                 divider = view.findViewById(R.id.divider);
                 divider_date = view.findViewById(R.id.divider_date);

@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -36,8 +35,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.shotball.project.R;
 import com.shotball.project.activities.ChatActivity;
-import com.shotball.project.models.ChatModel;
 import com.shotball.project.models.ChatRoomModel;
+import com.shotball.project.models.Message;
 import com.shotball.project.models.User;
 
 import java.text.SimpleDateFormat;
@@ -89,7 +88,7 @@ public class MessagesFragment extends Fragment {
         mAdapter = new ChatsRecyclerViewAdapter();
         recyclerView.setAdapter(mAdapter);
 
-        simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy");
         simpleDateFormat.setTimeZone(TimeZone.getDefault());
     }
 
@@ -152,13 +151,13 @@ public class MessagesFragment extends Fragment {
                         chatRoomModel.setRoomID(item.getKey());
 
                         long sortKey = 0;
-                        ChatModel.Message message = item.child("lastmessage").getValue(ChatModel.Message.class);
+                        Message message = item.child("lastmessage").getValue(Message.class);
                         if (message != null) {
                             sortKey = (long) message.timestamp;
                             chatRoomModel.setLastDatetime(simpleDateFormat.format(new Date(sortKey)));
 
                             switch (message.msgtype) {
-                                case "1": chatRoomModel.setLastMsg("Product"); break;
+                                case 1: chatRoomModel.setLastMsg("Product"); break;
                                 default:  chatRoomModel.setLastMsg(message.msg);
                             }
                         }
@@ -166,26 +165,15 @@ public class MessagesFragment extends Fragment {
                         sortRoomList.put(sortKey, chatRoomModel);
 
                         Map<String, Object> map = (Map<String, Object>)item.child("users").getValue();
-                        if (map.size() == 2) {
                             for (String key : map.keySet()) {
                                 if (myUid.equals(key)) continue;
                                 User userModel = userList.get(key);
                                 chatRoomModel.setTitle(userModel.getUsername());
                                 chatRoomModel.setPhoto(userModel.getImage());
+                                chatRoomModel.setUserUid(key);
                             }
-                        } else {                // group chat room
-                            String title = "";
-                            for (String key : map.keySet()) {
-                                if (myUid.equals(key)) continue;
-                                User userModel = userList.get(key);
-                                title += userModel.getUsername() + ", ";
-                            }
-                            //chatRoomModel.setTitle( title.substring(0, title.length()-2) );
-                            chatRoomModel.setTitle( title.substring(0, title.length()) );
-                        }
-                        chatRoomModel.setUserCount(map.size());
                         Integer unreadCount = item.child("unread/" + myUid).getValue(Integer.class);
-                        if (unreadCount==null)
+                        if (unreadCount == null)
                             chatRoomModel.setUnreadCount(0);
                         else {
                             chatRoomModel.setUnreadCount(unreadCount);
@@ -257,8 +245,10 @@ public class MessagesFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(v.getContext(), ChatActivity.class);
+                    intent.putExtra("toUid", chatRoomModel.getUserUid());
                     intent.putExtra("roomID", chatRoomModel.getRoomID());
                     intent.putExtra("roomTitle", chatRoomModel.getTitle());
+                    intent.putExtra("roomImage", chatRoomModel.getPhoto());
                     startActivity(intent);
                 }
             });

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -12,13 +13,6 @@
         android:gravity="center"
         android:orientation="horizontal">
 
-        <View
-            android:layout_width="100dp"
-            android:layout_height="1dp"
-            android:layout_weight="1"
-            android:background="@android:color/darker_gray"
-            android:visibility="visible">
-        </View>
         <TextView
             android:id="@+id/divider_date"
             android:layout_width="wrap_content"
@@ -26,76 +20,88 @@
             android:layout_weight="1"
             android:textAlignment="center"
             android:text="1999-01-01"/>
-        <View
-            android:layout_width="100dp"
-            android:layout_height="1dp"
-            android:layout_weight="1"
-            android:background="@android:color/darker_gray"
-            android:visibility="visible">
-        </View>
+
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/lyt_parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:orientation="horizontal">
-        <LinearLayout
+        android:layout_marginEnd="@dimen/spacing_xlarge"
+        android:layout_marginRight="@dimen/spacing_xlarge"
+        android:gravity="start|left"
+        android:orientation="horizontal"
+        android:paddingBottom="@dimen/spacing_xsmall"
+        android:paddingLeft="@dimen/spacing_middle"
+        android:paddingRight="@dimen/spacing_middle"
+        android:paddingTop="@dimen/spacing_xsmall">
+
+        <androidx.cardview.widget.CardView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:layout_margin="@dimen/spacing_small"
+            android:minHeight="32dp"
+            app:cardBackgroundColor="@android:color/white"
+            app:cardCornerRadius="5dp"
+            app:cardElevation="1dp"
+            app:cardUseCompatPadding="false">
 
-            <ImageView
-                android:id="@+id/user_photo"
-                android:layout_width="48dp"
-                android:layout_height="48dp" />
-        </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:minWidth="180dp"
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/spacing_medium"
+                android:paddingLeft="@dimen/spacing_medium"
+                android:paddingRight="@dimen/spacing_medium"
+                android:paddingTop="@dimen/spacing_medium">
 
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-            <TextView
-                android:id="@+id/msg_name"
-                android:layout_marginLeft="5dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="name" />
+                <TextView
+                    android:id="@+id/text_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/spacing_medium"
+                    android:layout_marginRight="@dimen/spacing_medium"
+                    android:text="Message content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+                    android:textColor="@android:color/black"
+                    android:textStyle="normal" />
 
-            <TextView
-                android:id="@+id/msg_item"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="3dp"
-                android:textSize="18dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxWidth="270dp"
-                android:autoLink="all"
-                android:text="msg"/>
-        </LinearLayout>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right|end"
+                    android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent">
+                    <TextView
+                        android:id="@+id/read_counter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/read_counter"
-                android:layout_gravity="top"
-                android:layout_marginLeft="3dp"
-                android:layout_marginTop="15dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="invisible"
-                android:text="0"/>
+                    <TextView
+                        android:id="@+id/timestamp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="02:30 AM"
+                        android:textColor="@color/grey_40"
+                        android:textSize="12sp" />
 
-            <TextView
-                android:id="@+id/timestamp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:text="time"/>
+                    <View
+                        android:layout_width="@dimen/spacing_medium"
+                        android:layout_height="0dp" />
 
-        </LinearLayout>
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <View
+            android:layout_width="@dimen/spacing_mlarge"
+            android:layout_height="0dp" />
+
     </LinearLayout>
+
 </LinearLayout>
