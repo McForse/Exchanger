@@ -37,6 +37,7 @@ import com.shotball.project.R;
 import com.shotball.project.models.ChatModel;
 import com.shotball.project.models.User;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -45,6 +46,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
+
+import static com.shotball.project.activities.MainActivity.location;
 
 public class ChatFragment extends Fragment {
 
@@ -55,15 +58,15 @@ public class ChatFragment extends Fragment {
     private RecyclerViewAdapter mAdapter;
     private LinearLayoutManager linearLayoutManager;
     private EditText messageInput;
-    private Button sendButton;
+    private ImageView sendButton;
 
     private DatabaseReference mDatabase;
     private StorageReference mStorage;
     private DatabaseReference databaseReference;
     private ValueEventListener valueEventListener;
 
-    private SimpleDateFormat dateFormatDay;
-    private SimpleDateFormat dateFormatHour;
+    private DateFormat dateFormat;
+
     private String roomID;
     private String myUid;
     private String toUid;
@@ -83,7 +86,6 @@ public class ChatFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_chat, container, false);
-        initToolbar();
         initComponents();
 
         /*
@@ -109,17 +111,12 @@ public class ChatFragment extends Fragment {
         return rootView;
     }
 
-    private void initToolbar() {
-
-    }
-
-    @SuppressLint("SimpleDateFormat")
     private void initComponents() {
         recyclerView = rootView.findViewById(R.id.chat_recyclerView);
         linearLayoutManager = new LinearLayoutManager(rootView.getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
         messageInput = rootView.findViewById(R.id.msg_input);
-        sendButton = rootView.findViewById(R.id.sendBtn);
+        sendButton = rootView.findViewById(R.id.btn_send);
         sendButton.setOnClickListener(sendButtonClickListener);
 
         if (getArguments() != null) {
@@ -130,10 +127,7 @@ public class ChatFragment extends Fragment {
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mStorage  = FirebaseStorage.getInstance().getReference();
 
-        dateFormatDay = new SimpleDateFormat("dd-MM-yyyy");
-        dateFormatHour = new SimpleDateFormat("aa hh:mm");
-        dateFormatDay.setTimeZone(TimeZone.getDefault());
-        dateFormatHour.setTimeZone(TimeZone.getDefault());
+        dateFormat = android.text.format.DateFormat.getDateFormat(getContext());
 
         myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
     }
@@ -340,7 +334,10 @@ public class ChatFragment extends Fragment {
         }
 
         private void stopListening() {
-            mDatabase.removeEventListener(valueEventListener);
+            if (valueEventListener != null) {
+                mDatabase.removeEventListener(valueEventListener);
+            }
+
             messagesList.clear();
             notifyDataSetChanged();
         }
@@ -349,12 +346,12 @@ public class ChatFragment extends Fragment {
         public int getItemViewType(int position) {
             ChatModel.Message message = messagesList.get(position);
             if (myUid.equals(message.uid) ) {
-                switch(message.msgtype){
+                switch (message.msgtype) {
                     case "1": return R.layout.item_chatproduct_right;
                     default:  return R.layout.item_chatmsg_right;
                 }
             } else {
-                switch(message.msgtype){
+                switch (message.msgtype) {
                     case "1": return R.layout.item_chatproduct_left;
                     default:  return R.layout.item_chatmsg_left;
                 }
@@ -374,8 +371,8 @@ public class ChatFragment extends Fragment {
 
             setReadCounter(position, messageViewHolder.read_counter);
 
-            String day = dateFormatDay.format( new Date( (long) message.timestamp) );
-            String timestamp = dateFormatHour.format( new Date( (long) message.timestamp) );
+            String day = dateFormat.format( new Date((long) message.timestamp));
+            String timestamp = DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date((long) message.timestamp));
             messageViewHolder.timestamp.setText(timestamp);
             if ("0".equals(message.msgtype)) {                                      // text message
                 messageViewHolder.msg_item.setText(message.msg);
@@ -387,11 +384,11 @@ public class ChatFragment extends Fragment {
                 User userModel = usersList.get(message.uid);
                 messageViewHolder.msg_name.setText(userModel.getUsername());
 
-                if (userModel.getImage()==null) {
+                if (userModel.getImage() == null) {
                     Glide.with(rootView.getContext()).load(R.drawable.ic_account_circle)
                             .apply(requestOptions)
                             .into(messageViewHolder.user_photo);
-                } else{
+                } else {
                     Glide.with(rootView.getContext())
                             .load(userModel.getImage())
                             .apply(requestOptions)
@@ -417,13 +414,13 @@ public class ChatFragment extends Fragment {
         }
 
         void setReadCounter (final int pos, final TextView textView) {
-            int cnt = usersList.size() - messagesList.get(pos).readUsers.size();
+            /*int cnt = usersList.size() - messagesList.get(pos).readUsers.size();
             if (cnt > 0) {
                 textView.setVisibility(View.VISIBLE);
                 textView.setText(String.valueOf(cnt));
             } else {
                 textView.setVisibility(View.INVISIBLE);
-            }
+            }*/
         }
 
         @Override

@@ -305,7 +305,7 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "Product was successfully recorded in the database!");
                 mDialog.dismiss();
-                new MaterialAlertDialogBuilder(AddProductActivity.this)
+                mDialog = new MaterialAlertDialogBuilder(AddProductActivity.this)
                         .setTitle(R.string.dialog_success)
                         .setMessage(R.string.dialog_publication_success)
                         //.setIcon(R.drawable.ic_done)
@@ -495,5 +495,11 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
                 .textOnNothingSelected("I need a photo!")
                 .setCamera(true)
                 .startAlbum();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mDialog.dismiss();
     }
 }

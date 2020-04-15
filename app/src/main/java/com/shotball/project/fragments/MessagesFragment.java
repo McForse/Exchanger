@@ -1,5 +1,6 @@
 package com.shotball.project.fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,14 +10,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,6 +29,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -51,20 +54,21 @@ public class MessagesFragment extends Fragment {
 
     private static final String TAG = "MessagesFragment";
 
+    private SimpleDateFormat simpleDateFormat;
+
+    private DatabaseReference mDatabase;
+
     private View rootView;
     private RecyclerView recyclerView;
-
-    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+    private ChatsRecyclerViewAdapter mAdapter;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_messages, container, false);
         Log.d(TAG, "onCreateView");
-
         initToolbar();
         initComponents();
-
         return rootView;
     }
 
@@ -75,10 +79,17 @@ public class MessagesFragment extends Fragment {
         //setHasOptionsMenu(true);
     }
 
+    @SuppressLint("SimpleDateFormat")
     private void initComponents() {
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
         recyclerView = rootView.findViewById(R.id.chats_recyclerView);
-        recyclerView.setAdapter(new ChatRecyclerViewAdapter());
         recyclerView.setLayoutManager(new LinearLayoutManager(rootView.getContext()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
+        mAdapter = new ChatsRecyclerViewAdapter();
+        recyclerView.setAdapter(mAdapter);
+
+        simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy");
         simpleDateFormat.setTimeZone(TimeZone.getDefault());
     }
 
@@ -88,38 +99,53 @@ public class MessagesFragment extends Fragment {
         Log.d(TAG, "onStart");
     }
 
-    class ChatRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d(TAG, "onDestroyView");
+        if (mAdapter != null) {
+            mAdapter.stopListening();
+        }
+    }
+
+    class ChatsRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
+        final private RequestOptions requestOptions = new RequestOptions().transforms(new CenterCrop(), new RoundedCorners(90));
         private List<ChatRoomModel> roomList = new ArrayList<>();
         private Map<String, User> userList = new HashMap<>();
-        final private RequestOptions requestOptions = new RequestOptions().transforms(new CenterCrop(), new RoundedCorners(90));
         private String myUid;
         private StorageReference storageReference;
 
-        public ChatRecyclerViewAdapter() {
-            storageReference  = FirebaseStorage.getInstance().getReference();
-            myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        private ValueEventListener listenerUsers;
+        private ValueEventListener listenerRegistration;
 
-            // all users information
-            FirebaseDatabase.getInstance().getReference().child("users").addListenerForSingleValueEvent(new ValueEventListener(){
+        ChatsRecyclerViewAdapter() {
+            myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            storageReference  = FirebaseStorage.getInstance().getReference();
+
+            listenerUsers = new ValueEventListener() {
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     for (DataSnapshot item : dataSnapshot.getChildren()) {
                         userList.put(item.getKey(), item.getValue(User.class));
                     }
+
                     getRoomInfo();
                 }
                 @Override
-                public void onCancelled(DatabaseError databaseError) {}
-            });
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Log.d(TAG, "onCancelled ChatsRecyclerViewAdapter: " + databaseError.getMessage());
+                }
+            };
+
+            mDatabase.child("users").addListenerForSingleValueEvent(listenerUsers);
         }
 
-        public void getRoomInfo() {
-            // my chatting room information
-            FirebaseDatabase.getInstance().getReference().child("rooms").orderByChild("users/"+myUid).equalTo("i").addValueEventListener(new ValueEventListener(){
+        void getRoomInfo() {
+            listenerRegistration = mDatabase.child("rooms").orderByChild("users/" + myUid).equalTo("i").addValueEventListener(new ValueEventListener() {
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    Integer unreadTotal = 0;
-                    TreeMap<Long, ChatRoomModel> sortRoomList = new TreeMap<Long, ChatRoomModel>(Collections.reverseOrder());
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    int unreadTotal = 0;
+                    TreeMap<Long, ChatRoomModel> sortRoomList = new TreeMap<>(Collections.reverseOrder());
 
                     for (DataSnapshot item : dataSnapshot.getChildren()) {
                         ChatRoomModel chatRoomModel = new ChatRoomModel();
@@ -127,12 +153,12 @@ public class MessagesFragment extends Fragment {
 
                         long sortKey = 0;
                         ChatModel.Message message = item.child("lastmessage").getValue(ChatModel.Message.class);
-                        if (message!=null) {
-                            //chatRoomModel.setLastMsg(message.msg);
+                        if (message != null) {
                             sortKey = (long) message.timestamp;
                             chatRoomModel.setLastDatetime(simpleDateFormat.format(new Date(sortKey)));
-                            switch(message.msgtype){
-                                case "1": chatRoomModel.setLastMsg("Image"); break;
+
+                            switch (message.msgtype) {
+                                case "1": chatRoomModel.setLastMsg("Product"); break;
                                 default:  chatRoomModel.setLastMsg(message.msg);
                             }
                         }
@@ -140,7 +166,7 @@ public class MessagesFragment extends Fragment {
                         sortRoomList.put(sortKey, chatRoomModel);
 
                         Map<String, Object> map = (Map<String, Object>)item.child("users").getValue();
-                        if (map.size()==2) {
+                        if (map.size() == 2) {
                             for (String key : map.keySet()) {
                                 if (myUid.equals(key)) continue;
                                 User userModel = userList.get(key);
@@ -158,7 +184,7 @@ public class MessagesFragment extends Fragment {
                             chatRoomModel.setTitle( title.substring(0, title.length()) );
                         }
                         chatRoomModel.setUserCount(map.size());
-                        Integer unreadCount = item.child("unread/"+myUid).getValue(Integer.class);
+                        Integer unreadCount = item.child("unread/" + myUid).getValue(Integer.class);
                         if (unreadCount==null)
                             chatRoomModel.setUnreadCount(0);
                         else {
@@ -175,10 +201,23 @@ public class MessagesFragment extends Fragment {
                 }
 
                 @Override
-                public void onCancelled(DatabaseError databaseError) {
-
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Log.d(TAG, "onCancelled getRoomInfo: " + databaseError.getMessage());
                 }
             });
+        }
+
+        void stopListening() {
+            if (listenerUsers != null) {
+                mDatabase.removeEventListener(listenerUsers);
+            }
+
+            if (listenerRegistration != null) {
+                mDatabase.removeEventListener(listenerRegistration);
+            }
+
+            roomList.clear();
+            notifyDataSetChanged();
         }
 
         @NonNull
@@ -198,20 +237,14 @@ public class MessagesFragment extends Fragment {
             roomViewHolder.last_msg.setText(chatRoomModel.getLastMsg());
             roomViewHolder.last_time.setText(chatRoomModel.getLastDatetime());
 
-            if (chatRoomModel.getPhoto() == null) {
-                Glide.with(getActivity()).load(R.drawable.ic_person)
+            if (chatRoomModel.getPhoto().equals("") || chatRoomModel.getPhoto() == null) {
+                Glide.with(rootView.getContext()).load(R.drawable.image_user)
                         .apply(requestOptions)
                         .into(roomViewHolder.room_image);
             } else {
-                Glide.with(getActivity()).load(storageReference.child("users_images/"+chatRoomModel.getPhoto()))
+                Glide.with(rootView.getContext()).load(chatRoomModel.getPhoto())
                         .apply(requestOptions)
                         .into(roomViewHolder.room_image);
-            }
-            if (chatRoomModel.getUserCount() > 2) {
-                roomViewHolder.room_count.setText(chatRoomModel.getUserCount().toString());
-                roomViewHolder.room_count.setVisibility(View.VISIBLE);
-            } else {
-                roomViewHolder.room_count.setVisibility(View.INVISIBLE);
             }
             if (chatRoomModel.getUnreadCount() > 0) {
                 roomViewHolder.unread_count.setText(chatRoomModel.getUnreadCount().toString());
@@ -237,26 +270,24 @@ public class MessagesFragment extends Fragment {
         }
 
         private class RoomViewHolder extends RecyclerView.ViewHolder {
-            public ImageView room_image;
-            public TextView room_title;
-            public TextView last_msg;
-            public TextView last_time;
-            public TextView room_count;
-            public TextView unread_count;
+            ImageView room_image;
+            TextView room_title;
+            TextView last_msg;
+            TextView last_time;
+            TextView unread_count;
 
-            public RoomViewHolder(View view) {
+            RoomViewHolder(View view) {
                 super(view);
                 room_image = view.findViewById(R.id.room_image);
                 room_title = view.findViewById(R.id.room_title);
                 last_msg = view.findViewById(R.id.last_msg);
                 last_time = view.findViewById(R.id.last_time);
-                room_count = view.findViewById(R.id.room_count);
                 unread_count = view.findViewById(R.id.unread_count);
             }
         }
     }
 
-    public static void setBadge(Context context, int count) {
+    private static void setBadge(Context context, int count) {
         String launcherClassName = getLauncherClassName(context);
         if (launcherClassName == null) {
             return;
@@ -268,7 +299,7 @@ public class MessagesFragment extends Fragment {
         context.sendBroadcast(intent);
     }
 
-    public static String getLauncherClassName(Context context) {
+    private static String getLauncherClassName(Context context) {
 
         PackageManager pm = context.getPackageManager();
 

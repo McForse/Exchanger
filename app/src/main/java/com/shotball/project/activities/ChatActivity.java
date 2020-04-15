@@ -8,37 +8,45 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.shotball.project.R;
 import com.shotball.project.fragments.ChatFragment;
 
 public class ChatActivity extends AppCompatActivity {
+
     private ChatFragment chatFragment;
+    private Toolbar toolbar;
+    private TextView roomTitleTextView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeButtonEnabled(true);
+        initToolbar();
+        roomTitleTextView = findViewById(R.id.room_title);
 
         String toUid = getIntent().getStringExtra("toUid");
         final String roomID = getIntent().getStringExtra("roomID");
         String roomTitle = getIntent().getStringExtra("roomTitle");
-        if (roomTitle!=null) {
-            actionBar.setTitle(roomTitle);
+
+        if (roomTitle != null) {
+            roomTitleTextView.setText(roomTitle);
         }
 
-        // chatting area
         chatFragment = ChatFragment.getInstance(toUid, roomID);
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mainFragment, chatFragment )
                 .commit();
+    }
+
+    private void initToolbar() {
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle(null);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override

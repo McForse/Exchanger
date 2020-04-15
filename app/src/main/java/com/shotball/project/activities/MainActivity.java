@@ -6,8 +6,10 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -22,9 +24,11 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
-    private FusedLocationProviderClient fusedLocationClient;
+    private ViewPager2 viewPager;
 
     public static Location location;
+
+    private int current_page = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         checkAuthState();
         setContentView(R.layout.activity_main);
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, new OnSuccessListener<Location>() {
@@ -51,13 +55,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initComponents() {
-        ViewPager2 viewPager = findViewById(R.id.view_pager);
+        viewPager = findViewById(R.id.view_pager);
         FragmentViewPagerAdapter adapter = new FragmentViewPagerAdapter(getSupportFragmentManager(), getLifecycle(), this);
         viewPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
         viewPager.setOffscreenPageLimit(1);
         viewPager.setUserInputEnabled(false);
         viewPager.setAdapter(adapter);
-        viewPager.setCurrentItem(0, false);
+        viewPager.setClipToPadding(false);
+        viewPager.setCurrentItem(current_page, false);
 
         new BottomNavigationHandler(this, viewPager);
     }
@@ -70,35 +75,43 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-}
-
-class BottomNavigationHandler implements BottomNavigationView.OnNavigationItemSelectedListener {
-
-    private ViewPager2 viewPager;
-
-    BottomNavigationHandler(Activity activity, ViewPager2 viewPager) {
-        this.viewPager = viewPager;
-        BottomNavigationView bottomNav = activity.findViewById(R.id.bottom_navigation);
-        bottomNav.setOnNavigationItemSelectedListener(this);
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Log.d(TAG, "onConfigurationChanged: " + current_page);
+        viewPager.setCurrentItem(current_page, false);
     }
 
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.nav_home:
-                viewPager.setCurrentItem(0, false);
-                break;
-            case R.id.nav_favorites:
-                viewPager.setCurrentItem(1, false);
-                break;
-            case R.id.nav_messages:
-                viewPager.setCurrentItem(2, false);
-                break;
-            case R.id.nav_account:
-                viewPager.setCurrentItem(3, false);
-                break;
+    class BottomNavigationHandler implements BottomNavigationView.OnNavigationItemSelectedListener {
+
+        private ViewPager2 viewPager;
+
+        BottomNavigationHandler(Activity activity, ViewPager2 viewPager) {
+            this.viewPager = viewPager;
+            BottomNavigationView bottomNav = activity.findViewById(R.id.bottom_navigation);
+            bottomNav.setOnNavigationItemSelectedListener(this);
         }
 
-        return true;
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.nav_home:
+                    current_page = 0;
+                    break;
+                case R.id.nav_favorites:
+                    current_page = 1;
+                    break;
+                case R.id.nav_messages:
+                    current_page = 2;
+                    break;
+                case R.id.nav_account:
+                    current_page = 3;
+                    break;
+            }
+
+            viewPager.setCurrentItem(current_page, false);
+            return true;
+        }
     }
+
 }
