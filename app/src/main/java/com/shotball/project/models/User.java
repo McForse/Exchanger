@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class User {
+    @Exclude
+    private String uid;
     public String username;
     public String email;
     public String image;
@@ -21,6 +23,27 @@ public class User {
         this.username = username;
         this.email = email;
         this.image = image;
+    }
+
+    @Exclude
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getImage() {
+        return image;
     }
 
     @Exclude

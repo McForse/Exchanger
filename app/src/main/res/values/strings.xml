@@ -19,6 +19,7 @@
     <string name="back">Back</string>
     <string name="verify_text">We have sent an email with a confirmation link to your email address.</string>
     <string name="error_weak_password">The given password is invalid</string>
+    <string name="error_password_mismatch">Password mismatch</string>
     <string name="error_invalid_email">The email address is badly formatted</string>
     <string name="error_invalid_email_or_password">The email address or password that you entered is not correctly</string>
     <string name="error_user_exists">An account already exists with the same email address but different sign-in credentials. Sign in using a provider associated with this email address</string>

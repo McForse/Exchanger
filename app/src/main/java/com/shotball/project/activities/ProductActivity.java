@@ -2,6 +2,7 @@ package com.shotball.project.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
@@ -9,6 +10,7 @@ import androidx.core.widget.NestedScrollView;
 import androidx.viewpager.widget.ViewPager;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
@@ -19,6 +21,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -51,6 +54,8 @@ import com.shotball.project.models.Product;
 import com.shotball.project.models.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class ProductActivity extends AppCompatActivity {
@@ -66,6 +71,11 @@ public class ProductActivity extends AppCompatActivity {
     private TextView description;
     private ImageView sellerImageView;
     private TextView sellerNameField;
+    private Button sendMessageButton;
+    private Button exchangeButton;
+
+    private View.OnClickListener sendMessageOnClickListener;
+    private View.OnClickListener exchangeOnClickListener;
 
     private DatabaseReference mDatabase;
     private Product mProduct;
@@ -101,6 +111,8 @@ public class ProductActivity extends AppCompatActivity {
         description = findViewById(R.id.description);
         sellerImageView = findViewById(R.id.seller_image);
         sellerNameField = findViewById(R.id.seller_name);
+        sendMessageButton = findViewById(R.id.send_message_button);
+        exchangeButton = findViewById(R.id.exchange_button);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         refProducts = mDatabase.child("products");
@@ -180,6 +192,7 @@ public class ProductActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
                 mSeller = dataSnapshot.getValue(User.class);
+                mSeller.setUid(dataSnapshot.getKey());
                 initSeller();
             }
 
@@ -238,6 +251,28 @@ public class ProductActivity extends AppCompatActivity {
                     .apply(RequestOptions.circleCropTransform())
                     .into(sellerImageView);
             sellerNameField.setText(mSeller.username);
+
+
+            sendMessageOnClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Map<String, String> selectedUsers = new HashMap<>() ;
+                    selectedUsers.put(getUid(), "i");
+                    selectedUsers.put(mSeller.getUid(), "i");
+                    final String room_id = FirebaseDatabase.getInstance().getReference().child("rooms").push().getKey();
+
+                    FirebaseDatabase.getInstance().getReference().child("rooms/"+room_id).child("users").setValue(selectedUsers).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Intent intent = new Intent(ProductActivity.this, ChatActivity.class);
+                            intent.putExtra("roomID", room_id);
+                            startActivity(intent);
+                            finish();
+                        }
+                    });
+                }
+            };
+            sendMessageButton.setOnClickListener(sendMessageOnClickListener);
         } else {
             //TODO: error
         }
@@ -296,8 +331,12 @@ public class ProductActivity extends AppCompatActivity {
         return CameraUpdateFactory.newLatLngZoom(new LatLng(mProduct.getLatitude(), mProduct.getLongitude()), 15);
     }
 
-    private String getUid() {
-        return Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+    public String getUid() {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            return FirebaseAuth.getInstance().getCurrentUser().getUid();
+        } else {
+            return null;
+        }
     }
 
     @Override

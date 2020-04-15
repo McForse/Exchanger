@@ -113,7 +113,7 @@ public class AdapterSnapGeneric extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     public void removeAt(int position) {
         items.remove(position);
-        notifyItemRemoved(position);
+        notifyDataSetChanged();
         addButton();
     }
 

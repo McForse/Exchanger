@@ -48,6 +48,8 @@ public class SignUpActivity extends BaseActivity {
     private EditText mRePasswordField;
     private EditText mUsernameField;
 
+    private Dialog verifyDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,7 +120,7 @@ public class SignUpActivity extends BaseActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
 
                             writeNewUser(user.getUid(), mUsernameField.getText().toString(), mEmailField.getText().toString());
-                            sendEmailVerification();
+                            sendEmailVerification(user);
                         } else {
                             try {
                                 throw Objects.requireNonNull(task.getException());
@@ -143,9 +145,7 @@ public class SignUpActivity extends BaseActivity {
                 });
     }
 
-    private void sendEmailVerification() {
-        final FirebaseUser user = mAuth.getCurrentUser();
-
+    private void sendEmailVerification(FirebaseUser user) {
         user.sendEmailVerification()
                 .addOnCompleteListener(this, new OnCompleteListener<Void>() {
                     @Override
@@ -169,26 +169,26 @@ public class SignUpActivity extends BaseActivity {
     }
 
     private void showVerifyDialog() {
-        final Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); // before
-        dialog.setContentView(R.layout.dialog_verify);
-        dialog.setCancelable(false);
+        verifyDialog = new Dialog(this);
+        verifyDialog.requestWindowFeature(Window.FEATURE_NO_TITLE); // before
+        verifyDialog.setContentView(R.layout.dialog_verify);
+        verifyDialog.setCancelable(false);
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-        lp.copyFrom(dialog.getWindow().getAttributes());
+        lp.copyFrom(verifyDialog.getWindow().getAttributes());
         lp.width = WindowManager.LayoutParams.WRAP_CONTENT;
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
 
 
-        (dialog.findViewById(R.id.bt_close)).setOnClickListener(new View.OnClickListener() {
+        (verifyDialog.findViewById(R.id.bt_close)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
         });
 
-        dialog.show();
-        dialog.getWindow().setAttributes(lp);
+        verifyDialog.show();
+        verifyDialog.getWindow().setAttributes(lp);
     }
 
     private boolean validateForm() {
@@ -199,7 +199,7 @@ public class SignUpActivity extends BaseActivity {
             mTextInputLayoutEmail.setError(getString(R.string.required));
             mTextInputLayoutEmail.requestFocus();
             valid = false;
-        } else if (TextUtil.validateEmail(email)) {
+        } else if (!TextUtil.validateEmail(email)) {
             mTextInputLayoutEmail.setError(getString(R.string.error_invalid_email));
             mTextInputLayoutEmail.requestFocus();
             valid = false;
@@ -219,6 +219,10 @@ public class SignUpActivity extends BaseActivity {
         String rePassword = mRePasswordField.getText().toString();
         if (TextUtils.isEmpty(rePassword)) {
             mTextInputLayoutRePassword.setError(getString(R.string.required));
+            mTextInputLayoutRePassword.requestFocus();
+            valid = false;
+        } else if (!rePassword.equals(password)) {
+            mTextInputLayoutRePassword.setError(getString(R.string.error_password_mismatch));
             mTextInputLayoutRePassword.requestFocus();
             valid = false;
         } else {
@@ -247,5 +251,14 @@ public class SignUpActivity extends BaseActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        FirebaseAuth.getInstance().signOut();
+        if (verifyDialog != null) {
+            verifyDialog.dismiss();
+        }
     }
 }

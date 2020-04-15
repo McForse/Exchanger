@@ -1,5 +1,6 @@
 package com.shotball.project;
 
+import com.shotball.project.Utils.TextUtil;
 import com.shotball.project.models.Product;
 
 import org.junit.Test;
@@ -18,8 +19,9 @@ public class ExampleUnitTest {
     }
 
     @Test
-    public void productInit() {
-        Product product = new Product("Name", "url", "desc", "user");
-
+    public void emailChecker() {
+        assertTrue(TextUtil.validateEmail("danilvda@gmail.com"));
+        assertTrue(TextUtil.validateEmail("danilvda@yandex.ru"));
+        assertFalse(TextUtil.validateEmail("danilvda@yandex"));
     }
 }
