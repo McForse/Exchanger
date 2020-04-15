@@ -37,6 +37,8 @@ public class ChatActivity extends AppCompatActivity {
         final String roomID = getIntent().getStringExtra("roomID");
         String roomTitle = getIntent().getStringExtra("roomTitle");
         String roomImage = getIntent().getStringExtra("roomImage");
+        String productKey = getIntent().getStringExtra("productKey");
+        String productTitle = getIntent().getStringExtra("productTitle");
 
         if (roomTitle != null) {
             roomTitleTextView.setText(roomTitle);
@@ -53,7 +55,7 @@ public class ChatActivity extends AppCompatActivity {
 
         }
 
-        chatFragment = ChatFragment.getInstance(toUid, roomID);
+        chatFragment = ChatFragment.getInstance(toUid, roomID, productKey, productTitle);
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.mainFragment, chatFragment )
@@ -76,12 +78,6 @@ public class ChatActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        chatFragment.backPressed();
-        finish();;
     }
 
 }

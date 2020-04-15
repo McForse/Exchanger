@@ -258,7 +258,6 @@ public class ProductActivity extends AppCompatActivity {
             sendMessageOnClickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.d(TAG, "roomId: " + roomId);
                     if (roomId == null || roomId.equals("")) {
                         Map<String, String> selectedUsers = new HashMap<>();
                         selectedUsers.put(getUid(), "i");
@@ -273,7 +272,10 @@ public class ProductActivity extends AppCompatActivity {
                                 intent.putExtra("roomID", room_id);
                                 intent.putExtra("roomTitle", mSeller.getUsername());
                                 intent.putExtra("roomImage", mSeller.getImage());
-                                Log.d(TAG, mSeller.getUsername());
+                                intent.putExtra("productKey", mProduct.getKey());
+                                intent.putExtra("productTitle", mProduct.getTitle());
+                                startActivity(intent);
+                                finish();
                             }
                         });
                     } else {
@@ -282,6 +284,8 @@ public class ProductActivity extends AppCompatActivity {
                         intent.putExtra("roomID", roomId);
                         intent.putExtra("roomTitle", mSeller.getUsername());
                         intent.putExtra("roomImage", mSeller.getImage());
+                        intent.putExtra("productKey", mProduct.getKey());
+                        intent.putExtra("productTitle", mProduct.getTitle());
                         startActivity(intent);
                         finish();
                     }

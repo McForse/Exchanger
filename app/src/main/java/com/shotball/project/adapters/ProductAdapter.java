@@ -64,9 +64,10 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         final Product product = items.get(position);
+
         if (holder instanceof ProductViewHolder) {
             ProductViewHolder view = (ProductViewHolder) holder;
-            view.bind(ctx, items.get(position), onProductSelectedListener);
+            view.bind(ctx, product, onProductSelectedListener);
         } else {
             ((ProgressViewHolder) holder).progress_bar.setIndeterminate(true);
         }

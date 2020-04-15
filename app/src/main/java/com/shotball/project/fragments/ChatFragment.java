@@ -1,5 +1,7 @@
 package com.shotball.project.fragments;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,11 +29,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.shotball.project.R;
-import com.shotball.project.adapters.ProductAdapter;
+import com.shotball.project.Utils.TextUtil;
+import com.shotball.project.activities.ProductActivity;
 import com.shotball.project.models.Message;
 import com.shotball.project.models.User;
-import com.shotball.project.viewHolders.ProductViewHolder;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -60,14 +65,17 @@ public class ChatFragment extends Fragment {
     private String roomID;
     private String myUid;
     private String toUid;
+    private String productKey;
+    private String productTitle;
     private Map<String, User> usersList = new HashMap<>();
-    private int usersCount = 0;
 
-    public static ChatFragment getInstance(String toUid, String roomID) {
+    public static ChatFragment getInstance(String toUid, String roomID, String productKey, String productTitle) {
         ChatFragment chatFragment = new ChatFragment();
         Bundle bundle = new Bundle();
         bundle.putString("toUid", toUid);
         bundle.putString("roomID", roomID);
+        bundle.putString("productKey", productKey);
+        bundle.putString("productTitle", productTitle);
         chatFragment.setArguments(bundle);
         return chatFragment;
     }
@@ -80,13 +88,16 @@ public class ChatFragment extends Fragment {
         myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         if (!toUid.equals("") && !roomID.equals("")) {
-            usersCount = 2;
             getUserInfoFromServer(myUid);
             getUserInfoFromServer(toUid);
         }
 
         mAdapter = new RecyclerViewAdapter();
         recyclerView.setAdapter(mAdapter);
+
+        if (productKey != null && productTitle != null) {
+            sendProduct(productKey, productTitle);
+        }
 
         return rootView;
     }
@@ -95,13 +106,15 @@ public class ChatFragment extends Fragment {
         recyclerView = rootView.findViewById(R.id.chat_recyclerView);
         linearLayoutManager = new LinearLayoutManager(rootView.getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
-        messageInput = rootView.findViewById(R.id.msg_input);
+        messageInput = rootView.findViewById(R.id.message_input);
         sendButton = rootView.findViewById(R.id.btn_send);
         sendButton.setOnClickListener(sendButtonClickListener);
 
         if (getArguments() != null) {
             roomID = getArguments().getString("roomID");
             toUid = getArguments().getString("toUid");
+            productKey = getArguments().getString("productKey");
+            productTitle = getArguments().getString("productTitle");
         }
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
@@ -118,11 +131,6 @@ public class ChatFragment extends Fragment {
                 User user = dataSnapshot.getValue(User.class);
                 user.setUid(dataSnapshot.getKey());
                 usersList.put(user.getUid(), user);
-
-                if (roomID != null & usersCount == usersList.size()) {
-                    Log.d(TAG, "recyclerView.setAdapter");
-
-                }
             }
 
             @Override
@@ -135,31 +143,49 @@ public class ChatFragment extends Fragment {
     private Button.OnClickListener sendButtonClickListener = new View.OnClickListener() {
         public void onClick(View view) {
             String message = messageInput.getText().toString();
-            sendMessage(message, 0);
+            sendMessage(message);
             messageInput.setText("");
         }
     };
 
-    private void sendMessage(String msg, int msgtype) {
-        sendButton.setEnabled(false);
+    private void sendProduct(String key, String title) {
+        Message message = new Message();
+        message.uid = key;
+        message.msg = title;
+        message.msgtype = 1;
+        message.timestamp = ServerValue.TIMESTAMP;
 
-        if (roomID == null) {
-            Log.w(TAG, "Chat has been deleted from the database");
-            Objects.requireNonNull(getActivity()).finish();
+        sendMessageToDatabase(message);
+    }
+
+    private void sendMessage(String msg) {
+        if (msg.equals("")) {
+            return;
         }
 
-        Message messages = new Message();
-        messages.uid = myUid;
-        messages.msg = msg;
-        messages.msgtype = msgtype;
-        messages.timestamp = ServerValue.TIMESTAMP;
+        sendButton.setEnabled(false);
+
+        Message message = new Message();
+        message.uid = myUid;
+        message.msg = msg;
+        message.msgtype = 0;
+        message.timestamp = ServerValue.TIMESTAMP;
+
+        sendMessageToDatabase(message);
+    }
+
+    private void sendMessageToDatabase(Message message) {
+        if (roomID == null) {
+            Objects.requireNonNull(getActivity()).finish();
+            return;
+        }
 
         // save last message
-        mDatabase.child("rooms").child(roomID).child("lastmessage").setValue(messages);
+        mDatabase.child("rooms").child(roomID).child("lastmessage").setValue(message);
 
         // save message
-        messages.readUsers.put(myUid, true);
-        mDatabase.child("rooms").child(roomID).child("messages").push().setValue(messages).addOnCompleteListener(new OnCompleteListener<Void>() {
+        message.readUsers.put(myUid, true);
+        mDatabase.child("rooms").child(roomID).child("messages").push().setValue(message).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 //sendGCM();
@@ -194,7 +220,9 @@ public class ChatFragment extends Fragment {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) { }
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled sendMessage: " + databaseError.getMessage());
+            }
         });
     }
 
@@ -207,13 +235,13 @@ public class ChatFragment extends Fragment {
     }
 
     class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+        private final int VIEW_MESSAGE_ME = 100;
+        private final int VIEW_MESSAGE_YOU = 200;
+        private final int VIEW_PRODUCT = 2;
 
-        private final int VIEW_MESSAGE = 0;
-        private final int VIEW_PRODUCT = 1;
-
-        List<Message> messagesList;
-        String beforeDay;
-        MessageViewHolder beforeViewHolder;
+        private List<Message> messagesList;
+        private String beforeDay;
+        private MessageViewHolder beforeViewHolder;
 
         RecyclerViewAdapter() {
             messagesList = new ArrayList<>();
@@ -283,65 +311,71 @@ public class ChatFragment extends Fragment {
         public int getItemViewType(int position) {
             Message message = messagesList.get(position);
 
-            if (message.msgtype == VIEW_MESSAGE) {
+            if (message.msgtype == 0) {
                 if (message.uid.equals(myUid)) {
-                    return R.layout.item_chatmsg_right;
+                    return VIEW_MESSAGE_ME;
                 } else {
-                    return R.layout.item_chatmsg_left;
+                    return VIEW_MESSAGE_YOU;
                 }
             } else {
-                return R.layout.item_chatproduct;
+                return VIEW_PRODUCT;
             }
         }
 
         @NonNull
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(viewType, parent, false);
-            return new MessageViewHolder(view);
+            RecyclerView.ViewHolder vh;
+            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+            if (viewType == VIEW_MESSAGE_ME) {
+                View v = inflater.inflate(R.layout.item_chatmsg_me, parent, false);
+                vh = new MessageViewHolder(v);
+            } else if (viewType == VIEW_MESSAGE_YOU) {
+                View v = inflater.inflate(R.layout.item_chatmsg_you, parent, false);
+                vh = new MessageViewHolder(v);
+            } else {
+                View v = inflater.inflate(R.layout.item_chatproduct, parent, false);
+                vh = new MessageProductViewHolder(v);
+            }
+            return vh;
         }
 
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-            final MessageViewHolder messageViewHolder = (MessageViewHolder) holder;
             final Message message = messagesList.get(position);
 
-            setReadCounter(position, messageViewHolder.read_counter);
+            if (holder instanceof MessageViewHolder) {
+                final MessageViewHolder view = (MessageViewHolder) holder;
+                String day = dateFormat.format(new Date((long) message.timestamp));
+                setReadCounter(position, view.read_counter);
+                view.divider.setVisibility(View.GONE);
 
-            String day = dateFormat.format( new Date((long) message.timestamp));
-            String timestamp = DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date((long) message.timestamp));
-            messageViewHolder.timestamp.setText(timestamp);
-            if ("0".equals(message.msgtype)) {                                      // text message
-                messageViewHolder.msg_item.setText(message.msg);
-            } else if ("2".equals(message.msgtype)) {                                      // file transfer
-                //TODO
+                if (position == 0 || position == 1 & getItemViewType(0) == VIEW_PRODUCT) {
+                    view.divider_date.setText(day);
+                    view.divider.setVisibility(View.VISIBLE);
+                }
+
+                if (!day.equals(beforeDay) && beforeDay != null) {
+                    beforeViewHolder.divider_date.setText(beforeDay);
+                    beforeViewHolder.divider.setVisibility(View.VISIBLE);
+                }
+                beforeViewHolder = view;
+                beforeDay = day;
+
+                view.bind(message);
+            } else {
+                MessageProductViewHolder view = (MessageProductViewHolder) holder;
+                view.bind(message);
             }
-
-            messageViewHolder.divider.setVisibility(View.INVISIBLE);
-            messageViewHolder.divider.getLayoutParams().height = 0;
-
-            if (position==0) {
-                messageViewHolder.divider_date.setText(day);
-                messageViewHolder.divider.setVisibility(View.VISIBLE);
-                messageViewHolder.divider.getLayoutParams().height = 60;
-            };
-            if (!day.equals(beforeDay) && beforeDay!=null) {
-                beforeViewHolder.divider_date.setText(beforeDay);
-                beforeViewHolder.divider.setVisibility(View.VISIBLE);
-                beforeViewHolder.divider.getLayoutParams().height = 60;
-            }
-            beforeViewHolder = messageViewHolder;
-            beforeDay = day;
         }
 
-        void setReadCounter (final int pos, final TextView textView) {
-            /*int cnt = usersList.size() - messagesList.get(pos).readUsers.size();
+        void setReadCounter(int position, ImageView imageView) {
+            int cnt = usersList.size() - messagesList.get(position).readUsers.size();
             if (cnt > 0) {
-                textView.setVisibility(View.VISIBLE);
-                textView.setText(String.valueOf(cnt));
+                imageView.setColorFilter(rootView.getContext().getColor(R.color.unread_message));
             } else {
-                textView.setVisibility(View.INVISIBLE);
-            }*/
+                imageView.setColorFilter(rootView.getContext().getColor(R.color.colorPrimary));
+            }
         }
 
         @Override
@@ -350,11 +384,11 @@ public class ChatFragment extends Fragment {
         }
 
         private class MessageViewHolder extends RecyclerView.ViewHolder {
-            TextView msg_item;
-            TextView timestamp;
-            TextView read_counter;
-            LinearLayout divider;
-            TextView divider_date;
+            private TextView msg_item;
+            private TextView timestamp;
+            private ImageView read_counter;
+            private LinearLayout divider;
+            private TextView divider_date;
 
             MessageViewHolder(View view) {
                 super(view);
@@ -364,12 +398,60 @@ public class ChatFragment extends Fragment {
                 divider = view.findViewById(R.id.divider);
                 divider_date = view.findViewById(R.id.divider_date);
             }
+
+            public void bind(final Message message) {
+                String day = dateFormat.format(new Date((long) message.timestamp));
+                String time = DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date((long) message.timestamp));
+                timestamp.setText(time);
+                msg_item.setText(message.msg);
+            }
+        }
+
+        private class MessageProductViewHolder extends RecyclerView.ViewHolder {
+            private TextView title;
+            private ImageView image;
+            private Button openButton;
+
+            MessageProductViewHolder(View view) {
+                super(view);
+                title = view.findViewById(R.id.product_message_title);
+                image = view.findViewById(R.id.product_message_image);
+                openButton = view.findViewById(R.id.product_open_button);
+            }
+
+            public void bind(final Message message) {
+                title.setText(message.msg);
+
+                mDatabase.child("products").child(message.uid).child("images/0").addListenerForSingleValueEvent(new ValueEventListener() {
+
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        String imageUrl = (String) dataSnapshot.getValue();
+                        if (TextUtil.isUrl(imageUrl)) {
+                            //TODO: placeholder and error
+                            Glide.with(rootView.getContext()).load(imageUrl).centerCrop().into(image);
+                        } else {
+                            StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("images/" + message.uid + "/" + imageUrl);
+                            Glide.with(rootView.getContext()).load(storageReference).centerCrop().into(image);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Log.d(TAG, "onCancelled MessageProductViewHolder: " + databaseError.getMessage());
+                    }
+                });
+
+                openButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getActivity(), ProductActivity.class);
+                        intent.putExtra(ProductActivity.EXTRA_PRODUCT_KEY, message.uid);
+                        startActivity(intent);
+                    }
+                });
+            }
         }
     }
 
-    public void backPressed() {
-        if (valueEventListener!=null) {
-            databaseReference.removeEventListener(valueEventListener);
-        }
-    }
 }

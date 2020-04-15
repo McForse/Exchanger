@@ -24,10 +24,9 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_alignParentTop="true"
-            android:background="@drawable/bg_gradient_soft"
-            android:rotation="180" />
+            android:layout_height="1dp"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/bg_gradient_soft" />
 
     </RelativeLayout>
 
@@ -43,13 +42,14 @@
             android:orientation="horizontal">
 
             <EditText
-                android:id="@+id/msg_input"
+                android:id="@+id/message_input"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
                 android:hint="Message"
-                android:imeOptions="actionSearch" />
+                android:imeOptions="actionSearch"
+                android:padding="@dimen/spacing_middle" />
 
             <ImageView
                 android:id="@+id/btn_send"
@@ -58,7 +58,7 @@
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:padding="12dp"
-                android:tint="#0382FE"
+                android:tint="@color/colorPrimary"
                 app:srcCompat="@drawable/ic_send" />
 
         </LinearLayout>

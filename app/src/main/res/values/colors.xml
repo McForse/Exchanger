@@ -5,6 +5,7 @@
     <color name="colorAccent">@color/deep_purple_A700</color>
 
     <color name="home_background">#F1EFF1</color>
+    <color name="unread_message">#58B346</color>
     <color name="black">#000</color>
 
     <color name="overlay_dark_10">#1A000000</color>
