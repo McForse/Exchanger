@@ -1,15 +1,16 @@
 package com.shotball.project.models;
 
-import android.text.TextUtils;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Filters {
 
     private int distance = 500; // meters
 
-    private String category = "";
+    private Map<Integer, Boolean> category = new HashMap<>();
 
     public Filters() {}
 
@@ -33,14 +34,14 @@ public class Filters {
     }
 
     public boolean hasCategory() {
-        return !(TextUtils.isEmpty(category));
+        return !category.isEmpty();
     }
 
-    public String getCategory() {
+    public Map<Integer, Boolean>  getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(Map<Integer, Boolean>  category) {
         this.category = category;
     }
 

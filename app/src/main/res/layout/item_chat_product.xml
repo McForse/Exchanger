@@ -2,11 +2,10 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/lyt_parent"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:paddingBottom="@dimen/spacing_xsmall"
     android:paddingTop="@dimen/spacing_xsmall">
 
@@ -16,7 +15,7 @@
         android:layout_margin="@dimen/mtrl_card_spacing"
         android:clickable="true"
         android:focusable="true"
-        android:minHeight="148dp">
+        android:minHeight="@dimen/cat_card_rich_media_demo_min_height">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -27,15 +26,15 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/spacing_large"
-                android:paddingBottom="@dimen/spacing_xmedium">
+                android:padding="@dimen/cat_card_double_spacing"
+                android:paddingBottom="@dimen/cat_card_single_spacing">
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginRight="@dimen/spacing_xmedium"
-                    android:paddingTop="@dimen/spacing_xmedium"
+                    android:layout_weight="1.0"
+                    android:layout_marginEnd="@dimen/cat_card_single_spacing"
+                    android:paddingTop="@dimen/cat_card_single_spacing"
                     android:orientation="vertical">
 
                     <TextView
@@ -48,10 +47,10 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/spacing_xmedium"
+                        android:layout_marginTop="@dimen/cat_card_single_spacing"
                         android:ellipsize="end"
                         android:maxLines="2"
-                        android:text="Discussed product"/>
+                        android:text="Discussed product" />
 
                 </LinearLayout>
 
@@ -59,7 +58,7 @@
                     android:id="@+id/product_message_image"
                     android:layout_width="80dp"
                     android:layout_height="80dp"
-                    android:layout_marginLeft="@dimen/spacing_xmedium"
+                    android:layout_marginStart="@dimen/cat_card_single_spacing"
                     android:background="@android:color/transparent"
                     app:backgroundTint="@color/material_on_surface_emphasis_medium"
                     app:backgroundTintMode="add" />
@@ -69,14 +68,17 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:padding="@dimen/cat_card_single_spacing"
+                android:orientation="horizontal"
+                android:paddingHorizontal="@dimen/cat_card_single_spacing">
 
-                <com.google.android.material.button.MaterialButton
+                <Button
                     style="?attr/borderlessButtonStyle"
                     android:id="@+id/product_open_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Open"/>
+                    android:layout_marginEnd="@dimen/cat_card_single_spacing"
+                    android:text="Open product" />
 
             </LinearLayout>
 

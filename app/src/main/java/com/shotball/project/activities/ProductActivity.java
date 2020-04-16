@@ -2,7 +2,6 @@ package com.shotball.project.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
@@ -36,7 +35,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -44,11 +42,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.ListResult;
-import com.google.firebase.storage.StorageReference;
 import com.shotball.project.R;
-import com.shotball.project.Utils.TextUtil;
 import com.shotball.project.adapters.AdapterImageSlider;
 import com.shotball.project.models.Product;
 import com.shotball.project.models.User;
@@ -56,7 +50,6 @@ import com.shotball.project.models.User;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class ProductActivity extends AppCompatActivity {
 
@@ -334,7 +327,7 @@ public class ProductActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(new ViewGroup.LayoutParams(width_height, width_height));
                 params.setMargins(10, 10, 10, 10);
                 dots[i].setLayoutParams(params);
-                dots[i].setImageResource(R.drawable.shape_circle);
+                dots[i].setImageResource(R.drawable.shape_circle_white);
                 dots[i].setColorFilter(ContextCompat.getColor(this, R.color.overlay_dark_10), PorterDuff.Mode.SRC_ATOP);
                 layout_dots.addView(dots[i]);
             }

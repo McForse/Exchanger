@@ -93,7 +93,7 @@
             android:layout_alignParentEnd="true"
             android:textAlignment="center"
             android:gravity="center"
-            android:background="@drawable/shape_circle"
+            android:background="@drawable/shape_circle_red"
             android:textColor="@android:color/white"
             android:text="0" />
 

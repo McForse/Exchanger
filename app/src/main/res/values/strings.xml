@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Exchanger</string>
+    <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
+
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
@@ -47,4 +49,14 @@
     <string name="dialog_success">Success</string>
     <string name="dialog_publication_success">Product published successfully!</string>
     <string name="go_to_product">Go to product</string>
+
+    <string name="category_all">All</string>
+    <string name="category_clothes">Clothes</string>
+    <string name="category_electronics">Electronics</string>
+    <string name="category_furniture">Furniture</string>
+    <string name="category_tools">Tools</string>
+    <string name="category_children">Сhilden\'s goods</string>
+    <string name="category_pet">Pet supplies</string>
+    <string name="category_food">Food</string>
+    <string name="category_others">Others</string>
 </resources>

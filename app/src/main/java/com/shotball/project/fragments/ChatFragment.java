@@ -1,6 +1,5 @@
 package com.shotball.project.fragments;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -334,7 +333,7 @@ public class ChatFragment extends Fragment {
                 View v = inflater.inflate(R.layout.item_chatmsg_you, parent, false);
                 vh = new MessageViewHolder(v);
             } else {
-                View v = inflater.inflate(R.layout.item_chatproduct, parent, false);
+                View v = inflater.inflate(R.layout.item_chat_product, parent, false);
                 vh = new MessageProductViewHolder(v);
             }
             return vh;

@@ -6,6 +6,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +17,8 @@ import com.shotball.project.R;
 import com.shotball.project.models.Filters;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FilterActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -30,6 +33,8 @@ public class FilterActivity extends AppCompatActivity implements View.OnClickLis
     private Button applyButton;
 
     private FilterListener mFilterListener;
+
+    private Map<Integer, Boolean> selectedCategories = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +85,28 @@ public class FilterActivity extends AppCompatActivity implements View.OnClickLis
     public void btToggleClick(View view) {
         if (view instanceof Button) {
             Button b = (Button) view;
+
+            switch (view.getId()) {
+                case R.id.category_0:
+                    break;
+                case R.id.category_1:
+                    break;
+                case R.id.category_2:
+                    break;
+                case R.id.category_3:
+                    break;
+                case R.id.category_4:
+                    break;
+                case R.id.category_5:
+                    break;
+                case R.id.category_6:
+                    break;
+                case R.id.category_7:
+                    break;
+
+            }
+
+
             if (b.isSelected()) {
                 b.setTextColor(getResources().getColor(R.color.grey_40));
             } else {
@@ -136,11 +163,15 @@ public class FilterActivity extends AppCompatActivity implements View.OnClickLis
         return seekBar.getProgress() * 100;
     }
 
+    private Map<Integer, Boolean> getSelectedCategory() {
+        return null;
+    }
+
     public Filters getFilters() {
         Filters filters = new Filters();
 
         filters.setDistance(getSelectedDistance());
-        //filters.setCategory(getSelectedCategory());
+        filters.setCategory(getSelectedCategory());
 
         return filters;
     }
