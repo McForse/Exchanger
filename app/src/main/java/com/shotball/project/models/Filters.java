@@ -10,13 +10,14 @@ public class Filters {
 
     private int distance = 500; // meters
 
-    private Map<Integer, Boolean> category = new HashMap<>();
+    private Map<Integer, Boolean> categories = new HashMap<>();
 
     public Filters() {}
 
     public static Filters getDefault() {
         Filters filter = new Filters();
         filter.setDistance(500);
+        filter.categories = new HashMap<>();
 
         return filter;
     }
@@ -34,25 +35,25 @@ public class Filters {
     }
 
     public boolean hasCategory() {
-        return !category.isEmpty();
+        return !categories.isEmpty();
     }
 
-    public Map<Integer, Boolean>  getCategory() {
-        return category;
+    public Map<Integer, Boolean> getCategories() {
+        return categories;
     }
 
-    public void setCategory(Map<Integer, Boolean>  category) {
-        this.category = category;
+    public void setCategories(Map<Integer, Boolean> categories) {
+        this.categories = categories;
     }
 
     @NonNull
     @Override
     public String toString() {
-        return "Distance=" + distance + "; Category:" + category;
+        return "Distance=" + distance + "; Category:" + categories;
     }
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        return distance == ((Filters) obj).getDistance() && category.equals(((Filters) obj).getCategory());
+        return distance == ((Filters) obj).getDistance() && ((Filters) obj).getCategories() == null || categories.equals(((Filters) obj).getCategories());
     }
 }

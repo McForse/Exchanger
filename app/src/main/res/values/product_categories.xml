@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="product_categories">
+        <item>All</item>
         <item>Clothes</item>
         <item>Electronics</item>
         <item>Furniture</item>
+        <item>Household products</item>
         <item>Tools</item>
         <item>Сhildens goods</item>
         <item>Pet supplies</item>
         <item>Food</item>
+        <item>Sporting goods</item>
+        <item>Сosmetics</item>
         <item>Others</item>
     </string-array>
 </resources>

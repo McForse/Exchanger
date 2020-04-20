@@ -13,6 +13,8 @@ public class Product {
     public String title;
     public ArrayList<String> images;
     public String description;
+    public int category;
+    public int exchange_category;
     public String user;
     public boolean available;
     public String g;
@@ -51,6 +53,22 @@ public class Product {
         this.description = description;
     }
 
+    public int getCategory() {
+        return category;
+    }
+
+    public void setCategory(int category) {
+        this.category = category;
+    }
+
+    public int getExchangeCategory() {
+        return exchange_category;
+    }
+
+    public void setExchangeCategory(int exchange_category) {
+        this.exchange_category = exchange_category;
+    }
+
     public void setUser(String user) {
         this.user = user;
     }
@@ -65,6 +83,14 @@ public class Product {
 
     public String getKey() {
         return key;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
     }
 
     public void setDistance(int distance) {
@@ -91,6 +117,8 @@ public class Product {
         result.put("title", title);
         result.put("images", images);
         result.put("description", description);
+        result.put("category", category);
+        result.put("exchange_category", exchange_category);
         result.put("user", user);
         result.put("available", available);
         result.put("g", g);

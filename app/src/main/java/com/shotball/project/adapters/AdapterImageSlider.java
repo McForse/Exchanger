@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import androidx.viewpager.widget.PagerAdapter;
@@ -18,7 +17,7 @@ import com.bumptech.glide.Glide;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.shotball.project.R;
-import com.shotball.project.Utils.TextUtil;
+import com.shotball.project.utils.TextUtil;
 
 import java.util.List;
 

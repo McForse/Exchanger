@@ -86,7 +86,9 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
     private TextInputLayout productCategoryInputLayout;
     private TextInputLayout productTitleInputLayout;
     private TextInputLayout productDescriptionInputLayout;
+    private TextInputLayout productExchangeCategoryInputLayout;
     private AutoCompleteTextView productCategory;
+    private AutoCompleteTextView productExchangeCategory;
     private EditText productTitle;
     private EditText productDescription;
 
@@ -141,9 +143,13 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
         productCategory = findViewById(R.id.product_category);
         productCategory.setAdapter(adapter);
 
+        productExchangeCategory = findViewById(R.id.product_exchange_category);
+        productExchangeCategory.setAdapter(adapter);
+
         productCategoryInputLayout = findViewById(R.id.product_category_input_layout);
         productTitleInputLayout = findViewById(R.id.product_title_input_layout);
         productDescriptionInputLayout = findViewById(R.id.product_description_input_layout);
+        productExchangeCategoryInputLayout = findViewById(R.id.product_exchage_category_input_layout);
         productTitle = findViewById(R.id.product_title);
         productDescription = findViewById(R.id.product_description);
 
@@ -174,25 +180,6 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
                 }
             }
         });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_add_product, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int i = item.getItemId();
-
-        if (i == android.R.id.home) {
-            finish();
-        } else if (item.getItemId() == R.id.action_done) {
-            onDoneClicked();
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     private void onDoneClicked() {
@@ -236,6 +223,15 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
             valid = false;
         } else {
             productDescriptionInputLayout.setError(null);
+        }
+
+        String exchageCategory = productExchangeCategory.getText().toString();
+        if (TextUtils.isEmpty(exchageCategory)) {
+            productExchangeCategoryInputLayout.setError(getString(R.string.required));
+            productExchangeCategoryInputLayout.requestFocus();
+            valid = false;
+        } else {
+            productExchangeCategoryInputLayout.setError(null);
         }
 
         if (mLastKnownLocation == null) {
@@ -293,6 +289,7 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
         location.add(mLastKnownLocation.getLatitude());
         location.add( mLastKnownLocation.getLongitude());
 
+        mProduct.setAvailable(true);
         mProduct.setTitle(productTitle.getText().toString());
         mProduct.setDescription(productDescription.getText().toString());
         mProduct.setUser(getUid());
@@ -501,5 +498,24 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
     public void onStop() {
         super.onStop();
         mDialog.dismiss();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_add_product, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int i = item.getItemId();
+
+        if (i == android.R.id.home) {
+            finish();
+        } else if (item.getItemId() == R.id.action_done) {
+            onDoneClicked();
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

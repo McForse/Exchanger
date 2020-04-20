@@ -31,7 +31,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.shotball.project.R;
-import com.shotball.project.Utils.TextUtil;
+import com.shotball.project.utils.TextUtil;
 import com.shotball.project.activities.ProductActivity;
 import com.shotball.project.models.Message;
 import com.shotball.project.models.User;

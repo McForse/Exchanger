@@ -6,13 +6,14 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.shotball.project.R;
 import com.shotball.project.models.Filters;
 
@@ -20,7 +21,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FilterActivity extends AppCompatActivity implements View.OnClickListener {
+public class FilterActivity extends AppCompatActivity {
 
     public interface FilterListener extends Serializable {
         void onFilter(Filters filters);
@@ -29,8 +30,7 @@ public class FilterActivity extends AppCompatActivity implements View.OnClickLis
 
     private SeekBar seekBar;
     private TextView distanceMaxTextView;
-    private Button clearButton;
-    private Button applyButton;
+    private ExtendedFloatingActionButton applyButton;
 
     private FilterListener mFilterListener;
 
@@ -42,24 +42,28 @@ public class FilterActivity extends AppCompatActivity implements View.OnClickLis
         setContentView(R.layout.activity_filter);
         initToolbar();
         initComponent();
+        findViewById(R.id.category_0).setSelected(true);
+        ((Button)findViewById(R.id.category_0)).setTextColor(Color.WHITE);
     }
 
     private void initToolbar() {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(getString(R.string.filter_title));
-        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_chevron_left);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     private void initComponent() {
         seekBar = findViewById(R.id.filter_seek_bar);
         distanceMaxTextView = findViewById(R.id.filter_distance_max);
-        clearButton = findViewById(R.id.filter_clear);
         applyButton = findViewById(R.id.filter_apply);
-
-        clearButton.setOnClickListener(this);
-        applyButton.setOnClickListener(this);
+        applyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onApplyClicked();
+            }
+        });
 
         mFilterListener = (FilterListener) getIntent().getSerializableExtra("interface");
 
@@ -116,18 +120,6 @@ public class FilterActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.filter_clear:
-                onClearClicked();
-                break;
-            case R.id.filter_apply:
-                onApplyClicked();
-                break;
-        }
-    }
-
     private void initFilters(Filters filter) {
         int progress = filter.getDistance() / 100;
         seekBar.setProgress(progress);
@@ -171,14 +163,27 @@ public class FilterActivity extends AppCompatActivity implements View.OnClickLis
         Filters filters = new Filters();
 
         filters.setDistance(getSelectedDistance());
-        filters.setCategory(getSelectedCategory());
+        filters.setCategories(getSelectedCategory());
 
         return filters;
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_filter, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        finish();
+        int i = item.getItemId();
+
+        if (i == android.R.id.home) {
+            finish();
+        } else if (item.getItemId() == R.id.action_clear) {
+            onClearClicked();
+        }
+
         return super.onOptionsItemSelected(item);
     }
 

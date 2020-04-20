@@ -1,12 +1,17 @@
 package com.shotball.project.fragments;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -14,12 +19,16 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -29,8 +38,6 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryDataEventListener;
-import com.firebase.geofire.core.GeoHash;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.google.firebase.database.DataSnapshot;
@@ -42,12 +49,12 @@ import com.google.firebase.database.Transaction;
 import com.shotball.project.R;
 import com.shotball.project.activities.AddProductActivity;
 import com.shotball.project.activities.FilterActivity;
-import com.shotball.project.activities.MainActivity;
 import com.shotball.project.activities.ProductActivity;
 import com.shotball.project.activities.SignInActivity;
 import com.shotball.project.adapters.ProductAdapter;
 import com.shotball.project.models.Filters;
 import com.shotball.project.models.Product;
+import com.shotball.project.utils.ViewAnimation;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -58,20 +65,24 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
 
     private static final String TAG = "HomeFragment";
     private static final String TAG_GEO = "GeoListener";
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private boolean mLocationPermissionGranted;
+    private static final int GPS_REQUEST = 1;
 
     private View rootView;
     private Activity mActivity;
-
-    private DatabaseReference mDatabase;
-    private GeoFire geoFire;
-    private GeoQuery geoQuery;
-    private GeoQueryDataEventListener geoQueryListener;
-
+    private RelativeLayout mainContainer;
+    private LinearLayout geolocationContainer;
     private ProgressBar progressBar;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeContainer;
     private StaggeredGridLayoutManager gridLayoutManager;
     private ProductAdapter mAdapter;
+
+    private DatabaseReference mDatabase;
+    private GeoFire geoFire;
+    private GeoQuery geoQuery;
+    private GeoQueryDataEventListener geoQueryListener;
 
     private final String KEY_RECYCLER_STATE = "recycler_state";
     private static Bundle mBundleRecyclerViewState;
@@ -87,24 +98,16 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     private int counter = 0;
 
     private static final double[] MY_LOCATION = { 55.936354, 37.494034 };
+    public static Location myLocation;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.fragment_home, container, false);
-        mActivity = getActivity();
         Log.d(TAG, "onCreateView");
-
+        rootView = inflater.inflate(R.layout.fragment_home, container, false);
+        initComponents();
+        checkPermissionsAndGps();
         initToolbar();
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-        progressBar = rootView.findViewById(R.id.progress_bar);
-        recyclerView = rootView.findViewById(R.id.product_grid);
-        swipeContainer = rootView.findViewById(R.id.swipe_container);
-        mAdapter = new ProductAdapter(rootView.getContext(), item_per_display);
-        mFilters = Filters.getDefault();
-        productsKeys = new HashSet<>();
-        setReferences();
-
         return rootView;
     }
 
@@ -118,11 +121,105 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
             gridLayoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         }
 
+        recyclerView.setLayoutManager(gridLayoutManager);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(mAdapter);
+    }
+
+    private void initComponents() {
+        mActivity = getActivity();
+        mainContainer = rootView.findViewById(R.id.home_main_container);
+        geolocationContainer = rootView.findViewById(R.id.lyt_no_permission_location);
+        mainContainer.setVisibility(View.GONE);
+        geolocationContainer.setVisibility(View.GONE);
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        progressBar = rootView.findViewById(R.id.home_progress_bar);
+        recyclerView = rootView.findViewById(R.id.product_grid);
+        swipeContainer = rootView.findViewById(R.id.swipe_container);
+        mAdapter = new ProductAdapter(rootView.getContext(), item_per_display);
+        mFilters = Filters.getDefault();
+        productsKeys = new HashSet<>();
+    }
+
+    private void initToolbar() {
+        Toolbar toolbar = rootView.findViewById(R.id.toolbar);
+        ((AppCompatActivity) rootView.getContext()).setSupportActionBar(toolbar);
+        setHasOptionsMenu(true);
+    }
+
+    private boolean checkPermissionsAndGps() {
+        if (!mLocationPermissionGranted) {
+            if (ContextCompat.checkSelfPermission(mActivity,
+                    Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                getLocationPermission();
+            } else {
+                mLocationPermissionGranted = true;
+            }
+        }
+
+        LocationManager locationManager = (LocationManager) mActivity.getSystemService(Context.LOCATION_SERVICE);
+        boolean gpsEnabled = false;
+
+        try {
+            gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch (Exception e) {
+            Log.w(TAG, "checkPermissionsAndGps: " + e.getMessage());
+            return false;
+        }
+
+        if (!mLocationPermissionGranted || !gpsEnabled) {
+            mainContainer.setVisibility(View.GONE);
+            geolocationContainer.setVisibility(View.VISIBLE);
+            Button allowLocationButton = rootView.findViewById(R.id.button_allow_location);
+            allowLocationButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!mLocationPermissionGranted) {
+                        getLocationPermission();
+                    } else {
+                        startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), GPS_REQUEST);
+                    }
+                }
+            });
+        } else {
+            geolocationContainer.setVisibility(View.GONE);
+            myLocation = new Location("1");
+            myLocation.setLatitude(MY_LOCATION[0]);
+            myLocation.setLongitude(MY_LOCATION[1]);
+            setMyLocation(myLocation);
+            //ViewAnimation.fadeIn(mainContainer);
+            mainContainer.setVisibility(View.VISIBLE);
+            setReferences();
+            return true;
+            /*FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(mActivity);
+
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(mActivity, new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            if (location != null) {
+                                Log.d(TAG, "CRCERCECERcre");
+                                setMyLocation(location);
+                                mainContainer.setVisibility(View.VISIBLE);
+                                setReferences();
+                            }
+                        }
+                    });*/
+        }
+
+        return false;
+    }
+
+    private void setReferences() {
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                stopGeoQueryListener();
                 resetRecycleView();
-                startSearch();
+                if (checkPermissionsAndGps()) {
+                    startSearch();
+                }
             }
         });
 
@@ -134,23 +231,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
             }
         });
 
-        //recyclerView.setVisibility(View.GONE);
-        recyclerView.setLayoutManager(gridLayoutManager);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setAdapter(mAdapter);
-
-        startSearch();
-    }
-
-    private void initToolbar() {
-        Toolbar toolbar = rootView.findViewById(R.id.toolbar);
-        ((AppCompatActivity) rootView.getContext()).setSupportActionBar(toolbar);
-        setHasOptionsMenu(true);
-    }
-
-    private void setReferences() {
         geoFire = new GeoFire(mDatabase.child("products"));
-
         geoQueryListener = new GeoQueryDataEventListener() {
             @Override
             public void onDataEntered(DataSnapshot dataSnapshot, GeoLocation location) {
@@ -166,11 +247,11 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
 
                             Location locationA = new Location("point A");
 
-                            locationA.setLatitude(MY_LOCATION[0]);
-                            locationA.setLongitude(MY_LOCATION[1]);
+                            locationA.setLatitude(myLocation.getLatitude());
+                            locationA.setLongitude(myLocation.getLongitude());
                             Location locationB = new Location("point B");
-                            locationB.setLatitude(MainActivity.location.getLatitude());
-                            locationB.setLongitude(MainActivity.location.getLongitude());
+                            locationB.setLatitude(location.latitude);
+                            locationB.setLongitude(location.longitude);
                             int distance = (int) locationA.distanceTo(locationB);
 
                             product.setDistance(distance);
@@ -203,6 +284,12 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
                 Log.e(TAG_GEO, "onGeoQueryError: " + error);
             }
         };
+
+        startSearch();
+    }
+
+    private void setMyLocation(Location location) {
+        myLocation = location;
     }
 
     private void loadNextData() {
@@ -213,7 +300,6 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     }
 
     private void startSearch() {
-        //Log.d(TAG, "startSearch: " + MainActivity.location.getLatitude() + " " + MainActivity.location.getLongitude());
         loading = true;
         //searchNearby(location.getLatitude(), location.getLongitude(), (double) mFilters.getDistance() / 1000);
         searchNearby(MY_LOCATION[0], MY_LOCATION[1], (double) mFilters.getDistance() / 1000);
@@ -318,6 +404,11 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         }
     }
 
+    private void getLocationPermission() {
+        requestPermissions(new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+    }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -360,22 +451,6 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
             resetRecycleView();
             startSearch();
         }
-    }
-
-    private void setLocationToProduct(String key, double latitude, double longitude) {
-        GeoHash geoHash = new GeoHash(new GeoLocation(latitude, longitude));
-        List<Double> location = new ArrayList<>();
-        location.add(latitude);
-        location.add(longitude);
-        DatabaseReference databaseReference = mDatabase.child("products").child(key);
-
-        databaseReference.child("g").setValue(geoHash.getGeoHashString()).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                Log.d(TAG, "newLocation writed");
-            }
-        });
-        databaseReference.child("l").setValue(location);
     }
 
     @Override
@@ -441,6 +516,27 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == GPS_REQUEST) {
+            checkPermissionsAndGps();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        mLocationPermissionGranted = false;
+
+        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                mLocationPermissionGranted = true;
+                checkPermissionsAndGps();
+            }
+        }
     }
 
 }

@@ -1,11 +1,13 @@
 package com.shotball.project.fragments;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,7 +32,10 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.Transaction;
 import com.shotball.project.R;
+import com.shotball.project.activities.ProductActivity;
+import com.shotball.project.adapters.ProductAdapter;
 import com.shotball.project.models.Product;
+import com.shotball.project.utils.ViewAnimation;
 import com.shotball.project.viewHolders.ProductViewHolder;
 
 public class FavoritesFragment extends Fragment {
@@ -43,12 +48,12 @@ public class FavoritesFragment extends Fragment {
     private DatabaseReference mDatabase;
 
     private FirebaseRecyclerAdapter<Product, ProductViewHolder> mAdapter;
-    private RecyclerView mRecycler;
+    private RecyclerView recyclerView;
     private LinearLayoutManager mManager;
     private boolean onUndoClicked;
-    float lastY;
 
     @Nullable
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_favorites, container, false);
@@ -58,8 +63,8 @@ public class FavoritesFragment extends Fragment {
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        mRecycler = rootView.findViewById(R.id.productGrid);
-        mRecycler.setHasFixedSize(true);
+        recyclerView = rootView.findViewById(R.id.productGrid);
+        recyclerView.setHasFixedSize(true);
 
         return rootView;
     }
@@ -69,33 +74,10 @@ public class FavoritesFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         mManager = new LinearLayoutManager(rootView.getContext());
-        mRecycler.setLayoutManager(mManager);
-        mRecycler.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-                                             @Override
-                                             public boolean onInterceptTouchEvent(RecyclerView recyclerView, MotionEvent event) {
-                                                 int action = event.getAction();
-                                                 if (action == MotionEvent.ACTION_DOWN) {
-                                                     lastY = event.getY();
-                                                 }
-                                                 if (action == MotionEvent.ACTION_MOVE && event.getY() > lastY) {
-                                                     return false;
-                                                 }
-                                                 return false;
-                                             }
-
-                                             @Override
-                                             public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-
-                                             }
-
-                                             @Override
-                                             public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-                                             }
-                                         });
+        recyclerView.setLayoutManager(mManager);
 
 
-            Query productsQuery = mDatabase.child("products").orderByChild("likes/" + getUid()).equalTo(true);
+        Query productsQuery = mDatabase.child("products").orderByChild("likes/" + getUid()).equalTo(true);
 
         FirebaseRecyclerOptions options = new FirebaseRecyclerOptions.Builder<Product>()
                 .setQuery(productsQuery, new SnapshotParser<Product>() {
@@ -123,6 +105,16 @@ public class FavoritesFragment extends Fragment {
                 viewHolder.bind(rootView.getContext(), product, null);
                 View view = viewHolder.itemView;
 
+                Button openProduct = view.findViewById(R.id.product_open);
+                openProduct.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getActivity(), ProductActivity.class);
+                        intent.putExtra(ProductActivity.EXTRA_PRODUCT_KEY, product.getKey());
+                        startActivity(intent);
+                    }
+                });
+
                 final CoordinatorLayout container = rootView.findViewById(R.id.favourites_container);
                 SwipeDismissBehavior<View> swipeDismissBehavior = new SwipeDismissBehavior<>();
                 swipeDismissBehavior.setSwipeDirection(SwipeDismissBehavior.SWIPE_DIRECTION_START_TO_END);
@@ -136,6 +128,8 @@ public class FavoritesFragment extends Fragment {
                 swipeDismissBehavior.setListener(new SwipeDismissBehavior.OnDismissListener() {
                     @Override
                     public void onDismiss(View view) {
+                        ViewAnimation.collapse(cardContentLayout);
+                        //cardContentLayout.setVisibility(View.GONE);
                         snackbar = Snackbar.make(container, "Product removed from favorites", Snackbar.LENGTH_SHORT)
                                 .setAction("Undo", new View.OnClickListener() {
                                     @Override
@@ -149,7 +143,7 @@ public class FavoritesFragment extends Fragment {
                                         Log.d(TAG, "onDismissed");
                                         super.onDismissed(transientBottomBar, event);
                                         if (!onUndoClicked) {
-                                            setLike(product.getKey());
+                                            unLike(product.getKey());
                                         }
                                         onUndoClicked = false;
                                     }
@@ -177,7 +171,7 @@ public class FavoritesFragment extends Fragment {
             }
         };
 
-        mRecycler.setAdapter(mAdapter);
+        recyclerView.setAdapter(mAdapter);
     }
 
     private void initToolbar() {
@@ -188,13 +182,14 @@ public class FavoritesFragment extends Fragment {
     }
 
     private void resetCard(MaterialCardView cardContentLayout, String key) {
+        ViewAnimation.expand(cardContentLayout);
         CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) cardContentLayout
                 .getLayoutParams();
         cardContentLayout.setAlpha(1.0f);
         cardContentLayout.requestLayout();
     }
 
-    public void setLike(String productKey) {
+    private void unLike(String productKey) {
         Log.d(TAG, "setLike");
         DatabaseReference reference = mDatabase.child("products").child(productKey);
 
@@ -210,12 +205,9 @@ public class FavoritesFragment extends Fragment {
                 if (product.likes.containsKey(getUid())) {
                     product.likeCount = product.likeCount - 1;
                     product.likes.remove(getUid());
-                } else {
-                    product.likeCount = product.likeCount + 1;
-                    product.likes.put(getUid(), true);
+                    mutableData.setValue(product);
                 }
 
-                mutableData.setValue(product);
                 return Transaction.success(mutableData);
             }
 

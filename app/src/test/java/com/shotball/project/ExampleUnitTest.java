@@ -1,7 +1,6 @@
 package com.shotball.project;
 
-import com.shotball.project.Utils.TextUtil;
-import com.shotball.project.models.Product;
+import com.shotball.project.utils.TextUtil;
 
 import org.junit.Test;
 

@@ -13,11 +13,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.shotball.project.R;
-import com.shotball.project.Utils.TextUtil;
+import com.shotball.project.utils.TextUtil;
 import com.shotball.project.adapters.ProductAdapter;
 import com.shotball.project.models.Product;
-
-import java.util.Objects;
 
 public class ProductViewHolder extends RecyclerView.ViewHolder {
 

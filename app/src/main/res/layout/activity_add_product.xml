@@ -152,6 +152,29 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/spacing_mlarge" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/product_exchage_category_input_layout"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Exchange for"
+                    app:errorEnabled="true"
+                    app:helperTextEnabled="true"
+                    app:helperText="@string/required">
+
+                    <AutoCompleteTextView
+                        android:id="@+id/product_exchange_category"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="none"
+                        android:editable="false"/>
+
+                </com.google.android.material.textfield.TextInputLayout>
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

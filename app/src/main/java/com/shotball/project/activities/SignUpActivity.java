@@ -27,7 +27,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.shotball.project.R;
-import com.shotball.project.Utils.TextUtil;
+import com.shotball.project.utils.TextUtil;
 import com.shotball.project.models.User;
 
 import java.util.Objects;

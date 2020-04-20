@@ -80,14 +80,6 @@
                     app:fontFamily="sans-serif-medium"
                     android:transitionName="product_title" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_medium"
-                    android:text="Subtitle"
-                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead"
-                    android:textColor="@color/grey_40" />
-
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"

@@ -22,18 +22,14 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.shotball.project.R;
 import com.shotball.project.adapters.FragmentViewPagerAdapter;
-import com.shotball.project.services.MyFirebaseMessagingService;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
     private ViewPager2 viewPager;
-
-    public static Location location;
 
     private int current_page = 0;
 
@@ -52,21 +48,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
-        FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        if (location != null) {
-                            setLocation(location);
-                        }
-                    }
-                });
-    }
-
-    private void setLocation(Location location) {
-        MainActivity.location = location;
         initComponents();
     }
 

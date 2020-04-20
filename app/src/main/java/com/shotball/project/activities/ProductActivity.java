@@ -9,6 +9,7 @@ import androidx.core.widget.NestedScrollView;
 import androidx.viewpager.widget.ViewPager;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -36,6 +37,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -44,8 +46,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.shotball.project.R;
 import com.shotball.project.adapters.AdapterImageSlider;
+import com.shotball.project.models.Categories;
 import com.shotball.project.models.Product;
 import com.shotball.project.models.User;
+import com.shotball.project.utils.ViewAnimation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,30 +62,26 @@ public class ProductActivity extends AppCompatActivity {
     private String PRODUCT_KEY;
 
     private Toolbar toolbar;
-
+    private NestedScrollView mainContainer;
     private ImageView image;
     private TextView title;
     private TextView description;
-    private ImageView sellerImageView;
-    private TextView sellerNameField;
+    private ImageView sellerImage;
+    private TextView sellerName;
     private Button sendMessageButton;
     private Button exchangeButton;
-
-    private View.OnClickListener sendMessageOnClickListener;
-    private View.OnClickListener exchangeOnClickListener;
-
-    private DatabaseReference mDatabase;
-    private Product mProduct;
-    private User mSeller;
-    private DatabaseReference refProducts;
-    private DatabaseReference refUsers;
-    private ValueEventListener dataListener;
-
     private ViewPager viewPager;
     private LinearLayout layout_dots;
     private AdapterImageSlider adapterImageSlider;
 
+    private DatabaseReference mDatabase;
+    private DatabaseReference refProducts;
+    private ValueEventListener dataListener;
+
+    private Product mProduct;
+    private User mSeller;
     private String roomId;
+    final Map<String, String> myProducts = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,17 +101,18 @@ public class ProductActivity extends AppCompatActivity {
 
     @SuppressLint("ClickableViewAccessibility")
     private void initComponents() {
+        mainContainer = findViewById(R.id.scroll_view);
+        mainContainer.setVisibility(View.GONE);
         image = findViewById(R.id.image);
         title = findViewById(R.id.title);
         description = findViewById(R.id.description);
-        sellerImageView = findViewById(R.id.seller_image);
-        sellerNameField = findViewById(R.id.seller_name);
+        sellerImage = findViewById(R.id.seller_image);
+        sellerName = findViewById(R.id.seller_name);
         sendMessageButton = findViewById(R.id.send_message_button);
         exchangeButton = findViewById(R.id.exchange_button);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         refProducts = mDatabase.child("products");
-        refUsers = mDatabase.child("users");
 
         getProduct();
 
@@ -197,7 +198,7 @@ public class ProductActivity extends AppCompatActivity {
             }
         };
 
-        refUsers.child(mProduct.user).addListenerForSingleValueEvent(dataListener);
+        mDatabase.child("users").child(mProduct.user).addListenerForSingleValueEvent(dataListener);
     }
 
     private void initProduct() {
@@ -228,6 +229,8 @@ public class ProductActivity extends AppCompatActivity {
                 }
             });
 
+            getMyProducts(mProduct.getExchangeCategory());
+
             getSeller();
             initMapFragment();
             invalidateOptionsMenu();
@@ -244,11 +247,14 @@ public class ProductActivity extends AppCompatActivity {
             Glide.with(this)
                     .load(mSeller.image)
                     .apply(RequestOptions.circleCropTransform())
-                    .into(sellerImageView);
-            sellerNameField.setText(mSeller.username);
+                    .into(sellerImage);
+            sellerName.setText(mSeller.username);
+
+            ViewAnimation.showIn(mainContainer);
+
             findChatRoom(mSeller.getUid());
 
-            sendMessageOnClickListener = new View.OnClickListener() {
+            View.OnClickListener sendMessageOnClickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (roomId == null || roomId.equals("")) {
@@ -284,7 +290,37 @@ public class ProductActivity extends AppCompatActivity {
                     }
                 }
             };
+
+            View.OnClickListener exchangeOnClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final ArrayList<String> productsList = new ArrayList<>(myProducts.values());
+                    new MaterialAlertDialogBuilder(ProductActivity.this)
+                            .setTitle(getString(R.string.dialog_exhange_to))
+                            .setNeutralButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.cancel();
+                                }
+                            })
+                            .setPositiveButton(getString(R.string.suggest), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+
+                                }
+                            })
+                            .setSingleChoiceItems(productsList.toArray(new String[productsList.size()]), 0, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+
+                                }
+                            })
+                            .show();
+                }
+            };
+
             sendMessageButton.setOnClickListener(sendMessageOnClickListener);
+            exchangeButton.setOnClickListener(exchangeOnClickListener);
         } else {
             //TODO: error
         }
@@ -363,6 +399,29 @@ public class ProductActivity extends AppCompatActivity {
 
     private CameraUpdate zoomingLocation() {
         return CameraUpdateFactory.newLatLngZoom(new LatLng(mProduct.getLatitude(), mProduct.getLongitude()), 15);
+    }
+
+    private void getMyProducts(final int category) {
+        ValueEventListener myProductsListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot item : dataSnapshot.getChildren()) {
+                    Product product = item.getValue(Product.class);
+
+                    if (product != null && product.available && (category == Categories.All.getValue() || product.getCategory() == category)) {
+                        product.setKey(item.getKey());
+                        myProducts.put(product.getKey(), product.getTitle());
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+
+        refProducts.orderByChild("user").equalTo(getUid()).addListenerForSingleValueEvent(myProductsListener);
     }
 
     public String getUid() {

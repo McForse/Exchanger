@@ -1,4 +1,4 @@
-package com.shotball.project.Utils;
+package com.shotball.project.utils;
 
 import android.webkit.URLUtil;
 
