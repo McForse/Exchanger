@@ -193,5 +193,39 @@
 
     </LinearLayout>
 
+    <View
+        android:layout_width="@dimen/spacing_medium"
+        android:layout_height="1dp"
+        android:layout_margin="@dimen/spacing_small"
+        android:background="@color/grey_60" />
+
+    <LinearLayout
+        android:id="@+id/proposed_ecxhanges_button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spacing_xxxlarge"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/spacing_large"
+        android:paddingRight="@dimen/spacing_large">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            app:srcCompat="@drawable/ic_shopping_cart" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/spacing_large"
+            android:layout_marginRight="@dimen/spacing_large"
+            android:text="@string/exchange_title"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            android:textColor="@color/grey_80" />
+
+    </LinearLayout>
+
 
 </LinearLayout>

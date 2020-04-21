@@ -33,7 +33,6 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.Transaction;
 import com.shotball.project.R;
 import com.shotball.project.activities.ProductActivity;
-import com.shotball.project.adapters.ProductAdapter;
 import com.shotball.project.models.Product;
 import com.shotball.project.utils.ViewAnimation;
 import com.shotball.project.viewHolders.ProductViewHolder;

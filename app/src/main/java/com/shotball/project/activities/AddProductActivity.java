@@ -116,7 +116,7 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
     }
 
     private void initToolbar() {
-        Toolbar toolbar =findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(R.string.add_product_title);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

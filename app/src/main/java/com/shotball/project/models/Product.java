@@ -61,11 +61,11 @@ public class Product {
         this.category = category;
     }
 
-    public int getExchangeCategory() {
+    public int getExchange_category() {
         return exchange_category;
     }
 
-    public void setExchangeCategory(int exchange_category) {
+    public void setExchange_category(int exchange_category) {
         this.exchange_category = exchange_category;
     }
 

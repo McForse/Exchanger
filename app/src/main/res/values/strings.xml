@@ -44,10 +44,13 @@
     <string name="add_product_title">Add New Product</string>
     <string name="no_location_selected">No location selected</string>
     <string name="error_publish_product">Error publishing product! Try it again</string>
+    <string name="error_adding_exchange">Error adding exchange! Try it again</string>
     <string name="dialog_product_publication">Product publication</string>
     <string name="wait">Please wait…</string>
     <string name="dialog_success">Success</string>
     <string name="dialog_publication_success">Product published successfully!</string>
+    <string name="dialog_exchange_added_success">Exchange added successfully!</string>
+    <string name="dialog_exchange_already_exist">Exchange already exist</string>
     <string name="go_to_product">Go to product</string>
 
     <string name="category_all">All</string>
@@ -65,4 +68,7 @@
 
     <string name="apply_filters">Apply filters</string>
     <string name="menu_clear_selections">Clear filters</string>
+    <string name="dialog_no_exchange_ptoducts">You do not have suitable products for the exchange</string>
+    <string name="ok">OK</string>
+    <string name="exchange_title">Proposed Exchanges</string>
 </resources>

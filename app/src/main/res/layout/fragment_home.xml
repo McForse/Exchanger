@@ -60,7 +60,8 @@
 
         </RelativeLayout>
 
-        <include layout="@layout/layout_allow_geolocation" />
+        <include layout="@layout/layout_allow_geolocation"
+            android:visibility="gone" />
 
     </RelativeLayout>
 

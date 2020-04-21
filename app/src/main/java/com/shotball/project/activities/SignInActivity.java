@@ -8,7 +8,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.ScrollView;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -17,6 +17,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -42,6 +43,8 @@ public class SignInActivity extends BaseActivity implements View.OnClickListener
     private static final String TAG = SignInActivity.class.getSimpleName();
     private static final int RC_SIGN_IN = 9001;
 
+    private ScrollView mainContainer;
+
     private TextInputLayout mTextInputLayoutEmail;
     private TextInputLayout mTextInputLayoutPassword;
 
@@ -56,6 +59,8 @@ public class SignInActivity extends BaseActivity implements View.OnClickListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
+
+        mainContainer = findViewById(R.id.sing_in_activity);
 
         mTextInputLayoutEmail = findViewById(R.id.textInputLayoutEmail);
         mTextInputLayoutPassword = findViewById(R.id.textInputLayoutPassword);
@@ -113,8 +118,7 @@ public class SignInActivity extends BaseActivity implements View.OnClickListener
                             onAuthSuccess(task.getResult().getUser());
                         } else {
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            Toast.makeText(SignInActivity.this, R.string.auth_failed,
-                                    Toast.LENGTH_SHORT).show();
+                            Snackbar.make(mainContainer, R.string.auth_failed, Snackbar.LENGTH_LONG).show();
                             updateUI(null);
                         }
                     }
@@ -153,8 +157,7 @@ public class SignInActivity extends BaseActivity implements View.OnClickListener
                                 Log.w(TAG, "createUserWithEmail:failure", task.getException());
                             }
 
-                            Toast.makeText(SignInActivity.this, R.string.auth_failed,
-                                    Toast.LENGTH_SHORT).show();
+                            Snackbar.make(mainContainer, R.string.auth_failed, Snackbar.LENGTH_LONG).show();
                             updateUI(null);
                         }
 

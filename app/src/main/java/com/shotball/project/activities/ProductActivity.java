@@ -11,6 +11,8 @@ import androidx.viewpager.widget.ViewPager;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
@@ -21,6 +23,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -36,8 +40,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -46,7 +52,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.shotball.project.R;
 import com.shotball.project.adapters.AdapterImageSlider;
+import com.shotball.project.interfaces.IsAvailableCallback;
 import com.shotball.project.models.Categories;
+import com.shotball.project.models.ExchangeModel;
 import com.shotball.project.models.Product;
 import com.shotball.project.models.User;
 import com.shotball.project.utils.ViewAnimation;
@@ -54,6 +62,7 @@ import com.shotball.project.utils.ViewAnimation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class ProductActivity extends AppCompatActivity {
 
@@ -76,11 +85,13 @@ public class ProductActivity extends AppCompatActivity {
 
     private DatabaseReference mDatabase;
     private DatabaseReference refProducts;
+    private DatabaseReference exchReference;
     private ValueEventListener dataListener;
 
     private Product mProduct;
     private User mSeller;
     private String roomId;
+    private String exchangeId;
     final Map<String, String> myProducts = new HashMap<>();
 
     @Override
@@ -113,6 +124,7 @@ public class ProductActivity extends AppCompatActivity {
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         refProducts = mDatabase.child("products");
+        exchReference = mDatabase.child("exchanges");
 
         getProduct();
 
@@ -120,9 +132,7 @@ public class ProductActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.pager);
         adapterImageSlider = new AdapterImageSlider(this, new ArrayList<String>(), PRODUCT_KEY);
 
-        final NestedScrollView mainScrollView = findViewById(R.id.scroll_view);
         ImageView transparentImageView = findViewById(R.id.transparent_image);
-
         transparentImageView.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
@@ -132,14 +142,11 @@ public class ProductActivity extends AppCompatActivity {
                     case MotionEvent.ACTION_DOWN:
 
                     case MotionEvent.ACTION_MOVE:
-                        // Disallow ScrollView to intercept touch events.
-                        mainScrollView.requestDisallowInterceptTouchEvent(true);
-                        // Disable touch on transparent view
+                        mainContainer.requestDisallowInterceptTouchEvent(true);
                         return false;
 
                     case MotionEvent.ACTION_UP:
-                        // Allow ScrollView to intercept touch events.
-                        mainScrollView.requestDisallowInterceptTouchEvent(false);
+                        mainContainer.requestDisallowInterceptTouchEvent(false);
                         return true;
 
                     default:
@@ -229,7 +236,7 @@ public class ProductActivity extends AppCompatActivity {
                 }
             });
 
-            getMyProducts(mProduct.getExchangeCategory());
+            getMyProducts(mProduct.getExchange_category());
 
             getSeller();
             initMapFragment();
@@ -266,27 +273,11 @@ public class ProductActivity extends AppCompatActivity {
                         mDatabase.child("rooms/" + room_id).child("users").setValue(selectedUsers).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
-                                Intent intent = new Intent(ProductActivity.this, ChatActivity.class);
-                                intent.putExtra("toUid", mSeller.getUid());
-                                intent.putExtra("roomID", room_id);
-                                intent.putExtra("roomTitle", mSeller.getUsername());
-                                intent.putExtra("roomImage", mSeller.getImage());
-                                intent.putExtra("productKey", mProduct.getKey());
-                                intent.putExtra("productTitle", mProduct.getTitle());
-                                startActivity(intent);
-                                finish();
+                                openChat();
                             }
                         });
                     } else {
-                        Intent intent = new Intent(ProductActivity.this, ChatActivity.class);
-                        intent.putExtra("toUid", mSeller.getUid());
-                        intent.putExtra("roomID", roomId);
-                        intent.putExtra("roomTitle", mSeller.getUsername());
-                        intent.putExtra("roomImage", mSeller.getImage());
-                        intent.putExtra("productKey", mProduct.getKey());
-                        intent.putExtra("productTitle", mProduct.getTitle());
-                        startActivity(intent);
-                        finish();
+                        openChat();
                     }
                 }
             };
@@ -295,27 +286,55 @@ public class ProductActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     final ArrayList<String> productsList = new ArrayList<>(myProducts.values());
-                    new MaterialAlertDialogBuilder(ProductActivity.this)
-                            .setTitle(getString(R.string.dialog_exhange_to))
-                            .setNeutralButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.cancel();
-                                }
-                            })
-                            .setPositiveButton(getString(R.string.suggest), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
+                    final int[] selectedProduct = {1};
+                    MaterialAlertDialogBuilder exchangeDialog = new MaterialAlertDialogBuilder(ProductActivity.this)
+                            .setTitle(getString(R.string.dialog_exhange_to));
+                    if (!productsList.isEmpty()) {
+                        exchangeDialog
+                                .setNeutralButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.cancel();
+                                    }
+                                }).setPositiveButton(getString(R.string.suggest), new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        Set<Map.Entry<String,String>> entrySet = myProducts.entrySet();
 
-                                }
-                            })
-                            .setSingleChoiceItems(productsList.toArray(new String[productsList.size()]), 0, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
+                                        String desiredObject = productsList.get(selectedProduct[0]);
+                                        for (final Map.Entry<String,String> pair : entrySet) {
+                                            if (desiredObject.equals(pair.getValue())) {
+                                                findExistExchange(pair.getKey(), new IsAvailableCallback() {
+                                                    @Override
+                                                    public void onAvailableCallback(boolean isAvailable) {
+                                                        Log.d(TAG, "tetetetet: " + String.valueOf(isAvailable));
+                                                        if (isAvailable) {
+                                                            Snackbar.make(mainContainer, R.string.dialog_exchange_already_exist, Snackbar.LENGTH_LONG).show();
+                                                        } else {
+                                                            addExchange(pair.getKey());
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    }
+                                }).setSingleChoiceItems(productsList.toArray(new String[productsList.size()]), 1, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                       selectedProduct[0] = which;
+                                    }
+                                });
+                    } else {
+                        exchangeDialog.setMessage(R.string.dialog_no_exchange_ptoducts)
+                                .setNeutralButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.cancel();
+                                    }
+                                });
+                    }
 
-                                }
-                            })
-                            .show();
+                    exchangeDialog.show();
                 }
             };
 
@@ -344,6 +363,60 @@ public class ProductActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.d(TAG, "onCancelled findChatRoom: " + databaseError.getMessage());
+            }
+        });
+    }
+
+    private void findExistExchange(final String myProductKey, final IsAvailableCallback callback) {
+        final boolean[] isAvailable = {false};
+        exchReference.orderByChild("what_exchange").equalTo(myProductKey).addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot item: dataSnapshot.getChildren()) {
+                    ExchangeModel exchange = item.getValue(ExchangeModel.class);
+
+                    if (exchange != null && exchange.exchange_for.equals(mProduct.getKey())) {
+                        Log.d(TAG, "findExistExchange: what_exchange - " + myProductKey + " ; exchange_for - " + exchange.exchange_for);
+                        isAvailable[0] = true;
+                        exchangeId = item.getKey();
+                        break;
+                    }
+                }
+
+                callback.onAvailableCallback(isAvailable[0]);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled findExistExchange: " + databaseError.getMessage());
+                callback.onAvailableCallback(isAvailable[0]);
+            }
+        });
+    }
+
+    private void addExchange(String myProductKey) {
+        Log.d(TAG, "addExchange: " + myProductKey);
+
+        String key = exchReference.push().getKey();
+
+        if (key == null) {
+            Snackbar.make(mainContainer, R.string.error_adding_exchange, Snackbar.LENGTH_LONG).show();
+            return;
+        }
+
+        ExchangeModel exchange = new ExchangeModel(0, mSeller.getUid(), myProductKey, mProduct.getKey());
+
+        exchReference.child(key).setValue(exchange).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Log.d(TAG, "Ecxhange was successfully added in the database!");
+                Snackbar.make(mainContainer, R.string.dialog_exchange_added_success, Snackbar.LENGTH_LONG).show();
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Snackbar.make(mainContainer, R.string.error_adding_exchange, Snackbar.LENGTH_LONG).show();
             }
         });
     }
@@ -424,7 +497,19 @@ public class ProductActivity extends AppCompatActivity {
         refProducts.orderByChild("user").equalTo(getUid()).addListenerForSingleValueEvent(myProductsListener);
     }
 
-    public String getUid() {
+    private void openChat() {
+        Intent intent = new Intent(ProductActivity.this, ChatActivity.class);
+        intent.putExtra("toUid", mSeller.getUid());
+        intent.putExtra("roomID", roomId);
+        intent.putExtra("roomTitle", mSeller.getUsername());
+        intent.putExtra("roomImage", mSeller.getImage());
+        intent.putExtra("productKey", mProduct.getKey());
+        intent.putExtra("productTitle", mProduct.getTitle());
+        startActivity(intent);
+        finish();
+    }
+
+    private String getUid() {
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             return FirebaseAuth.getInstance().getCurrentUser().getUid();
         } else {
@@ -463,4 +548,5 @@ public class ProductActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 }
