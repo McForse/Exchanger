@@ -20,7 +20,6 @@ import com.shotball.project.R;
 import com.shotball.project.models.ExchangeModel;
 import com.shotball.project.models.Product;
 import com.shotball.project.utils.TextUtil;
-import com.shotball.project.utils.ViewAnimation;
 
 public class ExchangeViewHolder extends RecyclerView.ViewHolder {
 
@@ -44,8 +43,6 @@ public class ExchangeViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void bind(final Context ctx, ExchangeModel model) {
-        itemView.setVisibility(View.GONE);
-
         ValueEventListener productListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -90,8 +87,6 @@ public class ExchangeViewHolder extends RecyclerView.ViewHolder {
                         StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("images").child(product.getKey()).child(image);
                         Glide.with(ctx).load(storageReference).centerCrop().into(toProductImage);
                     }
-
-                    ViewAnimation.showIn(itemView);
                 } catch (IllegalArgumentException ignored) {
 
                 }

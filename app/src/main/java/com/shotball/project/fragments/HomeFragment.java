@@ -320,7 +320,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
             if (productsList.isEmpty() && mAdapter.getItemCount() < item_per_display) {
                 mAdapter.setOnLoadMoreListener(null);
                 if (mAdapter.getItemCount() == 0) {
-                    ViewAnimation.showIn(noItemPage);
+                    ViewAnimation.fadeInAnimation(noItemPage);
                 }
             }
             new Handler().postDelayed(new Runnable() {
@@ -329,8 +329,8 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
                     mAdapter.insertData(productsList);
                     productsList.clear();
                     counter = 0;
+                    swipeContainer.setRefreshing(false);
                 }}, 1500);
-            swipeContainer.setRefreshing(false);
         }
     }
 

@@ -142,7 +142,7 @@ public class FavoritesFragment extends Fragment {
                                         Log.d(TAG, "onDismissed");
                                         super.onDismissed(transientBottomBar, event);
                                         if (!onUndoClicked) {
-                                            unLike(product.getKey());
+                                            unLike(product.getKey(), position);
                                         }
                                         onUndoClicked = false;
                                     }
@@ -188,7 +188,7 @@ public class FavoritesFragment extends Fragment {
         cardContentLayout.requestLayout();
     }
 
-    private void unLike(String productKey) {
+    private void unLike(String productKey, final int position) {
         Log.d(TAG, "setLike");
         DatabaseReference reference = mDatabase.child("products").child(productKey);
 
@@ -206,6 +206,8 @@ public class FavoritesFragment extends Fragment {
                     product.likes.remove(getUid());
                     mutableData.setValue(product);
                 }
+
+                mAdapter.notifyItemRemoved(position);
 
                 return Transaction.success(mutableData);
             }
