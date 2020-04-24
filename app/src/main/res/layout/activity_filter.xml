@@ -115,7 +115,7 @@
                     android:textAppearance="@style/TextAppearance.AppCompat.Title"
                     android:textColor="@color/grey_90" />
 
-                <com.google.android.flexbox.FlexboxLayout
+                <!--<com.google.android.flexbox.FlexboxLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_medium"
@@ -165,11 +165,11 @@
 
                     <androidx.appcompat.widget.AppCompatButton
                         android:id="@+id/category_4"
-                        android:layout_width="120dp"
+                        android:layout_width="90dp"
                         android:layout_height="wrap_content"
                         android:background="@drawable/btn_rounded_grey_outline"
                         android:onClick="btToggleClick"
-                        android:text="@string/category_tools"
+                        android:text="@string/category_household"
                         android:textAllCaps="false"
                         android:textColor="@color/grey_40" />
 
@@ -179,7 +179,7 @@
                         android:layout_height="wrap_content"
                         android:background="@drawable/btn_rounded_grey_outline"
                         android:onClick="btToggleClick"
-                        android:text="@string/category_children"
+                        android:text="@string/category_tools"
                         android:textAllCaps="false"
                         android:textColor="@color/grey_40" />
 
@@ -189,7 +189,7 @@
                         android:layout_height="wrap_content"
                         android:background="@drawable/btn_rounded_grey_outline"
                         android:onClick="btToggleClick"
-                        android:text="@string/category_pet"
+                        android:text="@string/category_children"
                         android:textAllCaps="false"
                         android:textColor="@color/grey_40" />
 
@@ -199,7 +199,7 @@
                         android:layout_height="wrap_content"
                         android:background="@drawable/btn_rounded_grey_outline"
                         android:onClick="btToggleClick"
-                        android:text="@string/category_food"
+                        android:text="@string/category_pet"
                         android:textAllCaps="false"
                         android:textColor="@color/grey_40" />
 
@@ -209,11 +209,144 @@
                         android:layout_height="wrap_content"
                         android:background="@drawable/btn_rounded_grey_outline"
                         android:onClick="btToggleClick"
+                        android:text="@string/category_food"
+                        android:textAllCaps="false"
+                        android:textColor="@color/grey_40" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/category_9"
+                        android:layout_width="120dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/btn_rounded_grey_outline"
+                        android:onClick="btToggleClick"
+                        android:text="@string/category_sport"
+                        android:textAllCaps="false"
+                        android:textColor="@color/grey_40" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/category_10"
+                        android:layout_width="120dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/btn_rounded_grey_outline"
+                        android:onClick="btToggleClick"
+                        android:text="@string/category_cosmetics"
+                        android:textAllCaps="false"
+                        android:textColor="@color/grey_40" />
+
+                    <androidx.appcompat.widget.AppCompatButton
+                        android:id="@+id/category_11"
+                        android:layout_width="120dp"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/btn_rounded_grey_outline"
+                        android:onClick="btToggleClick"
                         android:text="@string/category_others"
                         android:textAllCaps="false"
                         android:textColor="@color/grey_40" />
 
-                </com.google.android.flexbox.FlexboxLayout>
+                </com.google.android.flexbox.FlexboxLayout>-->
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/categories_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:id="@+id/category_0"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="onCategoryClick"
+                        android:text="@string/category_all" />
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:id="@+id/category_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="onCategoryClick"
+                        android:text="@string/category_clothes" />
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:id="@+id/category_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="onCategoryClick"
+                        android:text="@string/category_electronics" />
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:id="@+id/category_3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="onCategoryClick"
+                        android:text="@string/category_furniture" />
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:id="@+id/category_4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="onCategoryClick"
+                        android:text="@string/category_household" />
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:id="@+id/category_5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="onCategoryClick"
+                        android:text="@string/category_tools" />
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:id="@+id/category_6"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="onCategoryClick"
+                        android:text="@string/category_children" />
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:id="@+id/category_7"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="onCategoryClick"
+                        android:text="@string/category_pet" />
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:id="@+id/category_8"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="onCategoryClick"
+                        android:text="@string/category_food" />
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:id="@+id/category_9"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="onCategoryClick"
+                        android:text="@string/category_sport" />
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:id="@+id/category_10"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="onCategoryClick"
+                        android:text="@string/category_cosmetics" />
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.MaterialComponents.Chip.Filter"
+                        android:id="@+id/category_11"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="onCategoryClick"
+                        android:text="@string/category_others" />
+
+                </com.google.android.material.chip.ChipGroup>
 
             </LinearLayout>
 

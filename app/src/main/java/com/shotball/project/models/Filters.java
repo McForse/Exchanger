@@ -18,6 +18,7 @@ public class Filters {
         Filters filter = new Filters();
         filter.setDistance(500);
         filter.categories = new HashMap<>();
+        filter.categories.put(Categories.All.getValue(), true);
 
         return filter;
     }
@@ -34,8 +35,8 @@ public class Filters {
         this.distance = distance;
     }
 
-    public boolean hasCategory() {
-        return !categories.isEmpty();
+    public boolean hasCategory(int id) {
+        return (id < categories.size()) ? categories.get(id) : false;
     }
 
     public Map<Integer, Boolean> getCategories() {

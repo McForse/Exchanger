@@ -307,7 +307,6 @@ public class ProductActivity extends AppCompatActivity {
                                                 findExistExchange(pair.getKey(), new IsAvailableCallback() {
                                                     @Override
                                                     public void onAvailableCallback(boolean isAvailable) {
-                                                        Log.d(TAG, "tetetetet: " + String.valueOf(isAvailable));
                                                         if (isAvailable) {
                                                             Snackbar.make(mainContainer, R.string.dialog_exchange_already_exist, Snackbar.LENGTH_LONG).show();
                                                         } else {
@@ -318,7 +317,7 @@ public class ProductActivity extends AppCompatActivity {
                                             }
                                         }
                                     }
-                                }).setSingleChoiceItems(productsList.toArray(new String[productsList.size()]), 1, new DialogInterface.OnClickListener() {
+                                }).setSingleChoiceItems(productsList.toArray(new String[productsList.size()]), 0, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                        selectedProduct[0] = which;

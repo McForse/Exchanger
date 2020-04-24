@@ -3,9 +3,9 @@ package com.shotball.project.activities;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.paging.PagedList;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -15,14 +15,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.firebase.ui.database.paging.DatabasePagingOptions;
-import com.firebase.ui.database.paging.FirebaseRecyclerPagingAdapter;
-import com.firebase.ui.database.paging.LoadingState;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.shotball.project.R;
 import com.shotball.project.models.ExchangeModel;
+import com.shotball.project.utils.ViewAnimation;
 import com.shotball.project.viewHolders.ExchangeViewHolder;
 
 public class ExchangeActivity extends BaseActivity {
@@ -33,7 +33,9 @@ public class ExchangeActivity extends BaseActivity {
     private RecyclerView recyclerView;
 
     private DatabaseReference mDatabase;
-    private FirebaseRecyclerPagingAdapter<ExchangeModel, ExchangeViewHolder> mAdapter;
+    private FirebaseRecyclerAdapter<ExchangeModel, ExchangeViewHolder> mAdapter;
+
+    private boolean loaded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +55,7 @@ public class ExchangeActivity extends BaseActivity {
 
     private void initComponent() {
         mainContainer = findViewById(R.id.exchange_container);
+        //ViewAnimation.showOut(mainContainer);
         recyclerView = findViewById(R.id.exchange_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
@@ -60,18 +63,12 @@ public class ExchangeActivity extends BaseActivity {
         mDatabase = FirebaseDatabase.getInstance().getReference();
         Query baseQuery = mDatabase.child("exchanges").orderByChild("whom").equalTo(getUid());
 
-        PagedList.Config config = new PagedList.Config.Builder()
-                .setEnablePlaceholders(false)
-                .setPrefetchDistance(10)
-                .setPageSize(20)
-                .build();
-
-        DatabasePagingOptions<ExchangeModel> options = new DatabasePagingOptions.Builder<ExchangeModel>()
+        FirebaseRecyclerOptions<ExchangeModel> options = new FirebaseRecyclerOptions.Builder<ExchangeModel>()
                 .setLifecycleOwner(this)
-                .setQuery(baseQuery, config, ExchangeModel.class)
+                .setQuery(baseQuery, ExchangeModel.class)
                 .build();
 
-        mAdapter = new FirebaseRecyclerPagingAdapter<ExchangeModel, ExchangeViewHolder>(options) {
+        mAdapter = new FirebaseRecyclerAdapter<ExchangeModel, ExchangeViewHolder>(options) {
             @Override
             public ExchangeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 View view = LayoutInflater.from(parent.getContext())
@@ -83,25 +80,7 @@ public class ExchangeActivity extends BaseActivity {
             @Override
             protected void onBindViewHolder(@NonNull ExchangeViewHolder holder, int position, @NonNull ExchangeModel model) {
                 Log.d(TAG, model.what_exchange);
-            }
-
-            @Override
-            protected void onLoadingStateChanged(@NonNull LoadingState state) {
-                switch (state) {
-                    case LOADING_INITIAL:
-                        // The initial load has begun
-                        // ...
-                    case LOADING_MORE:
-                        // The adapter has started to load an additional page
-                        // ...
-                    case LOADED:
-                        // The previous load (either initial or additional) completed
-                        // ...
-                    case ERROR:
-                        // The previous load (either initial or additional) failed. Call
-                        // the retry() method in order to retry the load operation.
-                        // ...
-                }
+                holder.bind(ExchangeActivity.this, model);
             }
         };
 

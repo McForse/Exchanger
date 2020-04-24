@@ -57,11 +57,15 @@
     <string name="category_clothes">Clothes</string>
     <string name="category_electronics">Electronics</string>
     <string name="category_furniture">Furniture</string>
+    <string name="category_household">Household products</string>
     <string name="category_tools">Tools</string>
     <string name="category_children">Сhilden\'s goods</string>
     <string name="category_pet">Pet supplies</string>
     <string name="category_food">Food</string>
+    <string name="category_sport">Sporting goods</string>
+    <string name="category_cosmetics">Сosmetics</string>
     <string name="category_others">Others</string>
+
     <string name="dialog_exhange_to">Exchange to</string>
     <string name="cancel">Cancel</string>
     <string name="suggest">suggest</string>

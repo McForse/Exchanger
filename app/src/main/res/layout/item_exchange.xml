@@ -3,115 +3,115 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/product"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="@dimen/spacing_medium"
-    app:cardElevation="@dimen/cardview_default_elevation"
-    tools:ignore="PrivateResource"
-    android:clickable="true">
+    android:layout_margin="@dimen/mtrl_card_spacing"
+    android:clickable="true"
+    android:focusable="true"
+    android:minHeight="@dimen/cat_card_rich_media_demo_min_height">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <RelativeLayout
-            android:layout_width="wrap_content"
+        <ImageView
+            android:id="@+id/product_image"
+            android:layout_width="match_parent"
+            android:layout_height="194dp"
+            android:background="@android:color/transparent"
+            app:backgroundTint="@color/material_on_surface_emphasis_medium"
+            app:backgroundTintMode="add" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:clipChildren="false">
+            android:padding="@dimen/cat_card_double_spacing"
+            android:paddingBottom="@dimen/cat_card_single_spacing"
+            android:orientation="vertical">
+
+            <TextView
+                style="?attr/textAppearanceHeadline5"
+                android:id="@+id/product_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/cat_card_single_spacing"
+                android:text="Title" />
+
+            <TextView
+                style="?attr/textAppearanceSubtitle1"
+                android:id="@+id/product_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/cat_card_double_spacing"
+                android:singleLine="true"
+                android:text="Description" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="@dimen/cat_card_triple_spacing"
+                android:layout_marginBottom="@dimen/cat_card_single_spacing"
+                android:background="?attr/dividerHorizontal" />
+
+            <TextView
+                style="?attr/textAppearanceHeadline6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/cat_card_double_spacing"
+                android:layout_marginBottom="@dimen/cat_card_single_spacing"
+                android:text="Exchange to" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/cat_card_double_spacing"
+            android:paddingBottom="@dimen/cat_card_single_spacing">
 
             <ImageView
-                android:id="@+id/product_image"
-                android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:scaleType="centerCrop"
-                android:contentDescription="@string/content_description_media"
-                android:transitionName="product_image" />
-
-            <ImageButton
-                android:id="@+id/product_like"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_alignParentEnd="true"
-                android:layout_marginEnd="@dimen/spacing_medium"
-                android:layout_marginTop="@dimen/spacing_medium"
-                android:padding="1dp"
-                android:background="@drawable/state_pressed_ripple"
-                android:src="@drawable/ic_favorite_border"
-                android:clickable="true" />
-
-        </RelativeLayout>
-
-            <!--
-            <com.google.android.material.button.MaterialButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
-                android:layout_alignParentEnd="true"
-                android:clickable="true"
-                app:icon="@drawable/ic_favorite_border" />
-                <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_margin="@dimen/spacing_large"
-                android:clickable="true"
-                android:tint="@android:color/white"
-                app:backgroundTint="@color/amber_500"
-                app:fabSize="mini"
-                app:rippleColor="@android:color/white"
-                app:srcCompat="@drawable/ic_favorite"
-                tools:ignore="RelativeOverlap" />-->
+                android:id="@+id/to_product_image"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginEnd="@dimen/cat_card_single_spacing"
+                android:layout_marginRight="@dimen/cat_card_single_spacing" />
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="@dimen/activity_vertical_margin">
+                android:layout_weight="1.0"
+                android:layout_marginStart="@dimen/cat_card_single_spacing"
+                android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/product_title"
+                    style="?attr/textAppearanceHeadline6"
+                    android:id="@+id/to_product_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Title"
-                    android:textAppearance="?attr/textAppearanceHeadline6"
-                    android:transitionName="product_title" />
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="@dimen/spacing_middle"
-                        android:layout_height="@dimen/spacing_middle"
-                        android:layout_marginEnd="@dimen/spacing_medium"
-                        app:srcCompat="@drawable/ic_place"
-                        android:textAppearance="?attr/textAppearanceBody2"
-                        android:textColor="?android:attr/textColorSecondary" />
-
-                    <TextView
-                        android:id="@+id/product_distance"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="500"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
-
-                    <TextView
-                        android:id="@+id/product_distance_unit"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingStart="@dimen/spacing_small"
-                        android:text="meters"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
-
-                </LinearLayout>
+                    android:text="To product title" />
 
             </LinearLayout>
 
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/cat_card_single_spacing"
+            android:paddingLeft="@dimen/cat_card_single_spacing"
+            android:paddingRight="@dimen/cat_card_single_spacing"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                style="?attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/cat_card_single_spacing"
+                android:layout_marginRight="@dimen/cat_card_single_spacing"
+                android:text="Accept"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 

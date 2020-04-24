@@ -4,17 +4,20 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.shotball.project.R;
+import com.shotball.project.models.Categories;
 import com.shotball.project.models.Filters;
 
 import java.io.Serializable;
@@ -23,6 +26,8 @@ import java.util.Map;
 
 public class FilterActivity extends AppCompatActivity {
 
+    private static final String TAG = "FilterActivity";
+
     public interface FilterListener extends Serializable {
         void onFilter(Filters filters);
         Filters getCurrentFilters();
@@ -30,11 +35,10 @@ public class FilterActivity extends AppCompatActivity {
 
     private SeekBar seekBar;
     private TextView distanceMaxTextView;
+    private ChipGroup categoriesGroup;
     private ExtendedFloatingActionButton applyButton;
 
     private FilterListener mFilterListener;
-
-    private Map<Integer, Boolean> selectedCategories = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +46,6 @@ public class FilterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_filter);
         initToolbar();
         initComponent();
-        findViewById(R.id.category_0).setSelected(true);
-        ((Button)findViewById(R.id.category_0)).setTextColor(Color.WHITE);
     }
 
     private void initToolbar() {
@@ -57,6 +59,7 @@ public class FilterActivity extends AppCompatActivity {
     private void initComponent() {
         seekBar = findViewById(R.id.filter_seek_bar);
         distanceMaxTextView = findViewById(R.id.filter_distance_max);
+        categoriesGroup = findViewById(R.id.categories_group);
         applyButton = findViewById(R.id.filter_apply);
         applyButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,44 +89,19 @@ public class FilterActivity extends AppCompatActivity {
         });
     }
 
-    public void btToggleClick(View view) {
-        if (view instanceof Button) {
-            Button b = (Button) view;
-
-            switch (view.getId()) {
-                case R.id.category_0:
-                    break;
-                case R.id.category_1:
-                    break;
-                case R.id.category_2:
-                    break;
-                case R.id.category_3:
-                    break;
-                case R.id.category_4:
-                    break;
-                case R.id.category_5:
-                    break;
-                case R.id.category_6:
-                    break;
-                case R.id.category_7:
-                    break;
-
-            }
-
-
-            if (b.isSelected()) {
-                b.setTextColor(getResources().getColor(R.color.grey_40));
-            } else {
-                b.setTextColor(Color.WHITE);
-            }
-            b.setSelected(!b.isSelected());
-        }
-    }
-
     private void initFilters(Filters filter) {
         int progress = filter.getDistance() / 100;
         seekBar.setProgress(progress);
         setSeekBarProgress(progress);
+
+        for (int i = 0; i < categoriesGroup.getChildCount(); i++) {
+            Chip chip = (Chip) categoriesGroup.getChildAt(i);
+
+            if (filter.hasCategory(i)) {
+                chip.setChecked(true);
+                if (i == Categories.All.getValue()) break;
+            }
+        }
     }
 
     private void setSeekBarProgress(int progress) {
@@ -132,6 +110,20 @@ public class FilterActivity extends AppCompatActivity {
             distanceMaxTextView.setText(String.valueOf(distance) + " meters");
         } else {
             distanceMaxTextView.setText(String.valueOf((float)distance / 1000) + " km");
+        }
+    }
+
+    public void onCategoryClick(View view) {
+        Chip chip = (Chip) view;
+
+        if (view.getId() == R.id.category_0) {
+            if (chip.isChecked()) {
+                for (int i = 1; i < categoriesGroup.getChildCount(); i++) {
+                    ((Chip) categoriesGroup.getChildAt(i)).setChecked(false);
+                }
+            }
+        } else {
+            ((Chip) findViewById(R.id.category_0)).setChecked(false);
         }
     }
 
@@ -155,17 +147,29 @@ public class FilterActivity extends AppCompatActivity {
         return seekBar.getProgress() * 100;
     }
 
-    private Map<Integer, Boolean> getSelectedCategory() {
-        return null;
+    private Map<Integer, Boolean> getSelectedCategories() {
+        return getCheckedCategories();
     }
 
     public Filters getFilters() {
         Filters filters = new Filters();
 
         filters.setDistance(getSelectedDistance());
-        filters.setCategories(getSelectedCategory());
+        filters.setCategories(getSelectedCategories());
 
         return filters;
+    }
+
+    @NonNull
+    public Map<Integer, Boolean> getCheckedCategories() {
+        Map<Integer, Boolean> checkedCategories = new HashMap<>();
+
+        for (int i = 0; i < categoriesGroup.getChildCount(); i++) {
+            Chip chip = (Chip) categoriesGroup.getChildAt(i);
+            checkedCategories.put(i, chip.isChecked());
+        }
+
+        return checkedCategories;
     }
 
     @Override
