@@ -5,17 +5,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.shotball.project.R;
 import com.shotball.project.models.Categories;
 import com.shotball.project.models.Filters;
@@ -33,6 +33,7 @@ public class FilterActivity extends AppCompatActivity {
         Filters getCurrentFilters();
     }
 
+    private LinearLayout mainContainer;
     private SeekBar seekBar;
     private TextView distanceMaxTextView;
     private ChipGroup categoriesGroup;
@@ -57,6 +58,7 @@ public class FilterActivity extends AppCompatActivity {
     }
 
     private void initComponent() {
+        mainContainer = findViewById(R.id.filter_container);
         seekBar = findViewById(R.id.filter_seek_bar);
         distanceMaxTextView = findViewById(R.id.filter_distance_max);
         categoriesGroup = findViewById(R.id.categories_group);
@@ -137,10 +139,34 @@ public class FilterActivity extends AppCompatActivity {
 
     private void onApplyClicked() {
         if (mFilterListener != null) {
-            mFilterListener.onFilter(getFilters());
-        }
+            boolean valid = false;
+            Filters filters = getFilters();
+            for (Map.Entry<Integer, Boolean> category : filters.getCategories().entrySet()) {
+                if (category.getValue()) {
+                    valid = true;
+                    break;
+                }
+            }
 
-        finish();
+            if (valid) {
+                mFilterListener.onFilter(filters);
+                finish();
+            } else {
+                applyButton.setVisibility(View.GONE);
+                Snackbar.make(mainContainer, R.string.dialog_no_category_selected, Snackbar.LENGTH_SHORT).addCallback(new Snackbar.Callback() {
+                    @Override
+                    public void onDismissed(Snackbar snackbar, int event) {
+                        applyButton.show();
+                    }
+
+                    @Override
+                    public void onShown(Snackbar snackbar) { }
+                }).setAction(R.string.ok, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) { }
+                }).show();
+            }
+        }
     }
 
     private int getSelectedDistance() {

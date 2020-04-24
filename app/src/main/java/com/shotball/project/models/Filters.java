@@ -36,6 +36,7 @@ public class Filters {
     }
 
     public boolean hasCategory(int id) {
+        if (categories.get(Categories.All.getValue())) return true;
         return (id < categories.size()) ? categories.get(id) : false;
     }
 

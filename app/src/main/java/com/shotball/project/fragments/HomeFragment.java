@@ -92,6 +92,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     private static boolean filtersUpdated;
 
     private static boolean loading = false;
+    private static boolean done = false;
     private static final int item_per_display = 8;
     private final List<Product> productsList = new ArrayList<>();
     private HashSet<String> productsKeys;
@@ -238,9 +239,9 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
                 if (counter < item_per_display) {
                     final Product product = dataSnapshot.getValue(Product.class);
 
-                    if (product != null && product.available) {
+                    if (product != null) {
                         String key = dataSnapshot.getKey();
-                        if (!productsKeys.contains(key)) {
+                        if (!productsKeys.contains(key) && product.available && mFilters.hasCategory(product.getCategory())) {
                             Log.d(TAG_GEO, "onDataEntered: " + dataSnapshot.toString());
                             productsKeys.add(key);
                             product.setKey(key);
@@ -318,14 +319,16 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
             Log.d(TAG, "stopGeoQueryListener: " + productsList.size());
             geoQuery.removeAllListeners();
             swipeContainer.setRefreshing(false);
+            if (productsList.isEmpty() && mAdapter.getItemCount() < item_per_display) {
+                mAdapter.setOnLoadMoreListener(null);
+            }
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     mAdapter.insertData(productsList);
                     productsList.clear();
                     counter = 0;
-                }
-            }, 1500);
+                }}, 1500);
         }
     }
 

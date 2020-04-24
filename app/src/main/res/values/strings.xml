@@ -75,4 +75,5 @@
     <string name="dialog_no_exchange_ptoducts">You do not have suitable products for the exchange</string>
     <string name="ok">OK</string>
     <string name="exchange_title">Proposed Exchanges</string>
+    <string name="dialog_no_category_selected">No category selected</string>
 </resources>

@@ -5,7 +5,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
     android:fitsSystemWindows="true"
     tools:context=".activities.FilterActivity">
 
@@ -41,6 +40,7 @@
             android:scrollingCache="true">
 
             <LinearLayout
+                android:id="@+id/filter_parameters"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -50,12 +50,11 @@
                 android:paddingBottom="@dimen/spacing_mlarge">
 
                 <TextView
+                    style="?attr/textAppearanceHeadline6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_large"
-                    android:text="Distance Range"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                    android:textColor="@color/grey_90" />
+                    android:text="Distance Range" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -108,142 +107,11 @@
                 </LinearLayout>
 
                 <TextView
+                    style="?attr/textAppearanceHeadline6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_large"
-                    android:text="Categories"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                    android:textColor="@color/grey_90" />
-
-                <!--<com.google.android.flexbox.FlexboxLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/spacing_medium"
-                    app:flexWrap="wrap"
-                    app:justifyContent="flex_start">
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/category_0"
-                        android:layout_width="90dp"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/btn_rounded_grey_outline"
-                        android:onClick="btToggleClick"
-
-                        android:text="@string/category_all"
-                        android:textAllCaps="false"
-                        android:textColor="@color/grey_40" />
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/category_1"
-                        android:layout_width="90dp"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/btn_rounded_grey_outline"
-                        android:onClick="btToggleClick"
-                        android:text="@string/category_clothes"
-                        android:textAllCaps="false"
-                        android:textColor="@color/grey_40" />
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/category_2"
-                        android:layout_width="100dp"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/btn_rounded_grey_outline"
-                        android:onClick="btToggleClick"
-                        android:text="@string/category_electronics"
-                        android:textAllCaps="false"
-                        android:textColor="@color/grey_40" />
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/category_3"
-                        android:layout_width="90dp"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/btn_rounded_grey_outline"
-                        android:onClick="btToggleClick"
-                        android:text="@string/category_furniture"
-                        android:textAllCaps="false"
-                        android:textColor="@color/grey_40" />
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/category_4"
-                        android:layout_width="90dp"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/btn_rounded_grey_outline"
-                        android:onClick="btToggleClick"
-                        android:text="@string/category_household"
-                        android:textAllCaps="false"
-                        android:textColor="@color/grey_40" />
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/category_5"
-                        android:layout_width="120dp"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/btn_rounded_grey_outline"
-                        android:onClick="btToggleClick"
-                        android:text="@string/category_tools"
-                        android:textAllCaps="false"
-                        android:textColor="@color/grey_40" />
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/category_6"
-                        android:layout_width="120dp"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/btn_rounded_grey_outline"
-                        android:onClick="btToggleClick"
-                        android:text="@string/category_children"
-                        android:textAllCaps="false"
-                        android:textColor="@color/grey_40" />
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/category_7"
-                        android:layout_width="120dp"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/btn_rounded_grey_outline"
-                        android:onClick="btToggleClick"
-                        android:text="@string/category_pet"
-                        android:textAllCaps="false"
-                        android:textColor="@color/grey_40" />
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/category_8"
-                        android:layout_width="120dp"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/btn_rounded_grey_outline"
-                        android:onClick="btToggleClick"
-                        android:text="@string/category_food"
-                        android:textAllCaps="false"
-                        android:textColor="@color/grey_40" />
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/category_9"
-                        android:layout_width="120dp"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/btn_rounded_grey_outline"
-                        android:onClick="btToggleClick"
-                        android:text="@string/category_sport"
-                        android:textAllCaps="false"
-                        android:textColor="@color/grey_40" />
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/category_10"
-                        android:layout_width="120dp"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/btn_rounded_grey_outline"
-                        android:onClick="btToggleClick"
-                        android:text="@string/category_cosmetics"
-                        android:textAllCaps="false"
-                        android:textColor="@color/grey_40" />
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/category_11"
-                        android:layout_width="120dp"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/btn_rounded_grey_outline"
-                        android:onClick="btToggleClick"
-                        android:text="@string/category_others"
-                        android:textAllCaps="false"
-                        android:textColor="@color/grey_40" />
-
-                </com.google.android.flexbox.FlexboxLayout>-->
+                    android:text="Categories" />
 
                 <com.google.android.material.chip.ChipGroup
                     android:id="@+id/categories_group"
