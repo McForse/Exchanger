@@ -19,6 +19,9 @@ public class Filters {
         filter.setDistance(500);
         filter.categories = new HashMap<>();
         filter.categories.put(Categories.All.getValue(), true);
+        for (int i = 1; i <= Categories.getCategoriesCount(); i++) {
+            filter.categories.put(i, false);
+        }
 
         return filter;
     }
@@ -56,6 +59,6 @@ public class Filters {
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        return distance == ((Filters) obj).getDistance() && ((Filters) obj).getCategories() == null || categories.equals(((Filters) obj).getCategories());
+        return distance == ((Filters) obj).getDistance() && categories.equals(((Filters) obj).getCategories());
     }
 }

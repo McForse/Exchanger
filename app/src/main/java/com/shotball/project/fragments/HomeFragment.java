@@ -20,7 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
@@ -29,6 +28,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -72,7 +72,8 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     private View rootView;
     private Activity mActivity;
     private RelativeLayout mainContainer;
-    private LinearLayout geolocationContainer;
+    private NestedScrollView geolocationContainer;
+    private NestedScrollView noItemPage;
     private ProgressBar progressBar;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeContainer;
@@ -92,7 +93,6 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     private static boolean filtersUpdated;
 
     private static boolean loading = false;
-    private static boolean done = false;
     private static final int item_per_display = 8;
     private final List<Product> productsList = new ArrayList<>();
     private HashSet<String> productsKeys;
@@ -131,8 +131,10 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         mActivity = getActivity();
         mainContainer = rootView.findViewById(R.id.home_main_container);
         geolocationContainer = rootView.findViewById(R.id.lyt_no_permission_location);
+        noItemPage = rootView.findViewById(R.id.lyt_no_items);
         mainContainer.setVisibility(View.GONE);
         geolocationContainer.setVisibility(View.GONE);
+        noItemPage.setVisibility(View.GONE);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         progressBar = rootView.findViewById(R.id.home_progress_bar);
@@ -189,7 +191,6 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
             myLocation.setLatitude(MY_LOCATION[0]);
             myLocation.setLongitude(MY_LOCATION[1]);
             setMyLocation(myLocation);
-            //ViewAnimation.fadeIn(mainContainer);
             mainContainer.setVisibility(View.VISIBLE);
             setReferences();
             return true;
@@ -247,14 +248,12 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
                             product.setKey(key);
 
                             Location locationA = new Location("point A");
-
                             locationA.setLatitude(myLocation.getLatitude());
                             locationA.setLongitude(myLocation.getLongitude());
                             Location locationB = new Location("point B");
                             locationB.setLatitude(location.latitude);
                             locationB.setLongitude(location.longitude);
                             int distance = (int) locationA.distanceTo(locationB);
-
                             product.setDistance(distance);
                             productsList.add(product);
                             counter++;
@@ -318,9 +317,11 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
             recyclerView.setVisibility(View.VISIBLE);
             Log.d(TAG, "stopGeoQueryListener: " + productsList.size());
             geoQuery.removeAllListeners();
-            swipeContainer.setRefreshing(false);
             if (productsList.isEmpty() && mAdapter.getItemCount() < item_per_display) {
                 mAdapter.setOnLoadMoreListener(null);
+                if (mAdapter.getItemCount() == 0) {
+                    ViewAnimation.showIn(noItemPage);
+                }
             }
             new Handler().postDelayed(new Runnable() {
                 @Override
@@ -329,6 +330,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
                     productsList.clear();
                     counter = 0;
                 }}, 1500);
+            swipeContainer.setRefreshing(false);
         }
     }
 
@@ -336,6 +338,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         Log.d(TAG, "resetRecycleView");
         recyclerView.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);
+        noItemPage.setVisibility(View.GONE);
         counter = 0;
         productsKeys.clear();
         filtersUpdated = false;
@@ -452,6 +455,12 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
 
         if (filtersUpdated) {
             resetRecycleView();
+            mAdapter.setOnLoadMoreListener(new ProductAdapter.OnLoadMoreListener() {
+                @Override
+                public void onLoadMore(int current_page) {
+                    loadNextData();
+                }
+            });
             startSearch();
         }
     }

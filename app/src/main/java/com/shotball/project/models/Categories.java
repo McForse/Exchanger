@@ -24,4 +24,8 @@ public enum Categories {
         return value;
     }
 
+    public static int getCategoriesCount() {
+        return Others.value;
+    }
+
 }

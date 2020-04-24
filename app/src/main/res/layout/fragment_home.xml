@@ -61,6 +61,9 @@
         </RelativeLayout>
 
         <include layout="@layout/layout_allow_geolocation"
+        android:visibility="gone" />
+
+        <include layout="@layout/layout_no_items"
             android:visibility="gone" />
 
     </RelativeLayout>

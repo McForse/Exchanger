@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/lyt_no_permission_location"
+    android:id="@+id/lyt_no_items"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white">
@@ -16,13 +16,13 @@
         <ImageView
             android:layout_width="250dp"
             android:layout_height="250dp"
-            android:src="@drawable/img_no_geolocation" />
+            android:src="@drawable/img_no_items2" />
 
         <TextView
             style="?attr/textAppearanceHeadline6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Turn On Your Location" />
+            android:text="Nothing found" />
 
         <TextView
             style="?attr/textAppearanceBody1"
@@ -30,16 +30,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_large"
             android:gravity="center"
-            android:text="Allow access to your location to start exchanging products!"
+            android:text="No products found"
             android:textColor="@color/grey_40" />
-
-        <Button
-            android:id="@+id/button_allow_location"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/spacing_xlarge"
-            android:layout_marginBottom="@dimen/spacing_large"
-            android:text="Allow" />
 
     </LinearLayout>
 
