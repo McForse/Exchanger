@@ -2,26 +2,25 @@ package com.shotball.project.fragments;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Canvas;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.firebase.ui.database.SnapshotParser;
-import com.google.android.material.behavior.SwipeDismissBehavior;
-import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -31,24 +30,33 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.Transaction;
+import com.google.firebase.database.ValueEventListener;
 import com.shotball.project.R;
 import com.shotball.project.activities.ProductActivity;
+import com.shotball.project.helpers.RecyclerItemTouchHelper;
+import com.shotball.project.interfaces.IsAvailableCallback;
 import com.shotball.project.models.Product;
 import com.shotball.project.utils.ViewAnimation;
-import com.shotball.project.viewHolders.ProductViewHolder;
+import com.shotball.project.viewHolders.FavoriteProductViewHolder;
 
-public class FavoritesFragment extends Fragment {
+import java.util.ArrayList;
+import java.util.List;
+
+public class FavoritesFragment extends Fragment implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
 
     private static final String TAG = "FavoritesFragment";
 
     private View rootView;
-    private Snackbar snackbar;
+    private CoordinatorLayout mainContainer;
+    private NestedScrollView noItemPage;
+    private SwipeRefreshLayout swipeContainer;
+    private RecyclerView recyclerView;
 
     private DatabaseReference mDatabase;
-
-    private FirebaseRecyclerAdapter<Product, ProductViewHolder> mAdapter;
-    private RecyclerView recyclerView;
     private LinearLayoutManager mManager;
+    private FavouriteProductsAdapter mAdapter;
+    private ValueEventListener productsListener;
+    private IsAvailableCallback isAvailableCallback;
     private boolean onUndoClicked;
 
     @Nullable
@@ -57,138 +65,121 @@ public class FavoritesFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_favorites, container, false);
         Log.d(TAG, "onCreateView");
-
         initToolbar();
-
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-
-        recyclerView = rootView.findViewById(R.id.productGrid);
-        recyclerView.setHasFixedSize(true);
-
+        initComponents();
         return rootView;
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        mManager = new LinearLayoutManager(rootView.getContext());
-        recyclerView.setLayoutManager(mManager);
-
-
-        Query productsQuery = mDatabase.child("products").orderByChild("likes/" + getUid()).equalTo(true);
-
-        FirebaseRecyclerOptions options = new FirebaseRecyclerOptions.Builder<Product>()
-                .setQuery(productsQuery, new SnapshotParser<Product>() {
-                    @NonNull
-                    @Override
-                    public Product parseSnapshot(@NonNull DataSnapshot snapshot) {
-                        Product product = snapshot.getValue(Product.class);
-                        product.setKey(snapshot.getKey());
-                        return product;
-                    }
-                })
-                .build();
-
-        mAdapter = new FirebaseRecyclerAdapter<Product, ProductViewHolder>(options) {
-
-            @Override
-            public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-                LayoutInflater inflater = LayoutInflater.from(viewGroup.getContext());
-                View view = inflater.inflate(R.layout.item_favourite_product, viewGroup, false);
-                return new ProductViewHolder(view);
-            }
-
-            @Override
-            protected void onBindViewHolder(@NonNull ProductViewHolder viewHolder, final int position, @NonNull final Product product) {
-                viewHolder.bind(rootView.getContext(), product, null);
-                View view = viewHolder.itemView;
-
-                Button openProduct = view.findViewById(R.id.product_open);
-                openProduct.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(getActivity(), ProductActivity.class);
-                        intent.putExtra(ProductActivity.EXTRA_PRODUCT_KEY, product.getKey());
-                        startActivity(intent);
-                    }
-                });
-
-                final CoordinatorLayout container = rootView.findViewById(R.id.favourites_container);
-                SwipeDismissBehavior<View> swipeDismissBehavior = new SwipeDismissBehavior<>();
-                swipeDismissBehavior.setSwipeDirection(SwipeDismissBehavior.SWIPE_DIRECTION_START_TO_END);
-
-                final MaterialCardView cardContentLayout = view.findViewById(R.id.product_favourite_card);
-                CoordinatorLayout.LayoutParams coordinatorParams =
-                        (CoordinatorLayout.LayoutParams) cardContentLayout.getLayoutParams();
-
-                coordinatorParams.setBehavior(swipeDismissBehavior);
-
-                swipeDismissBehavior.setListener(new SwipeDismissBehavior.OnDismissListener() {
-                    @Override
-                    public void onDismiss(View view) {
-                        ViewAnimation.collapse(cardContentLayout);
-                        //cardContentLayout.setVisibility(View.GONE);
-                        snackbar = Snackbar.make(container, "Product removed from favorites", Snackbar.LENGTH_SHORT)
-                                .setAction("Undo", new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        resetCard(cardContentLayout, product.getKey());
-                                        onUndoClicked = true;
-                                    }
-                                }).addCallback(new Snackbar.Callback() {
-                                    @Override
-                                    public void onDismissed(Snackbar transientBottomBar, int event) {
-                                        Log.d(TAG, "onDismissed");
-                                        super.onDismissed(transientBottomBar, event);
-                                        if (!onUndoClicked) {
-                                            unLike(product.getKey(), position);
-                                        }
-                                        onUndoClicked = false;
-                                    }
-                                });
-                        snackbar.setAnchorView(getActivity().findViewById(R.id.bottom_navigation));
-                        snackbar.show();
-                    }
-
-                    @Override
-                    public void onDragStateChanged(int state) {
-                        Log.d(TAG, String.valueOf(state));
-                        switch (state) {
-                            case SwipeDismissBehavior.STATE_DRAGGING:
-                                break;
-                            case SwipeDismissBehavior.STATE_SETTLING:
-                                cardContentLayout.setDragged(true);
-                                break;
-                            case SwipeDismissBehavior.STATE_IDLE:
-                                cardContentLayout.setDragged(false);
-                                break;
-                            default:
-                        }
-                    }
-                });
-            }
-        };
-
-        recyclerView.setAdapter(mAdapter);
     }
 
     private void initToolbar() {
         Toolbar toolbar = rootView.findViewById(R.id.toolbar);
         toolbar.setTitle("Favorites");
-        //((AppCompatActivity) mActivity).setSupportActionBar(toolbar);
-        //setHasOptionsMenu(true);
     }
 
-    private void resetCard(MaterialCardView cardContentLayout, String key) {
-        ViewAnimation.expand(cardContentLayout);
-        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) cardContentLayout
-                .getLayoutParams();
-        cardContentLayout.setAlpha(1.0f);
-        cardContentLayout.requestLayout();
+    private void initComponents() {
+        mainContainer = rootView.findViewById(R.id.favourites_container);
+        noItemPage = rootView.findViewById(R.id.lyt_no_items);
+        swipeContainer = rootView.findViewById(R.id.swipe_container);
+        mAdapter = new FavouriteProductsAdapter();
+        mManager = new LinearLayoutManager(rootView.getContext());
+        recyclerView = rootView.findViewById(R.id.productGrid);
+        recyclerView.setVisibility(View.GONE);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(mManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+
+            @Override
+            public void onRefresh() {
+                resetRecyclerView();
+            }
+        });
+
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+
+        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.RIGHT, this);
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
+
+        ItemTouchHelper.SimpleCallback itemTouchHelperCallback1 = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) { }
+
+            @Override
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+            }
+        };
+
+        new ItemTouchHelper(itemTouchHelperCallback1).attachToRecyclerView(recyclerView);
+
+        recyclerView.setAdapter(mAdapter);
+
+        isAvailableCallback = new IsAvailableCallback() {
+
+            @Override
+            public void onAvailableCallback(boolean isAvailable) {
+                if (!isAvailable) {
+                    recyclerView.setVisibility(View.GONE);
+                    ViewAnimation.fadeInAnimation(noItemPage);
+                    //noItemPage.setVisibility(View.VISIBLE);
+                    swipeContainer.setRefreshing(false);
+                } else {
+                    noItemPage.setVisibility(View.GONE);
+                    //recyclerView.setVisibility(View.VISIBLE);
+                    ViewAnimation.fadeInAnimation(recyclerView);
+                    swipeContainer.setRefreshing(false);
+                }
+            }
+        };
+
+        loadData(isAvailableCallback);
     }
 
-    private void unLike(String productKey, final int position) {
+    private void loadData(final IsAvailableCallback callback) {
+        final boolean[] isAvailable = {false};
+        productsListener = new ValueEventListener() {
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot item : dataSnapshot.getChildren()) {
+                    Product product = item.getValue(Product.class);
+
+                    if (product != null) {
+                        Log.d(TAG, String.valueOf(dataSnapshot));
+                        isAvailable[0] = true;
+                        String key = item.getKey();
+                        product.setKey(key);
+                        mAdapter.insertItem(product);
+                        swipeContainer.setRefreshing(false);
+                    }
+                }
+
+                callback.onAvailableCallback(isAvailable[0]);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled loadData: " + databaseError.getMessage());
+                callback.onAvailableCallback(isAvailable[0]);
+            }
+        };
+        Query productsQuery = mDatabase.child("products").orderByChild("likes/" + getUid()).equalTo(true);
+        productsQuery.addListenerForSingleValueEvent(productsListener);
+    }
+
+    private void resetRecyclerView() {
+        mAdapter.clear();
+        noItemPage.setVisibility(View.GONE);
+        ViewAnimation.fadeInAnimation(recyclerView);
+        loadData(isAvailableCallback);
+    }
+
+    private void unLike(String productKey) {
         Log.d(TAG, "setLike");
         DatabaseReference reference = mDatabase.child("products").child(productKey);
 
@@ -207,8 +198,6 @@ public class FavoritesFragment extends Fragment {
                     mutableData.setValue(product);
                 }
 
-                mAdapter.notifyItemRemoved(position);
-
                 return Transaction.success(mutableData);
             }
 
@@ -217,6 +206,37 @@ public class FavoritesFragment extends Fragment {
                 Log.d(TAG, "productTransaction:onComplete: " + databaseError);
             }
         });
+    }
+
+    @Override
+    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, final int position) {
+        if (viewHolder instanceof FavoriteProductViewHolder) {
+            final Product deletedItem = mAdapter.getItem(viewHolder.getAdapterPosition());
+            final int deletedIndex = viewHolder.getAdapterPosition();
+            mAdapter.removeItem(viewHolder.getAdapterPosition());
+            
+            Snackbar snackbar = Snackbar.make(mainContainer, "Product removed from favorites", Snackbar.LENGTH_LONG);
+            snackbar.setAnchorView(getActivity().findViewById(R.id.bottom_navigation));
+            snackbar.addCallback(new Snackbar.Callback() {
+                @Override
+                public void onDismissed(Snackbar transientBottomBar, int event) {
+                    super.onDismissed(transientBottomBar, event);
+                    Log.d(TAG, "onDismissed: " + deletedItem.getKey());
+                    if (!onUndoClicked) {
+                        unLike(deletedItem.getKey());
+                    }
+                    onUndoClicked = false;
+                }
+            });
+            snackbar.setAction("UNDO", new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onUndoClicked = true;
+                    mAdapter.restoreItem(deletedItem, deletedIndex);
+                }
+            });
+            snackbar.show();
+        }
     }
 
     @Override
@@ -229,27 +249,18 @@ public class FavoritesFragment extends Fragment {
     public void onStop() {
         super.onStop();
         Log.d(TAG, "onStop");
-        if (mAdapter != null) {
-            mAdapter.stopListening();
-        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
         Log.d(TAG, "onPause");
-        if (mAdapter != null) {
-            mAdapter.stopListening();
-        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
-        if (mAdapter != null) {
-            mAdapter.startListening();
-        }
     }
 
     private String getUid() {
@@ -257,6 +268,61 @@ public class FavoritesFragment extends Fragment {
             return FirebaseAuth.getInstance().getCurrentUser().getUid();
         } else {
             return null;
+        }
+    }
+
+    class FavouriteProductsAdapter extends RecyclerView.Adapter<FavoriteProductViewHolder> {
+        List<Product> items = new ArrayList<>();
+
+        @NonNull
+        @Override
+        public FavoriteProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+            View view = inflater.inflate(R.layout.item_favourite_product, parent, false);
+            return new FavoriteProductViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull FavoriteProductViewHolder holder, int position) {
+            final Product product = items.get(position);
+            holder.bind(rootView.getContext(), product, new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getActivity(), ProductActivity.class);
+                    intent.putExtra(ProductActivity.EXTRA_PRODUCT_KEY, product.getKey());
+                    startActivity(intent);
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return items.size();
+        }
+
+        public Product getItem(int position) {
+            return items.get(position);
+        }
+
+        public void insertItem(Product item) {
+            items.add(item);
+            notifyItemInserted(getItemCount());
+        }
+
+        public void removeItem(int position) {
+            items.remove(position);
+            notifyItemRemoved(position);
+        }
+
+        public void restoreItem(Product item, int position) {
+            items.add(position, item);
+            notifyItemInserted(position);
+            recyclerView.smoothScrollToPosition(position);
+        }
+
+        public void clear() {
+            items.clear();
+            notifyDataSetChanged();
         }
     }
 

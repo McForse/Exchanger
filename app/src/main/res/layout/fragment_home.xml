@@ -64,7 +64,7 @@
         android:visibility="gone" />
 
         <include layout="@layout/layout_no_items"
-            android:visibility="visible" />
+            android:visibility="gone" />
 
     </RelativeLayout>
 

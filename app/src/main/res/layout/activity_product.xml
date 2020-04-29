@@ -71,12 +71,14 @@
                 android:padding="@dimen/spacing_large">
 
                 <TextView
+                    style="@style/TextAppearance.MaterialComponents.Headline5"
                     android:id="@+id/title"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
                     android:layout_marginTop="@dimen/spacing_small"
                     android:text="Title"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+                    android:layout_weight="1"
+                    android:maxLines="1"
                     app:fontFamily="sans-serif-medium"
                     android:transitionName="product_title" />
 
@@ -105,40 +107,17 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:gravity="center_vertical"
                         android:orientation="vertical">
 
                         <TextView
+                            style="@style/TextAppearance.MaterialComponents.Subtitle1"
                             android:id="@+id/seller_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Name"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
                             android:textColor="@color/grey_60"
                             app:fontFamily="sans-serif-medium" />
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="@dimen/spacing_middle"
-                                android:layout_height="@dimen/spacing_middle"
-                                android:layout_marginTop="@dimen/spacing_xsmall"
-                                android:layout_marginEnd="@dimen/spacing_medium"
-                                android:layout_marginRight="@dimen/spacing_medium"
-                                android:tint="@color/yellow_500"
-                                app:srcCompat="@drawable/ic_star_border" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="4,5"
-                                android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-                                android:textColor="@color/grey_60" />
-
-                        </LinearLayout>
 
                     </LinearLayout>
 
@@ -152,45 +131,53 @@
                     android:background="@color/grey_10" />
 
                 <LinearLayout
+                    android:id="@+id/product_action_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="vertical">
 
-                    <Button
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
-                        android:id="@+id/send_message_button"
-                        android:layout_width="0dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="@dimen/spacing_small"
-                        app:icon="@drawable/ic_mail_outline"
-                        android:text="Message" />
+                        android:orientation="horizontal">
 
-                    <Button
-                        android:id="@+id/exchange_button"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/spacing_small"
-                        android:layout_weight="1"
-                        android:text="Exchange"
-                        app:icon="@drawable/ic_autorenew" />
+                        <Button
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+                            android:id="@+id/send_message_button"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="@dimen/spacing_small"
+                            app:icon="@drawable/ic_mail_outline"
+                            android:text="Message" />
+
+                        <Button
+                            android:id="@+id/exchange_button"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/spacing_small"
+                            android:layout_weight="1"
+                            android:text="Exchange"
+                            app:icon="@drawable/ic_autorenew" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginBottom="@dimen/spacing_middle"
+                        android:layout_marginTop="@dimen/spacing_large"
+                        android:background="@color/grey_10" />
 
                 </LinearLayout>
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginBottom="@dimen/spacing_middle"
-                    android:layout_marginTop="@dimen/spacing_large"
-                    android:background="@color/grey_10" />
-
                 <TextView
+                    style="@style/TextAppearance.MaterialComponents.Subtitle1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_middle"
                     android:text="Description"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     app:fontFamily="sans-serif-medium" />
 
                 <TextView
@@ -209,17 +196,48 @@
                     android:layout_marginTop="@dimen/spacing_large"
                     android:background="@color/grey_10" />
 
+                <TextView
+                    style="@style/TextAppearance.MaterialComponents.Subtitle1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_middle"
+                    android:layout_marginBottom="@dimen/spacing_middle"
+                    android:text="Exchange to"
+                    app:fontFamily="sans-serif-medium" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/product_exchange_category_chip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Clothes" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginBottom="@dimen/spacing_middle"
+                    android:layout_marginTop="@dimen/spacing_large"
+                    android:background="@color/grey_10" />
+
+                <TextView
+                    style="@style/TextAppearance.MaterialComponents.Subtitle1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_middle"
+                    android:layout_marginBottom="@dimen/spacing_middle"
+                    android:text="Location"
+                    app:fontFamily="sans-serif-medium" />
+
                 <RelativeLayout
                     android:id="@+id/map_layout"
                     android:layout_width="match_parent"
                     android:layout_height="300dp">
 
-                <fragment
-                    android:id="@+id/map"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    tools:context=".MapsActivity"
-                    android:name="com.google.android.gms.maps.SupportMapFragment" />
+                    <fragment
+                        android:id="@+id/map"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        tools:context=".MapsActivity"
+                        android:name="com.google.android.gms.maps.SupportMapFragment" />
 
                     <ImageView
                         android:id="@+id/transparent_image"

@@ -11,8 +11,6 @@ import androidx.viewpager.widget.ViewPager;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
@@ -23,8 +21,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -42,6 +38,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.chip.Chip;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -61,6 +58,7 @@ import com.shotball.project.utils.ViewAnimation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -72,6 +70,7 @@ public class ProductActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private NestedScrollView mainContainer;
+    private LinearLayout actionsContainer;
     private ImageView image;
     private TextView title;
     private TextView description;
@@ -91,7 +90,6 @@ public class ProductActivity extends AppCompatActivity {
     private Product mProduct;
     private User mSeller;
     private String roomId;
-    private String exchangeId;
     final Map<String, String> myProducts = new HashMap<>();
 
     @Override
@@ -114,6 +112,7 @@ public class ProductActivity extends AppCompatActivity {
     private void initComponents() {
         mainContainer = findViewById(R.id.scroll_view);
         mainContainer.setVisibility(View.GONE);
+        actionsContainer = findViewById(R.id.product_action_container);
         image = findViewById(R.id.image);
         title = findViewById(R.id.title);
         description = findViewById(R.id.description);
@@ -214,6 +213,8 @@ public class ProductActivity extends AppCompatActivity {
         if (mProduct != null) {
             title.setText(mProduct.title);
             description.setText(mProduct.description);
+            Chip exchangeCategoryChip = findViewById(R.id.product_exchange_category_chip);
+            exchangeCategoryChip.setText(Categories.getNameByValue(mProduct.getExchange_category()));
 
             adapterImageSlider.setItems(mProduct.images);
             viewPager.setAdapter(adapterImageSlider);
@@ -250,6 +251,9 @@ public class ProductActivity extends AppCompatActivity {
         stopDataListener();
 
         if (mSeller != null) {
+            if (mSeller.getUid().equals(getUid())) {
+                actionsContainer.setVisibility(View.GONE);
+            }
             //TODO: placeholder and error
             Glide.with(this)
                     .load(mSeller.image)
@@ -286,7 +290,7 @@ public class ProductActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     final ArrayList<String> productsList = new ArrayList<>(myProducts.values());
-                    final int[] selectedProduct = {1};
+                    final int[] selectedProduct = {0};
                     MaterialAlertDialogBuilder exchangeDialog = new MaterialAlertDialogBuilder(ProductActivity.this)
                             .setTitle(getString(R.string.dialog_exhange_to));
                     if (!productsList.isEmpty()) {
@@ -320,7 +324,8 @@ public class ProductActivity extends AppCompatActivity {
                                 }).setSingleChoiceItems(productsList.toArray(new String[productsList.size()]), 0, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                       selectedProduct[0] = which;
+                                        Log.d(TAG, "Exchange product selected: " + which);
+                                        selectedProduct[0] = which;
                                     }
                                 });
                     } else {
@@ -378,7 +383,6 @@ public class ProductActivity extends AppCompatActivity {
                     if (exchange != null && exchange.exchange_for.equals(mProduct.getKey())) {
                         Log.d(TAG, "findExistExchange: what_exchange - " + myProductKey + " ; exchange_for - " + exchange.exchange_for);
                         isAvailable[0] = true;
-                        exchangeId = item.getKey();
                         break;
                     }
                 }

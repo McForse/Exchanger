@@ -1,10 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/product_favourite_container"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/product_favourite_card_background"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/cat_card_rich_media_demo_min_height"
+        android:layout_margin="@dimen/mtrl_card_spacing"
+        android:background="@drawable/red_rounded_card">
+
+        <ImageView
+            android:id="@+id/delete_icon"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/spacing_large"
+            android:src="@drawable/ic_delete"
+            android:tint="@android:color/white" />
+
+        <TextView
+            style="@style/TextAppearance.MaterialComponents.Headline6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="10dp"
+            android:layout_toEndOf="@id/delete_icon"
+            android:text="Delete"
+            android:textColor="@android:color/white" />
+
+    </RelativeLayout>
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/product_favourite_card"
@@ -13,7 +43,8 @@
         android:layout_margin="@dimen/mtrl_card_spacing"
         android:focusable="true"
         android:minHeight="@dimen/cat_card_rich_media_demo_min_height"
-        app:state_dragged="true">
+        app:state_dragged="true"
+        android:clickable="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -125,5 +156,5 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</FrameLayout>
 
