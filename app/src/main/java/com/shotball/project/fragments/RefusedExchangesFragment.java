@@ -9,7 +9,7 @@ public class RefusedExchangesFragment extends ExchangesFragment {
 
     @Override
     public Query getQuery(DatabaseReference databaseReference) {
-        return mDatabase.child("exchanges").child("refused").orderByChild("whom").equalTo(getUid());
+        return mDatabase.child("exchanges").child("refused").orderByChild("who").equalTo(getUid());
     }
 
 }

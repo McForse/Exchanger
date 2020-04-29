@@ -95,6 +95,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/product_exchange_actions_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingBottom="@dimen/cat_card_single_spacing"
@@ -104,18 +105,18 @@
 
             <com.google.android.material.button.MaterialButton
                 style="?attr/borderlessButtonStyle"
+                android:id="@+id/product_exchange_accept"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/cat_card_single_spacing"
-                android:layout_marginRight="@dimen/cat_card_single_spacing"
                 android:text="Accept"/>
 
             <com.google.android.material.button.MaterialButton
                 style="?attr/borderlessButtonStyle"
+                android:id="@+id/product_exchange_refuse"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/cat_card_single_spacing"
-                android:layout_marginRight="@dimen/cat_card_single_spacing"
                 android:text="Refuse"/>
 
         </LinearLayout>

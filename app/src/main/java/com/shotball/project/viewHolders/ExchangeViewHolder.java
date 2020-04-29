@@ -3,12 +3,14 @@ package com.shotball.project.viewHolders;
 import android.content.Context;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -30,6 +32,8 @@ public class ExchangeViewHolder extends RecyclerView.ViewHolder {
     TextView productDescription;
     ImageView toProductImage;
     TextView toProductTitle;
+    Button acceptButton;
+    Button refuseButton;
 
     DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
 
@@ -40,9 +44,15 @@ public class ExchangeViewHolder extends RecyclerView.ViewHolder {
         productDescription = itemView.findViewById(R.id.product_description);
         toProductImage = itemView.findViewById(R.id.to_product_image);
         toProductTitle = itemView.findViewById(R.id.to_product_title);
+        acceptButton = itemView.findViewById(R.id.product_exchange_accept);
+        refuseButton = itemView.findViewById(R.id.product_exchange_refuse);
     }
 
-    public void bind(final Context ctx, ExchangeModel model) {
+    public void bind(final Context ctx, final ExchangeModel model) {
+        if (model.getStatus() != 0) {
+            itemView.findViewById(R.id.product_exchange_actions_container).setVisibility(View.GONE);
+        }
+
         ValueEventListener productListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -60,9 +70,7 @@ public class ExchangeViewHolder extends RecyclerView.ViewHolder {
                         StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("images").child(product.getKey()).child(image);
                         Glide.with(ctx).load(storageReference).centerCrop().into(productImage);
                     }
-                } catch (IllegalArgumentException ignored) {
-
-                }
+                } catch (IllegalArgumentException ignored) { }
             }
 
             @Override
@@ -87,9 +95,7 @@ public class ExchangeViewHolder extends RecyclerView.ViewHolder {
                         StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("images").child(product.getKey()).child(image);
                         Glide.with(ctx).load(storageReference).centerCrop().into(toProductImage);
                     }
-                } catch (IllegalArgumentException ignored) {
-
-                }
+                } catch (IllegalArgumentException ignored) { }
             }
 
             @Override
@@ -99,6 +105,40 @@ public class ExchangeViewHolder extends RecyclerView.ViewHolder {
         };
         mDatabase.child("products").child(model.what_exchange).addListenerForSingleValueEvent(productListener);
         mDatabase.child("products").child(model.exchange_for).addListenerForSingleValueEvent(toProductListener);
+
+        acceptButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                acceptExchange(model);
+            }
+        });
+
+        refuseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                refuseExchange(model);
+            }
+        });
+    }
+
+    private void acceptExchange(final ExchangeModel model) {
+        model.setStatus(1);
+        mDatabase.child("exchanges").child("accepted").child(model.getKey()).setValue(model).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                mDatabase.child("exchanges").child("proposed").child(model.getKey()).removeValue();
+            }
+        });
+    }
+
+    private void refuseExchange(final ExchangeModel model) {
+        model.setStatus(2);
+        mDatabase.child("exchanges").child("refused").child(model.getKey()).setValue(model).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                mDatabase.child("exchanges").child("proposed").child(model.getKey()).removeValue();
+            }
+        });
     }
 
 }

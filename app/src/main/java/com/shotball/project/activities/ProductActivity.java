@@ -408,7 +408,7 @@ public class ProductActivity extends AppCompatActivity {
             return;
         }
 
-        ExchangeModel exchange = new ExchangeModel(0, mSeller.getUid(), myProductKey, mProduct.getKey());
+        ExchangeModel exchange = new ExchangeModel(0, getUid(), mSeller.getUid(), myProductKey, mProduct.getKey());
 
         exchReference.child(key).setValue(exchange).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override

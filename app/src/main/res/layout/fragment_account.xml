@@ -160,44 +160,9 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginBottom="@dimen/spacing_large"
+        android:layout_marginBottom="@dimen/spacing_middle"
         android:layout_marginTop="@dimen/spacing_large"
-        android:background="@color/grey_5" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Average Rating"
-            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            android:textColor="@color/grey_40" />
-
-        <View
-            android:layout_width="@dimen/spacing_medium"
-            android:layout_height="1dp"
-            android:layout_margin="@dimen/spacing_small"
-            android:background="@color/grey_60" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="4.5"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-            android:textColor="@color/grey_80"
-            android:textStyle="bold" />
-
-    </LinearLayout>
-
-    <View
-        android:layout_width="@dimen/spacing_medium"
-        android:layout_height="1dp"
-        android:layout_margin="@dimen/spacing_small"
-        android:background="@color/grey_60" />
+        android:background="@color/grey_10" />
 
     <LinearLayout
         android:id="@+id/proposed_ecxhanges_button"
@@ -226,6 +191,13 @@
             android:textColor="@color/grey_80" />
 
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="@dimen/spacing_middle"
+        android:layout_marginTop="@dimen/spacing_large"
+        android:background="@color/grey_10" />
 
 
 </LinearLayout>

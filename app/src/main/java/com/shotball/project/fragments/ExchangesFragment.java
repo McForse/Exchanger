@@ -14,13 +14,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.firebase.ui.database.SnapshotParser;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.shotball.project.R;
 import com.shotball.project.models.ExchangeModel;
 import com.shotball.project.viewHolders.ExchangeViewHolder;
+
+import java.util.Objects;
 
 public abstract class ExchangesFragment extends Fragment {
 
@@ -60,7 +64,17 @@ public abstract class ExchangesFragment extends Fragment {
         Query offersQuery = getQuery(mDatabase);
 
         FirebaseRecyclerOptions options = new FirebaseRecyclerOptions.Builder<ExchangeModel>()
-                .setQuery(offersQuery, ExchangeModel.class)
+                .setQuery(offersQuery, new SnapshotParser<ExchangeModel>() {
+                    @NonNull
+                    @Override
+                    public ExchangeModel parseSnapshot(@NonNull DataSnapshot snapshot) {
+                        ExchangeModel exchange = snapshot.getValue(ExchangeModel.class);
+                        if (exchange != null) {
+                            exchange.setKey(snapshot.getKey());
+                        }
+                        return Objects.requireNonNull(exchange);
+                    }
+                })
                 .build();
 
         mAdapter = new FirebaseRecyclerAdapter<ExchangeModel, ExchangeViewHolder>(options) {
@@ -99,7 +113,11 @@ public abstract class ExchangesFragment extends Fragment {
     }
 
     public String getUid() {
-        return FirebaseAuth.getInstance().getCurrentUser().getUid();
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            return FirebaseAuth.getInstance().getCurrentUser().getUid();
+        } else {
+            return null;
+        }
     }
 
     public abstract Query getQuery(DatabaseReference databaseReference);
