@@ -38,6 +38,10 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryDataEventListener;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.google.firebase.database.DataSnapshot;
@@ -49,6 +53,7 @@ import com.google.firebase.database.Transaction;
 import com.shotball.project.R;
 import com.shotball.project.activities.AddProductActivity;
 import com.shotball.project.activities.FilterActivity;
+import com.shotball.project.activities.MainActivity;
 import com.shotball.project.activities.ProductActivity;
 import com.shotball.project.activities.SignInActivity;
 import com.shotball.project.adapters.ProductAdapter;
@@ -60,6 +65,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 public class HomeFragment extends Fragment implements ProductAdapter.OnProductSelectedListener {
 
@@ -193,21 +199,16 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
             setMyLocation(myLocation);
             mainContainer.setVisibility(View.VISIBLE);
             setReferences();
+            /*FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mActivity);
+            mFusedLocationClient.getLastLocation().addOnSuccessListener(MainActivity.this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if (location != null) {
+                        myLocation = location;
+                    }
+                }
+            });*/
             return true;
-            /*FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(mActivity);
-
-            fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(mActivity, new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            if (location != null) {
-                                Log.d(TAG, "CRCERCECERcre");
-                                setMyLocation(location);
-                                mainContainer.setVisibility(View.VISIBLE);
-                                setReferences();
-                            }
-                        }
-                    });*/
         }
 
         return false;

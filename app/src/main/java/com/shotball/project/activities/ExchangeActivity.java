@@ -3,9 +3,9 @@ package com.shotball.project.activities;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -17,12 +17,15 @@ import android.view.ViewGroup;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.shotball.project.R;
+import com.shotball.project.fragments.AcceptedExchangesFragment;
+import com.shotball.project.fragments.OffersExchangesFragment;
+import com.shotball.project.fragments.RefusedExchangesFragment;
 import com.shotball.project.models.ExchangeModel;
-import com.shotball.project.utils.ViewAnimation;
 import com.shotball.project.viewHolders.ExchangeViewHolder;
 
 public class ExchangeActivity extends BaseActivity {
@@ -30,12 +33,11 @@ public class ExchangeActivity extends BaseActivity {
     private static final String TAG = "ExchangeActivity";
 
     private CoordinatorLayout mainContainer;
-    private RecyclerView recyclerView;
+    private TabLayout tabLayout;
+    private ViewPager viewPager;
 
     private DatabaseReference mDatabase;
     private FirebaseRecyclerAdapter<ExchangeModel, ExchangeViewHolder> mAdapter;
-
-    private boolean loaded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,10 +57,41 @@ public class ExchangeActivity extends BaseActivity {
 
     private void initComponent() {
         mainContainer = findViewById(R.id.exchange_container);
-        //ViewAnimation.showOut(mainContainer);
-        recyclerView = findViewById(R.id.exchange_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setHasFixedSize(true);
+        tabLayout = findViewById(R.id.tabs);
+        viewPager = findViewById(R.id.view_pager);
+
+        FragmentPagerAdapter mPagerAdapter = new FragmentPagerAdapter(getSupportFragmentManager(),
+                FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
+            private final Fragment[] mFragments = new Fragment[] {
+                    new OffersExchangesFragment(),
+                    new AcceptedExchangesFragment(),
+                    new RefusedExchangesFragment()
+            };
+
+            private final String[] mFragmentNames = new String[] {
+                    getString(R.string.tab_offers),
+                    getString(R.string.tab_accepted),
+                    getString(R.string.tab_refused)
+            };
+
+            @Override
+            public Fragment getItem(int position) {
+                return mFragments[position];
+            }
+
+            @Override
+            public int getCount() {
+                return mFragments.length;
+            }
+
+            @Override
+            public CharSequence getPageTitle(int position) {
+                return mFragmentNames[position];
+            }
+        };
+
+        viewPager.setAdapter(mPagerAdapter);
+        tabLayout.setupWithViewPager(viewPager);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         Query baseQuery = mDatabase.child("exchanges").orderByChild("whom").equalTo(getUid());
@@ -83,8 +116,6 @@ public class ExchangeActivity extends BaseActivity {
                 holder.bind(ExchangeActivity.this, model);
             }
         };
-
-        recyclerView.setAdapter(mAdapter);
     }
 
     @Override
@@ -95,9 +126,6 @@ public class ExchangeActivity extends BaseActivity {
     @Override
     public void onStop() {
         super.onStop();
-        if (mAdapter != null) {
-            mAdapter.stopListening();
-        }
     }
 
     @Override

@@ -248,7 +248,6 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
         if (key == null) {
             mDialog.dismiss();
             Snackbar.make(mainContainer, R.string.error_publish_product, Snackbar.LENGTH_SHORT).show();
-            return;
         } else {
             uploadImages(key);
         }

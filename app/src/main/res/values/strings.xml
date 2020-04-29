@@ -76,4 +76,8 @@
     <string name="ok">OK</string>
     <string name="exchange_title">Proposed Exchanges</string>
     <string name="dialog_no_category_selected">No category selected</string>
+    
+    <string name="tab_offers">Offers</string>
+    <string name="tab_accepted">Accepted</string>
+    <string name="tab_refused">Refused</string>
 </resources>

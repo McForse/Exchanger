@@ -123,7 +123,7 @@ public class ProductActivity extends AppCompatActivity {
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         refProducts = mDatabase.child("products");
-        exchReference = mDatabase.child("exchanges");
+        exchReference = mDatabase.child("exchanges").child("proposed");
 
         getProduct();
 
