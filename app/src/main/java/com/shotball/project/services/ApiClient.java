@@ -15,6 +15,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
+
     public static NotificationApiService getApiService() {
         return new Retrofit.Builder()
                 .baseUrl(BuildConfig.FCM_BASE_URL)
@@ -23,6 +24,7 @@ public class ApiClient {
                 .build()
                 .create(NotificationApiService.class);
     }
+
     private static OkHttpClient provideClient() {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);

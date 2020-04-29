@@ -16,13 +16,19 @@ android {
     }
 
     buildTypes {
+        compileOptions {
+            sourceCompatibility JavaVersion.VERSION_1_8
+            targetCompatibility JavaVersion.VERSION_1_8
+        }
         debug {
             buildConfigField("String", "FCM_BASE_URL", "\"https://fcm.googleapis.com/\"")
-            buildConfigField("String", "FCM_SERVER_KEY", "\"AAAA-XDq018:APA91bG3gSzwZcqt5ifKh1Yd-hADYvoSr8AYyWWvLP2-5bESGp60LLpo7POASETf6dwBtey8QDCMQo5p0mR0afk1X9JvzeRSZBWmqzkKWO9tuNWf3io0pPf4WrD4D79nssdF-qARZLQc\"")
+            buildConfigField("String", "FCM_SERVER_KEY", "\"AAAA-XDq018:APA91bEVWAPJnoWOabtBiOfs--LBh9ccrlIJogLegRb9f6deeqQtE9_sGWvv533yncu4-arlNzjxJ_mCw0aXU0MDaoui3yLOermMLLwYB2l6YjjW5PWnS9RkcAQr3ldLsvAvQ6WBTO54\"")
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField("String", "FCM_BASE_URL", "\"https://fcm.googleapis.com/\"")
+            buildConfigField("String", "FCM_SERVER_KEY", "\"AAAA-XDq018:APA91bEVWAPJnoWOabtBiOfs--LBh9ccrlIJogLegRb9f6deeqQtE9_sGWvv533yncu4-arlNzjxJ_mCw0aXU0MDaoui3yLOermMLLwYB2l6YjjW5PWnS9RkcAQr3ldLsvAvQ6WBTO54\"")
         }
     }
 
@@ -55,7 +61,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-storage:19.1.1'
     implementation 'com.firebaseui:firebase-ui-storage:6.2.1'
     implementation 'com.mikhaellopez:circularimageview:4.2.0'
-    implementation 'com.google.firebase:firebase-messaging:20.1.5'
+    implementation 'com.google.firebase:firebase-messaging:20.1.6'
     implementation 'android.arch.work:work-runtime:1.0.1'
     implementation 'com.squareup.retrofit2:retrofit:2.7.1'
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
