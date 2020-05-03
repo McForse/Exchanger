@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -204,6 +205,18 @@ public class FavoritesFragment extends Fragment implements RecyclerItemTouchHelp
             @Override
             public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
                 Log.d(TAG, "productTransaction:onComplete: " + databaseError);
+                if (mAdapter.getItemCount() == 0) {
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mAdapter.getItemCount() == 0) {
+                                swipeContainer.setRefreshing(true);
+                                resetRecyclerView();
+                            }
+                        }
+                    }, 3000);
+                }
             }
         });
     }

@@ -5,6 +5,7 @@ public class ChatRoomModel {
     private String title;
     private String photo;
     private String lastMsg;
+    private String lastProduct;
     private String lastDatetime;
     private String userUid;
     private Integer unreadCount;
@@ -39,6 +40,14 @@ public class ChatRoomModel {
 
     public void setLastMsg(String lastMsg) {
         this.lastMsg = lastMsg;
+    }
+
+    public String getLastProduct() {
+        return lastProduct;
+    }
+
+    public void setLastProduct(String lastProduct) {
+        this.lastProduct = lastProduct;
     }
 
     public String getLastDatetime() {

@@ -58,7 +58,6 @@ import com.shotball.project.utils.ViewAnimation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -263,26 +262,29 @@ public class ProductActivity extends AppCompatActivity {
 
             ViewAnimation.showIn(mainContainer);
 
-            findChatRoom(mSeller.getUid());
-
             View.OnClickListener sendMessageOnClickListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (roomId == null || roomId.equals("")) {
-                        Map<String, String> selectedUsers = new HashMap<>();
-                        selectedUsers.put(getUid(), "i");
-                        selectedUsers.put(mSeller.getUid(), "i");
-                        final String room_id = mDatabase.child("rooms").push().getKey();
-
-                        mDatabase.child("rooms/" + room_id).child("users").setValue(selectedUsers).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
+                    findChatRoom(mSeller.getUid(), new IsAvailableCallback() {
+                        @Override
+                        public void onAvailableCallback(boolean isAvailable) {
+                            if (isAvailable) {
                                 openChat();
+                            } else {
+                                Map<String, String> selectedUsers = new HashMap<>();
+                                selectedUsers.put(getUid(), "i");
+                                selectedUsers.put(mSeller.getUid(), "i");
+                                final String room_id = mDatabase.child("rooms").push().getKey();
+
+                                mDatabase.child("rooms/" + room_id).child("users").setValue(selectedUsers).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        openChat();
+                                    }
+                                });
                             }
-                        });
-                    } else {
-                        openChat();
-                    }
+                        }
+                    });
                 }
             };
 
@@ -349,7 +351,8 @@ public class ProductActivity extends AppCompatActivity {
         }
     }
 
-    private void findChatRoom(final String toUid) {
+    private void findChatRoom(final String toUid, final IsAvailableCallback callback) {
+        final boolean[] isAvailable = {false};
         mDatabase.child("rooms").orderByChild("users/" + getUid()).equalTo("i").addListenerForSingleValueEvent(new ValueEventListener() {
 
             @Override
@@ -359,14 +362,18 @@ public class ProductActivity extends AppCompatActivity {
 
                     if (users.size() == 2 & users.get(toUid) != null) {
                         roomId = item.getKey();
+                        isAvailable[0] = true;
                         break;
                     }
                 }
+
+                callback.onAvailableCallback(isAvailable[0]);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.d(TAG, "onCancelled findChatRoom: " + databaseError.getMessage());
+                callback.onAvailableCallback(isAvailable[0]);
             }
         });
     }
@@ -531,9 +538,10 @@ public class ProductActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu_product, menu);
 
         if (mProduct != null) {
-            if (mProduct.likes.containsKey(getUid()));
-            MenuItem likeItem = menu.findItem(R.id.action_like);
-            likeItem.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_favorite));
+            if (mProduct.likes.containsKey(getUid())) {
+                MenuItem likeItem = menu.findItem(R.id.action_like);
+                likeItem.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_favorite));
+            }
         }
 
         return super.onCreateOptionsMenu(menu);

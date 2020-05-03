@@ -94,8 +94,21 @@ public class ChatFragment extends Fragment {
         mAdapter = new RecyclerViewAdapter();
         recyclerView.setAdapter(mAdapter);
 
-        if (productKey != null && productTitle != null) {
-            sendProduct(productKey, productTitle);
+        if (productKey != null) {
+            mDatabase.child("rooms").child(roomID).child("lastproduct").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    Log.d(TAG, String.valueOf(dataSnapshot.getValue()));
+                    if (!String.valueOf(dataSnapshot.getValue()).equals(productKey)) {
+                        sendProduct();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
         }
 
         return rootView;
@@ -147,13 +160,14 @@ public class ChatFragment extends Fragment {
         }
     };
 
-    private void sendProduct(String key, String title) {
+    private void sendProduct() {
         Message message = new Message();
-        message.uid = key;
-        message.msg = title;
+        message.uid = productKey;
+        message.msg = productTitle;
         message.msgtype = 1;
         message.timestamp = ServerValue.TIMESTAMP;
 
+        mDatabase.child("rooms").child(roomID).child("lastproduct").setValue(productKey);
         sendMessageToDatabase(message);
     }
 

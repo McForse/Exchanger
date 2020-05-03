@@ -40,7 +40,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 scheduleJob();
             } else {
                 // Handle message within 10 seconds
-                handleNow(data);
+                sendNotification(data.get("title"), data.get("message"));
             }
 
         }
