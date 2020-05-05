@@ -1,5 +1,6 @@
 package com.shotball.project.services;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -30,24 +31,18 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Log.d(TAG, "From: " + remoteMessage.getFrom());
 
+        RemoteMessage.Notification data = remoteMessage.getNotification();
+
         // Check if message contains a data payload.
-        if (remoteMessage.getData().size() > 0) {
-            Map<String, String> data = remoteMessage.getData();
-            Log.d(TAG, "Message data payload: " + data);
+        if (data != null) {
+            Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
 
             if (/* Check if data needs to be processed by long running job */ false) {
                 // For long-running tasks (10 seconds or more) use WorkManager.
                 scheduleJob();
             } else {
-                // Handle message within 10 seconds
-                sendNotification(data.get("title"), data.get("message"));
+                sendNotification(data.getTitle(), data.getBody());
             }
-
-        }
-
-        // Check if message contains a notification payload.
-        if (remoteMessage.getNotification() != null) {
-            Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
         }
     }
 
@@ -61,13 +56,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         OneTimeWorkRequest work = new OneTimeWorkRequest.Builder(DataSyncWorker.class)
                 .build();
         WorkManager.getInstance().beginWith(work).enqueue();
-    }
-
-    private void handleNow(Map<String, String> data) {
-        Log.d(TAG, "Short lived task is done.");
-        if (data.containsKey("title") && data.containsKey("message")) {
-            sendNotification(data.get("title"), data.get("message"));
-        }
     }
 
     private void sendRegistrationToServer(String token) {
@@ -98,7 +86,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(channelId,
                     "Channel human readable title",
-                    NotificationManager.IMPORTANCE_DEFAULT);
+                    NotificationManager.IMPORTANCE_HIGH);
             notificationManager.createNotificationChannel(channel);
         }
 

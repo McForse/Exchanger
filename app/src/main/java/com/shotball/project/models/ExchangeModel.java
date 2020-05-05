@@ -3,6 +3,7 @@ package com.shotball.project.models;
 import com.google.firebase.database.Exclude;
 
 public class ExchangeModel {
+
     @Exclude
     public String key;
     public int status;
@@ -80,4 +81,5 @@ public class ExchangeModel {
     public void setExchange_for(String exchange_for) {
         this.exchange_for = exchange_for;
     }
+
 }

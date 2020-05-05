@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
                         Log.d(TAG, token);
                     }
                 });
-        FirebaseMessaging.getInstance().subscribeToTopic("pushNotifications");
+        FirebaseMessaging.getInstance().subscribeToTopic("common");
         initComponents();
     }
 

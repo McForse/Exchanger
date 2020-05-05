@@ -59,6 +59,7 @@ import com.sangcomz.fishbun.define.Define;
 import com.shotball.project.R;
 import com.shotball.project.adapters.AdapterSnapGeneric;
 import com.shotball.project.helpers.StartSnapHelper;
+import com.shotball.project.models.Categories;
 import com.shotball.project.models.Image;
 import com.shotball.project.models.Product;
 
@@ -139,7 +140,7 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
         new StartSnapHelper().attachToRecyclerView(recyclerView);
         mAdapter.addButton();
 
-        ArrayAdapter adapter = new ArrayAdapter<CharSequence>(this, R.layout.dropdown_product_category, getResources().getStringArray(R.array.product_categories));
+        ArrayAdapter adapter = new ArrayAdapter<CharSequence>(this, R.layout.dropdown_product_category, Categories.getStringArray());
         productCategory = findViewById(R.id.product_category);
         productCategory.setAdapter(adapter);
 

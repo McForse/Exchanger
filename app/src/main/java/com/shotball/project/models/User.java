@@ -6,11 +6,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class User {
+
     @Exclude
     private String uid;
     public String username;
     public String email;
     public String image;
+    public String fcm;
 
     public User() { }
 
@@ -38,12 +40,32 @@ public class User {
         return username;
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getEmail() {
         return email;
     }
 
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getImage() {
         return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getFcm() {
+        return fcm;
+    }
+
+    public void setFcm(String fcm) {
+        this.fcm = fcm;
     }
 
     @Exclude
@@ -52,6 +74,7 @@ public class User {
         result.put("username", username);
         result.put("email", email);
         result.put("image", image);
+        result.put("fcm", fcm);
 
         return result;
     }

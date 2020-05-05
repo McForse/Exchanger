@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Product {
+
     @Exclude
     public String key;
     public String title;

@@ -1,6 +1,7 @@
 package com.shotball.project.models;
 
 public class ChatRoomModel {
+
     private String roomID;
     private String title;
     private String photo;
@@ -73,4 +74,5 @@ public class ChatRoomModel {
     public void setUnreadCount(Integer unreadCount) {
         this.unreadCount = unreadCount;
     }
+
 }
