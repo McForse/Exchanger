@@ -34,7 +34,6 @@ import com.shotball.project.R;
 import com.shotball.project.utils.TextUtil;
 import com.shotball.project.activities.ProductActivity;
 import com.shotball.project.models.Message;
-import com.shotball.project.models.User;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -66,7 +65,6 @@ public class ChatFragment extends Fragment {
     private String toUid;
     private String productKey;
     private String productTitle;
-    private Map<String, User> usersList = new HashMap<>();
 
     public static ChatFragment getInstance(String toUid, String roomID, String productKey, String productTitle) {
         ChatFragment chatFragment = new ChatFragment();
@@ -85,11 +83,6 @@ public class ChatFragment extends Fragment {
         rootView = inflater.inflate(R.layout.fragment_chat, container, false);
         initComponents();
         myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-        if (!toUid.equals("") && !roomID.equals("")) {
-            getUserInfoFromServer(myUid);
-            getUserInfoFromServer(toUid);
-        }
 
         mAdapter = new RecyclerViewAdapter();
         recyclerView.setAdapter(mAdapter);
@@ -117,6 +110,7 @@ public class ChatFragment extends Fragment {
     private void initComponents() {
         recyclerView = rootView.findViewById(R.id.chat_recyclerView);
         linearLayoutManager = new LinearLayoutManager(rootView.getContext());
+        linearLayoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(linearLayoutManager);
         messageInput = rootView.findViewById(R.id.message_input);
         sendButton = rootView.findViewById(R.id.btn_send);
@@ -132,24 +126,6 @@ public class ChatFragment extends Fragment {
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         dateFormat = android.text.format.DateFormat.getDateFormat(getContext());
-    }
-
-    void getUserInfoFromServer(String id) {
-        Log.d(TAG, "getUserInfoFromServer: " + id);
-        mDatabase.child("users").child(id).addListenerForSingleValueEvent(new ValueEventListener() {
-
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                User user = dataSnapshot.getValue(User.class);
-                user.setUid(dataSnapshot.getKey());
-                usersList.put(user.getUid(), user);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.d(TAG, "onCancelled getUserInfoFromServer: " + databaseError.getMessage());
-            }
-        });
     }
 
     private Button.OnClickListener sendButtonClickListener = new View.OnClickListener() {
@@ -276,6 +252,7 @@ public class ChatFragment extends Fragment {
 
                     // Update number of messages unread to 0 => read all
                     mDatabase.child("rooms").child(roomID).child("unread").child(myUid).setValue(0);
+                    Log.d(TAG, "111111");
                     Map<String, Object> unreadMessages = new HashMap<>();
 
                     for (DataSnapshot item: dataSnapshot.getChildren()) {
@@ -290,7 +267,6 @@ public class ChatFragment extends Fragment {
                     }
 
                     if (unreadMessages.size() > 0) {
-                        // Marks read about unread messages
                         mDatabase.child("rooms").child(roomID).child("messages").updateChildren(unreadMessages).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
@@ -313,7 +289,7 @@ public class ChatFragment extends Fragment {
 
         private void stopListening() {
             if (valueEventListener != null) {
-                mDatabase.removeEventListener(valueEventListener);
+                databaseReference.removeEventListener(valueEventListener);
             }
 
             messagesList.clear();
@@ -383,7 +359,7 @@ public class ChatFragment extends Fragment {
         }
 
         void setReadCounter(int position, ImageView imageView) {
-            int cnt = usersList.size() - messagesList.get(position).readUsers.size();
+            int cnt = 2 - messagesList.get(position).readUsers.size();
             if (cnt > 0) {
                 imageView.setColorFilter(rootView.getContext().getColor(R.color.unread_message));
             } else {
@@ -413,7 +389,6 @@ public class ChatFragment extends Fragment {
             }
 
             public void bind(final Message message) {
-                String day = dateFormat.format(new Date((long) message.timestamp));
                 String time = DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date((long) message.timestamp));
                 timestamp.setText(time);
                 msg_item.setText(message.msg);

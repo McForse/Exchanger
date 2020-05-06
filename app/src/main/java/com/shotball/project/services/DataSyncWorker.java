@@ -10,7 +10,7 @@ import androidx.work.WorkerParameters;
 
 public class DataSyncWorker extends Worker {
 
-    private static final String TAG = "MyWorker";
+    private static final String TAG = "DataSyncWorker";
 
     public DataSyncWorker(@NonNull Context appContext, @NonNull WorkerParameters workerParams) {
         super(appContext, workerParams);

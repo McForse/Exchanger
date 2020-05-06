@@ -74,8 +74,6 @@ public class MessagesFragment extends Fragment {
     private void initToolbar() {
         Toolbar toolbar = rootView.findViewById(R.id.toolbar);
         toolbar.setTitle("Messages");
-        //((AppCompatActivity) mActivity).setSupportActionBar(toolbar);
-        //setHasOptionsMenu(true);
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -185,7 +183,7 @@ public class MessagesFragment extends Fragment {
                         roomList.add(entry.getValue());
                     }
                     notifyDataSetChanged();
-                    setBadge(getContext(), unreadTotal);
+                    setBadge(rootView.getContext(), unreadTotal);
                 }
 
                 @Override
@@ -290,7 +288,6 @@ public class MessagesFragment extends Fragment {
     }
 
     private static String getLauncherClassName(Context context) {
-
         PackageManager pm = context.getPackageManager();
 
         Intent intent = new Intent(Intent.ACTION_MAIN);

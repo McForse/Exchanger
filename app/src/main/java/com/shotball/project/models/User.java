@@ -14,7 +14,9 @@ public class User {
     public String image;
     public String fcm;
 
-    public User() { }
+    public User() {
+
+    }
 
     public User(String username, String email) {
         this.username = username;

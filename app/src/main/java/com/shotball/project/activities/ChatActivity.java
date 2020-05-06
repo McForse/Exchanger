@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -13,6 +14,8 @@ import com.shotball.project.R;
 import com.shotball.project.fragments.ChatFragment;
 
 public class ChatActivity extends AppCompatActivity {
+
+    private static final String TAG = "ChatActivity";
 
     private ChatFragment chatFragment;
     private Toolbar toolbar;
@@ -24,6 +27,17 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         initToolbar();
+        initComponents();
+    }
+
+    private void initToolbar() {
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle(null);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    private void initComponents() {
         roomTitleTextView = findViewById(R.id.room_title);
         roomImageView = findViewById(R.id.room_image);
 
@@ -42,11 +56,9 @@ public class ChatActivity extends AppCompatActivity {
             Glide.with(this)
                     .load(roomImage)
                     .into(roomImageView);
-            } else {
-
+        } else {
             Glide.with(this).load(R.drawable.image_user)
                     .into(roomImageView);
-
         }
 
         chatFragment = ChatFragment.getInstance(toUid, roomID, productKey, productTitle);
@@ -54,13 +66,6 @@ public class ChatActivity extends AppCompatActivity {
                 .beginTransaction()
                 .replace(R.id.mainFragment, chatFragment )
                 .commit();
-    }
-
-    private void initToolbar() {
-        toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(null);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -74,4 +79,9 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop");
+    }
 }
