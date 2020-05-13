@@ -1,7 +1,6 @@
 package com.shotball.project.activities;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.app.Activity;
@@ -15,13 +14,14 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.shotball.project.R;
 import com.shotball.project.adapters.FragmentViewPagerAdapter;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     private static final String TAG = "MainActivity";
 
@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
                         String token = task.getResult().getToken();
                         Log.d(TAG, "FCM token: " + token);
+                        FirebaseDatabase.getInstance().getReference().child("users").child(getUid()).child("fcm").setValue(token);
                     }
                 });
         FirebaseMessaging.getInstance().subscribeToTopic("common");

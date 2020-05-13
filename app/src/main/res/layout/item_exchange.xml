@@ -95,7 +95,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/product_exchange_actions_container"
+            android:id="@+id/product_exchange_offers_actions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingBottom="@dimen/cat_card_single_spacing"
@@ -118,6 +118,34 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/cat_card_single_spacing"
                 android:text="Refuse"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/product_exchange_accept_actions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/cat_card_single_spacing"
+            android:paddingLeft="@dimen/cat_card_single_spacing"
+            android:paddingRight="@dimen/cat_card_single_spacing"
+            android:visibility="gone"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                style="?attr/borderlessButtonStyle"
+                android:id="@+id/product_exchange_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/cat_card_single_spacing"
+                android:text="Messages"/>
+
+            <com.google.android.material.button.MaterialButton
+                style="?attr/borderlessButtonStyle"
+                android:id="@+id/product_exchange_complete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/cat_card_single_spacing"
+                android:text="Took place"/>
 
         </LinearLayout>
 

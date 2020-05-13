@@ -218,7 +218,6 @@ public class ProductActivity extends AppCompatActivity {
             adapterImageSlider.setItems(mProduct.images);
             viewPager.setAdapter(adapterImageSlider);
 
-            // displaying selected image first
             viewPager.setCurrentItem(0);
             addBottomDots(layout_dots, adapterImageSlider.getCount(), 0);
             viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -274,9 +273,9 @@ public class ProductActivity extends AppCompatActivity {
                                 Map<String, String> selectedUsers = new HashMap<>();
                                 selectedUsers.put(getUid(), "i");
                                 selectedUsers.put(mSeller.getUid(), "i");
-                                final String room_id = mDatabase.child("rooms").push().getKey();
+                                roomId = mDatabase.child("rooms").push().getKey();
 
-                                mDatabase.child("rooms/" + room_id).child("users").setValue(selectedUsers).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                mDatabase.child("rooms/" + roomId).child("users").setValue(selectedUsers).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
                                         openChat();

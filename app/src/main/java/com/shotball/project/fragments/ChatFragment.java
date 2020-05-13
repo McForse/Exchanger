@@ -30,11 +30,17 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.shotball.project.Config;
 import com.shotball.project.R;
+import com.shotball.project.models.User;
 import com.shotball.project.utils.TextUtil;
 import com.shotball.project.activities.ProductActivity;
 import com.shotball.project.models.Message;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,6 +48,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class ChatFragment extends Fragment {
 
@@ -66,6 +82,8 @@ public class ChatFragment extends Fragment {
     private String productKey;
     private String productTitle;
 
+    private User interlocutor;
+
     public static ChatFragment getInstance(String toUid, String roomID, String productKey, String productTitle) {
         ChatFragment chatFragment = new ChatFragment();
         Bundle bundle = new Bundle();
@@ -83,6 +101,7 @@ public class ChatFragment extends Fragment {
         rootView = inflater.inflate(R.layout.fragment_chat, container, false);
         initComponents();
         myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        getInterlocutor();
 
         mAdapter = new RecyclerViewAdapter();
         recyclerView.setAdapter(mAdapter);
@@ -128,6 +147,27 @@ public class ChatFragment extends Fragment {
         dateFormat = android.text.format.DateFormat.getDateFormat(getContext());
     }
 
+    void getInterlocutor() {
+        Log.d(TAG, "getUserInfoFromServer: " + toUid);
+        mDatabase.child("users").child(toUid).addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                User user = dataSnapshot.getValue(User.class);
+
+                if (user != null) {
+                    user.setUid(dataSnapshot.getKey());
+                    interlocutor = user;
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled getUserInfoFromServer: " + databaseError.getMessage());
+            }
+        });
+    }
+
     private Button.OnClickListener sendButtonClickListener = new View.OnClickListener() {
         public void onClick(View view) {
             String message = messageInput.getText().toString();
@@ -161,6 +201,51 @@ public class ChatFragment extends Fragment {
         message.timestamp = ServerValue.TIMESTAMP;
 
         sendMessageToDatabase(message);
+        sendPush(msg);
+    }
+
+    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+
+    OkHttpClient client = new OkHttpClient();
+
+    Call post(String url, String json, Callback callback) {
+        RequestBody body = RequestBody.create(JSON, json);
+        Request request = new Request.Builder()
+                .url(url)
+                .post(body)
+                .build();
+        Call call = client.newCall(request);
+        call.enqueue(callback);
+        return call;
+    }
+
+    private void sendPush(String msg) {
+
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("title", "New message");
+            jsonObject.put("message", msg);
+            jsonObject.put("token", "etO0heftQrC-zAe00daqTr:APA91bEjQHpxf-Sw-P8xKaMLZ5GCfm9zKtxgvmZ2YXZEX3RJx8_2xVp81aoS5mMm7qD_JE0-8G3nIPxtYVXRYZzJDcw6l0FaHgtZr8tYAqjLpMi2mgvmWzj78T6vM78OpvRd22wm1paX");
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        post(Config.FCM_SERVER_URL + "/notification/token", jsonObject.toString(), new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.d(TAG, e.toString());
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String responseStr = response.body().string();
+                    Log.d(TAG, responseStr);
+                } else {
+                    Log.d(TAG, "not");
+                }
+            }
+        });
     }
 
     private void sendMessageToDatabase(Message message) {
@@ -252,7 +337,6 @@ public class ChatFragment extends Fragment {
 
                     // Update number of messages unread to 0 => read all
                     mDatabase.child("rooms").child(roomID).child("unread").child(myUid).setValue(0);
-                    Log.d(TAG, "111111");
                     Map<String, Object> unreadMessages = new HashMap<>();
 
                     for (DataSnapshot item: dataSnapshot.getChildren()) {

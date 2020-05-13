@@ -26,21 +26,21 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMessagingService";
 
+    private static int notificationID = 0;
+
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Log.d(TAG, "From: " + remoteMessage.getFrom());
 
-        RemoteMessage.Notification data = remoteMessage.getNotification();
-
         // Check if message contains a data payload.
-        if (data != null) {
+        if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
 
             if (/* Check if data needs to be processed by long running job */ false) {
                 // For long-running tasks (10 seconds or more) use WorkManager.
                 scheduleJob();
             } else {
-                sendNotification(data.getTitle(), data.getBody());
+                sendNotification(remoteMessage);
             }
         }
     }
@@ -65,7 +65,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         FirebaseDatabase.getInstance().getReference().child("users").child(getUid()).child("fcm").setValue(token);
     }
 
-    private void sendNotification(String title, String messageBody) {
+    private void sendNotification(RemoteMessage remoteMessage) {
+        String title = remoteMessage.getNotification().getTitle();
+        String messageBody = remoteMessage.getNotification().getBody();
+        String url = remoteMessage.getData().get("image");
+
+
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
@@ -93,7 +98,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             notificationManager.createNotificationChannel(channel);
         }
 
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        notificationManager.notify(notificationID++ /* ID of notification */, notificationBuilder.build());
     }
 
     public String getUid() {

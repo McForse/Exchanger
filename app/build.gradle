@@ -21,14 +21,11 @@ android {
             targetCompatibility JavaVersion.VERSION_1_8
         }
         debug {
-            buildConfigField("String", "FCM_BASE_URL", "\"https://fcm.googleapis.com/\"")
-            buildConfigField("String", "FCM_SERVER_KEY", "\"AAAA-XDq018:APA91bEVWAPJnoWOabtBiOfs--LBh9ccrlIJogLegRb9f6deeqQtE9_sGWvv533yncu4-arlNzjxJ_mCw0aXU0MDaoui3yLOermMLLwYB2l6YjjW5PWnS9RkcAQr3ldLsvAvQ6WBTO54\"")
+
         }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            buildConfigField("String", "FCM_BASE_URL", "\"https://fcm.googleapis.com/\"")
-            buildConfigField("String", "FCM_SERVER_KEY", "\"AAAA-XDq018:APA91bEVWAPJnoWOabtBiOfs--LBh9ccrlIJogLegRb9f6deeqQtE9_sGWvv533yncu4-arlNzjxJ_mCw0aXU0MDaoui3yLOermMLLwYB2l6YjjW5PWnS9RkcAQr3ldLsvAvQ6WBTO54\"")
         }
     }
 

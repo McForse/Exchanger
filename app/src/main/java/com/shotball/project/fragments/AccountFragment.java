@@ -24,13 +24,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.network.ListNetworkRequest;
 import com.google.gson.JsonObject;
 import com.shotball.project.R;
 import com.shotball.project.activities.ExchangeActivity;
-import com.shotball.project.activities.MainActivity;
 import com.shotball.project.models.User;
-import com.shotball.project.services.ApiClient;
 import com.shotball.project.utils.ViewAnimation;
 
 import retrofit2.Call;
@@ -77,27 +74,6 @@ public class AccountFragment extends Fragment {
         });
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
-
-        Button send = rootView.findViewById(R.id.sendBtn);
-        send.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                JsonObject payload = buildNotificationPayload();
-                // send notification to receiver ID
-                ApiClient.getApiService().sendNotification(payload).enqueue(
-                        new Callback<JsonObject>() {
-                            @Override
-                            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
-                                if (response.isSuccessful()) {
-                                    Toast.makeText(rootView.getContext(), "Notification send successful",
-                                            Toast.LENGTH_LONG).show();
-                                }
-                            }
-                            @Override public void onFailure(Call<JsonObject> call, Throwable t) {
-                            }
-                        });
-            }
-        });
     }
 
     private JsonObject buildNotificationPayload() {
