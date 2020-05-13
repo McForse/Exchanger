@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true">
 
-        <androidx.appcompat.widget.Toolbar
+        <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
@@ -21,7 +21,7 @@
             android:theme="@style/Toolbar.Light"
             app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light"
             android:fitsSystemWindows="true"
-            android:elevation="4dp" />
+            android:elevation="@dimen/design_appbar_elevation" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

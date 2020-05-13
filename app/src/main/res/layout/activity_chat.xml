@@ -12,12 +12,13 @@
         android:background="@android:color/white"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <androidx.appcompat.widget.Toolbar
+        <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/white"
             app:contentInsetStartWithNavigation="0dp"
+            android:elevation="@dimen/design_appbar_elevation"
             android:theme="@style/Toolbar.Light"
             app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light">
 
@@ -60,7 +61,7 @@
 
             </LinearLayout>
 
-        </androidx.appcompat.widget.Toolbar>
+        </com.google.android.material.appbar.MaterialToolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
 

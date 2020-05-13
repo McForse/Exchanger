@@ -81,8 +81,11 @@ public class MessagesFragment extends Fragment {
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         recyclerView = rootView.findViewById(R.id.chats_recyclerView);
+        int verticalPadding = rootView.getContext().getResources().getDimensionPixelSize(R.dimen.item_list_padding_vertical);
+        recyclerView.setPadding(0, verticalPadding, 0, verticalPadding);
+        recyclerView.setClipToPadding(false);
         recyclerView.setLayoutManager(new LinearLayoutManager(rootView.getContext()));
-        recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));
+        recyclerView.addItemDecoration(new DividerItemDecoration(rootView.getContext(), DividerItemDecoration.VERTICAL));
         mAdapter = new ChatsRecyclerViewAdapter();
         recyclerView.setAdapter(mAdapter);
 
@@ -216,7 +219,6 @@ public class MessagesFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
             RoomViewHolder roomViewHolder = (RoomViewHolder) holder;
-
             final ChatRoomModel chatRoomModel = roomList.get(position);
 
             roomViewHolder.room_title.setText(chatRoomModel.getTitle());
@@ -232,6 +234,7 @@ public class MessagesFragment extends Fragment {
                         .apply(requestOptions)
                         .into(roomViewHolder.room_image);
             }
+
             if (chatRoomModel.getUnreadCount() > 0) {
                 roomViewHolder.unread_count.setText(chatRoomModel.getUnreadCount().toString());
                 roomViewHolder.unread_count.setVisibility(View.VISIBLE);

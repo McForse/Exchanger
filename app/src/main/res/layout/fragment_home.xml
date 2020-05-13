@@ -14,13 +14,13 @@
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <androidx.appcompat.widget.Toolbar
+        <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/white"
             app:contentInsetStartWithNavigation="0dp"
-            android:elevation="4dp"
+            android:elevation="@dimen/design_appbar_elevation"
             android:theme="@style/Toolbar.Light.ColorIcons"
             app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light" />
 
@@ -41,11 +41,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/product_grid"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+                <include layout="@layout/layout_no_items"
+                    android:visibility="gone" />
+
+                </RelativeLayout>
 
             </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
@@ -62,9 +71,6 @@
 
         <include layout="@layout/layout_allow_geolocation"
         android:visibility="gone" />
-
-        <include layout="@layout/layout_no_items"
-            android:visibility="gone" />
 
     </RelativeLayout>
 

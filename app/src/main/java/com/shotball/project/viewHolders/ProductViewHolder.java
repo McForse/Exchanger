@@ -57,6 +57,7 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
 
         if (product_distance < 1000) {
             distance.setText(String.valueOf(product_distance));
+            distanceUnit.setText(R.string.meters);
         } else {
             distance.setText(String.valueOf((float) product_distance / 1000));
             distanceUnit.setText(R.string.kilometers);

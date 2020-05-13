@@ -38,6 +38,7 @@
     <string name="content_description_media">Media</string>
     <string name="menu_like">Add to favourite</string>
     <string name="title_activity_maps">Map</string>
+    <string name="meters">meters</string>
     <string name="kilometers">kilometers</string>
     <string name="menu_add">Add product</string>
     <string name="menu_done">Upload product</string>

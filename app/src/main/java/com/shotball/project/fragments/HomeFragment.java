@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.Parcelable;
 import android.provider.Settings;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
@@ -27,6 +29,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
@@ -38,10 +41,6 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryDataEventListener;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.google.firebase.database.DataSnapshot;
@@ -53,7 +52,6 @@ import com.google.firebase.database.Transaction;
 import com.shotball.project.R;
 import com.shotball.project.activities.AddProductActivity;
 import com.shotball.project.activities.FilterActivity;
-import com.shotball.project.activities.MainActivity;
 import com.shotball.project.activities.ProductActivity;
 import com.shotball.project.activities.SignInActivity;
 import com.shotball.project.adapters.ProductAdapter;
@@ -65,7 +63,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executor;
 
 public class HomeFragment extends Fragment implements ProductAdapter.OnProductSelectedListener {
 
@@ -77,9 +74,8 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
 
     private View rootView;
     private Activity mActivity;
-    private RelativeLayout mainContainer;
-    private NestedScrollView geolocationContainer;
-    private NestedScrollView noItemPage;
+    private ConstraintLayout geolocationContainer;
+    private ConstraintLayout noItemPage;
     private ProgressBar progressBar;
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeContainer;
@@ -128,6 +124,9 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
             gridLayoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         }
 
+        int verticalPadding = getResources().getDimensionPixelSize(R.dimen.item_list_padding_vertical);
+        recyclerView.setPadding(0, verticalPadding, 0, verticalPadding);
+        recyclerView.setClipToPadding(false);
         recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setAdapter(mAdapter);
@@ -135,16 +134,15 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
 
     private void initComponents() {
         mActivity = getActivity();
-        mainContainer = rootView.findViewById(R.id.home_main_container);
         geolocationContainer = rootView.findViewById(R.id.lyt_no_permission_location);
         noItemPage = rootView.findViewById(R.id.lyt_no_items);
-        mainContainer.setVisibility(View.GONE);
         geolocationContainer.setVisibility(View.GONE);
         noItemPage.setVisibility(View.GONE);
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
         progressBar = rootView.findViewById(R.id.home_progress_bar);
         recyclerView = rootView.findViewById(R.id.product_grid);
+        recyclerView.setVisibility(View.GONE);
         swipeContainer = rootView.findViewById(R.id.swipe_container);
         mAdapter = new ProductAdapter(rootView.getContext(), item_per_display);
         mFilters = Filters.getDefault();
@@ -178,7 +176,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         }
 
         if (!mLocationPermissionGranted || !gpsEnabled) {
-            mainContainer.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.GONE);
             geolocationContainer.setVisibility(View.VISIBLE);
             Button allowLocationButton = rootView.findViewById(R.id.button_allow_location);
             allowLocationButton.setOnClickListener(new View.OnClickListener() {
@@ -197,7 +195,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
             myLocation.setLatitude(MY_LOCATION[0]);
             myLocation.setLongitude(MY_LOCATION[1]);
             setMyLocation(myLocation);
-            mainContainer.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.VISIBLE);
             setReferences();
             /*FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mActivity);
             mFusedLocationClient.getLastLocation().addOnSuccessListener(MainActivity.this, new OnSuccessListener<Location>() {
@@ -455,14 +453,12 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         }
 
         if (filtersUpdated) {
+            swipeContainer.setRefreshing(true);
+            stopGeoQueryListener();
             resetRecycleView();
-            mAdapter.setOnLoadMoreListener(new ProductAdapter.OnLoadMoreListener() {
-                @Override
-                public void onLoadMore(int current_page) {
-                    loadNextData();
-                }
-            });
-            startSearch();
+            if (checkPermissionsAndGps()) {
+                startSearch();
+            }
         }
     }
 
@@ -483,10 +479,21 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
             }, 50);
         }
 
+        ImageView geo = rootView.findViewById(R.id.no_geolocation_image);
+        ImageView noItems = rootView.findViewById(R.id.no_items_image);
+        int normalSize = (int) getResources().getDimension(R.dimen.error_image_size);
         if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             gridLayoutManager.setSpanCount(2);
+            geo.getLayoutParams().width = normalSize;
+            geo.getLayoutParams().height = normalSize;
+            noItems.getLayoutParams().width = normalSize;
+            noItems.getLayoutParams().height = normalSize;
         } else if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE){
             gridLayoutManager.setSpanCount(3);
+            geo.getLayoutParams().width = (int) getResources().getDimension(R.dimen.error_image_size_landscape2);
+            geo.getLayoutParams().height = (int) getResources().getDimension(R.dimen.error_image_size_landscape2);
+            noItems.getLayoutParams().width = (int) getResources().getDimension(R.dimen.error_image_size_landscape);
+            noItems.getLayoutParams().height = (int) getResources().getDimension(R.dimen.error_image_size_landscape);
         }
 
         recyclerView.setLayoutManager(gridLayoutManager);

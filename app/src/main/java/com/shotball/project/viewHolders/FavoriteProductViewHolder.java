@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -63,6 +64,7 @@ public class FavoriteProductViewHolder extends RecyclerView.ViewHolder {
             distanceUnit.setText(R.string.kilometers);
         }
 
+        viewForeground.setOnClickListener(OnProductSelectedListener);
         openProduct.setOnClickListener(OnProductSelectedListener);
     }
 

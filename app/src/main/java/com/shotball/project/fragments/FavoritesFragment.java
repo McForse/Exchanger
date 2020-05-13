@@ -2,6 +2,7 @@ package com.shotball.project.fragments;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,12 +10,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -49,7 +51,7 @@ public class FavoritesFragment extends Fragment implements RecyclerItemTouchHelp
 
     private View rootView;
     private CoordinatorLayout mainContainer;
-    private NestedScrollView noItemPage;
+    private ConstraintLayout noItemPage;
     private SwipeRefreshLayout swipeContainer;
     private RecyclerView recyclerView;
 
@@ -82,8 +84,12 @@ public class FavoritesFragment extends Fragment implements RecyclerItemTouchHelp
         swipeContainer = rootView.findViewById(R.id.swipe_container);
         mAdapter = new FavouriteProductsAdapter();
         mManager = new LinearLayoutManager(rootView.getContext());
+
         recyclerView = rootView.findViewById(R.id.productGrid);
         recyclerView.setVisibility(View.GONE);
+        int verticalPadding = getResources().getDimensionPixelSize(R.dimen.item_list_padding_vertical);
+        recyclerView.setPadding(0, verticalPadding, 0, verticalPadding);
+        recyclerView.setClipToPadding(false);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(mManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -274,6 +280,24 @@ public class FavoritesFragment extends Fragment implements RecyclerItemTouchHelp
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume");
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Log.d(TAG, "onConfigurationChanged");
+
+        ImageView noItems = rootView.findViewById(R.id.no_items_image);
+        int normalSize = (int) getResources().getDimension(R.dimen.error_image_size);
+        int minSize = (int) getResources().getDimension(R.dimen.error_image_size_landscape);
+
+        if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            noItems.getLayoutParams().width = normalSize;
+            noItems.getLayoutParams().height = normalSize;
+        } else if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            noItems.getLayoutParams().width = minSize;
+            noItems.getLayoutParams().height = minSize;
+        }
     }
 
     private String getUid() {
