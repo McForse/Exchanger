@@ -41,7 +41,7 @@
             android:orientation="vertical">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayoutEmail"
+                android:id="@+id/text_input_layout_email"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -52,7 +52,7 @@
                 app:helperText="@string/required">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/fieldEmail"
+                    android:id="@+id/field_email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textEmailAddress"
@@ -67,7 +67,7 @@
                 android:layout_height="@dimen/spacing_mlarge" />
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayoutPassword"
+                android:id="@+id/text_input_layout_password"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -79,7 +79,7 @@
                 app:endIconMode="clear_text">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/fieldPassword"
+                    android:id="@+id/field_password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"

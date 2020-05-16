@@ -1,7 +1,9 @@
 package com.shotball.project.activities;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -9,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -51,6 +54,8 @@ public class SignInActivity extends BaseActivity implements View.OnClickListener
     private EditText mEmailField;
     private EditText mPasswordField;
 
+    private AlertDialog resetPasswordDialog;
+
     public FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
     private GoogleSignInClient mGoogleSignInClient;
@@ -60,17 +65,7 @@ public class SignInActivity extends BaseActivity implements View.OnClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
 
-        mainContainer = findViewById(R.id.sing_in_activity);
-
-        mTextInputLayoutEmail = findViewById(R.id.textInputLayoutEmail);
-        mTextInputLayoutPassword = findViewById(R.id.textInputLayoutPassword);
-
-        mEmailField = findViewById(R.id.fieldEmail);
-        mPasswordField = findViewById(R.id.fieldPassword);
-
-        findViewById(R.id.signInButton).setOnClickListener(this);
-        findViewById(R.id.createAccountButton).setOnClickListener(this);
-        findViewById(R.id.googleSignInButton).setOnClickListener(this);
+        initComponents();
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -80,6 +75,29 @@ public class SignInActivity extends BaseActivity implements View.OnClickListener
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+    }
+
+    private void initComponents() {
+        mainContainer = findViewById(R.id.sing_in_activity);
+
+        mTextInputLayoutEmail = findViewById(R.id.text_input_layout_email);
+        mTextInputLayoutPassword = findViewById(R.id.text_input_layout_password);
+
+        mEmailField = findViewById(R.id.field_email);
+        mPasswordField = findViewById(R.id.field_password);
+
+        findViewById(R.id.signin_button).setOnClickListener(this);
+        findViewById(R.id.forgot_password).setOnClickListener(this);
+        findViewById(R.id.create_account_button).setOnClickListener(this);
+        findViewById(R.id.google_signin_button).setOnClickListener(this);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle("Reset password")
+                .setMessage("Enter your email address")
+                .setView(R.layout.dialog_password_restore)
+                .setNeutralButton(R.string.cancel, null)
+                .setPositiveButton("Send", null);
+        resetPasswordDialog = builder.create();
     }
 
     @Override
@@ -228,6 +246,19 @@ public class SignInActivity extends BaseActivity implements View.OnClickListener
         return valid;
     }
 
+    private void resetPassword(String email) {
+        mAuth.sendPasswordResetEmail(email)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Snackbar.make(mainContainer, R.string.reset_password_email_send, Snackbar.LENGTH_LONG).show();
+                            Log.d(TAG, "Email sent.");
+                        }
+                    }
+                });
+    }
+
     private void updateUI(FirebaseUser user) {
         hideProgressDialog();
 
@@ -251,12 +282,36 @@ public class SignInActivity extends BaseActivity implements View.OnClickListener
         int i = v.getId();
         hideKeyboard(v);
 
-        if (i == R.id.createAccountButton) {
+        if (i == R.id.forgot_password) {
+            resetPasswordDialog.show();
+            resetPasswordDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    TextInputLayout textInputLayout = resetPasswordDialog.findViewById(R.id.text_input_layout);
+                    TextView input = resetPasswordDialog.findViewById(android.R.id.text1);
+                    if (textInputLayout == null || input == null) return;
+                    String email = input.getText().toString();
+
+                    if (TextUtils.isEmpty(email)) {
+                        textInputLayout.setError(getString(R.string.required));
+                        textInputLayout.requestFocus();
+                    } else if (!TextUtil.validateEmail(email)) {
+                        textInputLayout.setError(getString(R.string.error_invalid_email));
+                        textInputLayout.requestFocus();
+                    } else {
+                        textInputLayout.setError(null);
+                        resetPassword(input.getText().toString());
+                        input.setText("");
+                        resetPasswordDialog.dismiss();
+                    }
+                }
+            });
+        } else if (i == R.id.create_account_button) {
             Intent intent = new Intent(SignInActivity.this, SignUpActivity.class);
             startActivity(intent);
-        } else if (i == R.id.signInButton) {
+        } else if (i == R.id.signin_button) {
             signIn(mEmailField.getText().toString(), mPasswordField.getText().toString());
-        } else if (i == R.id.googleSignInButton) {
+        } else if (i == R.id.google_signin_button) {
             signInGoogle();
         }
     }

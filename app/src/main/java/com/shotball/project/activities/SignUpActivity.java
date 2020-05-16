@@ -70,12 +70,12 @@ public class SignUpActivity extends BaseActivity {
     }
 
     private void initComponents() {
-        mTextInputLayoutEmail = findViewById(R.id.textInputLayoutEmail);
-        mTextInputLayoutPassword = findViewById(R.id.textInputLayoutPassword);
+        mTextInputLayoutEmail = findViewById(R.id.text_input_layout_email);
+        mTextInputLayoutPassword = findViewById(R.id.text_input_layout_password);
         mTextInputLayoutRePassword = findViewById(R.id.textInputLayoutRePassword);
 
-        mEmailField = findViewById(R.id.fieldEmail);
-        mPasswordField = findViewById(R.id.fieldPassword);
+        mEmailField = findViewById(R.id.field_email);
+        mPasswordField = findViewById(R.id.field_password);
         mRePasswordField = findViewById(R.id.fieldRePassword);
         mUsernameField = findViewById(R.id.fieldUsername);
 

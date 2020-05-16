@@ -13,6 +13,7 @@ import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.shotball.project.R;
+import com.shotball.project.fragments.AccountFragment;
 import com.shotball.project.models.Product;
 import com.shotball.project.utils.TextUtil;
 
@@ -20,25 +21,18 @@ public class MyProductViewHolder extends RecyclerView.ViewHolder {
 
     private TextView title;
     private ImageView image;
-    private TextView distance;
-    private TextView distanceUnit;
-    private Button openProduct;
-    public MaterialCardView viewForeground;
+    private Button deleteProduct;
 
     public MyProductViewHolder(View itemView) {
         super(itemView);
 
         title = itemView.findViewById(R.id.product_title);
         image = itemView.findViewById(R.id.product_image);
-        distance = itemView.findViewById(R.id.product_distance);
-        distanceUnit = itemView.findViewById(R.id.product_distance_unit);
-        openProduct = itemView.findViewById(R.id.product_open);
-        viewForeground = itemView.findViewById(R.id.product_favourite_card);
+        deleteProduct = itemView.findViewById(R.id.product_delete);
     }
 
-    public void bind(final Context context, final Product product, View.OnClickListener OnProductSelectedListener) {
+    public void bind(final Context context, final Product product, AccountFragment.OnProductSelectedListener listener) {
         title.setText(product.title);
-
         String imageUrl = product.images.get(0);
 
         try {
@@ -50,25 +44,20 @@ public class MyProductViewHolder extends RecyclerView.ViewHolder {
                 StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("images").child(product.getKey()).child(imageUrl);
                 Glide.with(context).load(storageReference).centerCrop().into(image);
             }
-        } catch (IllegalArgumentException ignored) {
+        } catch (IllegalArgumentException ignored) { }
 
-        }
-
-        int product_distance = round10(product.distance);
-
-        if (product_distance < 1000) {
-            distance.setText(String.valueOf(product_distance));
-        } else {
-            distance.setText(String.valueOf((float) product_distance / 1000));
-            distanceUnit.setText(R.string.kilometers);
-        }
-
-        viewForeground.setOnClickListener(OnProductSelectedListener);
-        openProduct.setOnClickListener(OnProductSelectedListener);
-    }
-
-    private int round10(int value) {
-        return value / 10 * 10;
+        itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.onProductSelected(product);
+            }
+        });
+        deleteProduct.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.onDeleteClicked(product.getKey());
+            }
+        });
     }
 
 }

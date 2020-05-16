@@ -1,5 +1,6 @@
 package com.shotball.project.fragments;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,12 +10,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,7 +24,10 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.firebase.ui.database.SnapshotParser;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -33,10 +37,12 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.shotball.project.R;
 import com.shotball.project.activities.ExchangeActivity;
+import com.shotball.project.activities.ProductActivity;
 import com.shotball.project.models.Product;
 import com.shotball.project.models.User;
 import com.shotball.project.utils.ViewAnimation;
 import com.shotball.project.viewHolders.FavoriteProductViewHolder;
+import com.shotball.project.viewHolders.MyProductViewHolder;
 
 public class AccountFragment extends Fragment {
 
@@ -45,7 +51,6 @@ public class AccountFragment extends Fragment {
     private View rootView;
     private CoordinatorLayout mainContainer;
     private ImageView userImageView;
-    private TextView userNameField;
     private TextView exchangesCount;
     private RecyclerView recyclerView;
     private FirebaseRecyclerAdapter mAdapter;
@@ -69,7 +74,6 @@ public class AccountFragment extends Fragment {
         mainContainer = rootView.findViewById(R.id.account_fragment);
         mainContainer.setVisibility(View.GONE);
         userImageView = rootView.findViewById(R.id.account_image);
-        userNameField = rootView.findViewById(R.id.account_name);
         exchangesCount = rootView.findViewById(R.id.exchanges_count);
 
         LinearLayout proposedExchangesButton = rootView.findViewById(R.id.proposed_ecxhanges_button);
@@ -126,7 +130,6 @@ public class AccountFragment extends Fragment {
                     .load(mUser.getImage())
                     .apply(RequestOptions.circleCropTransform())
                     .into(userImageView);
-            //userNameField.setText(mUser.getUsername());
             exchangesCount.setText(String.valueOf(mUser.getExchanges()));
 
             ViewAnimation.showIn(mainContainer);
@@ -142,21 +145,55 @@ public class AccountFragment extends Fragment {
 
         FirebaseRecyclerOptions<Product> options =
                 new FirebaseRecyclerOptions.Builder<Product>()
-                        .setQuery(query, Product.class)
+                        .setQuery(query, new SnapshotParser<Product>() {
+                            @NonNull
+                            @Override
+                            public Product parseSnapshot(@NonNull DataSnapshot snapshot) {
+                                Product product = snapshot.getValue(Product.class);
+
+                                if (product != null) {
+                                    product.setKey(snapshot.getKey());
+                                }
+
+                                return product;
+                            }
+                        })
                         .build();
 
-        mAdapter = new FirebaseRecyclerAdapter<Product, FavoriteProductViewHolder>(options) {
+        mAdapter = new FirebaseRecyclerAdapter<Product, MyProductViewHolder>(options) {
             @Override
-            public FavoriteProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            public MyProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 View view = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.item_favourite_product, parent, false);
+                        .inflate(R.layout.item_my_product, parent, false);
 
-                return new FavoriteProductViewHolder(view);
+                return new MyProductViewHolder(view);
             }
 
             @Override
-            protected void onBindViewHolder(@NonNull FavoriteProductViewHolder holder, int position, @NonNull Product model) {
-                holder.bind(rootView.getContext(), model, null);
+            protected void onBindViewHolder(@NonNull MyProductViewHolder holder, int position, @NonNull Product model) {
+                holder.bind(rootView.getContext(), model, new OnProductSelectedListener() {
+                    @Override
+                    public void onProductSelected(Product product) {
+                        Intent intent = new Intent(getActivity(), ProductActivity.class);
+                        intent.putExtra(ProductActivity.EXTRA_PRODUCT_KEY, product.getKey());
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    public void onDeleteClicked(String productKey) {
+                        new MaterialAlertDialogBuilder(rootView.getContext())
+                                .setTitle("Delete product")
+                                .setMessage("Are you sure you want to remove the product?")
+                                .setNegativeButton(R.string.cancel, null)
+                                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        deleteProduct(productKey);
+                                    }
+                                })
+                                .show();
+                    }
+                });
             }
         };
 
@@ -164,6 +201,16 @@ public class AccountFragment extends Fragment {
         recyclerView.setAdapter(mAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(rootView.getContext()));
         mAdapter.startListening();
+    }
+
+    private void deleteProduct(String productKey) {
+        mDatabase.child("products").child(productKey).removeValue().addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Snackbar snackbar = Snackbar.make(mainContainer, "An error occurred while deleting the product", Snackbar.LENGTH_LONG);
+                snackbar.setAnchorView(getActivity().findViewById(R.id.bottom_navigation));
+            }
+        });
     }
 
     @Override
@@ -195,5 +242,10 @@ public class AccountFragment extends Fragment {
         } else {
             return null;
         }
+    }
+
+    public interface OnProductSelectedListener {
+        void onProductSelected(Product product);
+        void onDeleteClicked(String productKey);
     }
 }

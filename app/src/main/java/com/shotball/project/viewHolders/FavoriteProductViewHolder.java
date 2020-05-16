@@ -39,7 +39,6 @@ public class FavoriteProductViewHolder extends RecyclerView.ViewHolder {
 
     public void bind(final Context context, final Product product, View.OnClickListener OnProductSelectedListener) {
         title.setText(product.title);
-
         String imageUrl = product.images.get(0);
 
         try {
