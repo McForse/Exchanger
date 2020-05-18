@@ -30,17 +30,12 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.shotball.project.Config;
 import com.shotball.project.R;
 import com.shotball.project.models.User;
 import com.shotball.project.utils.TextUtil;
 import com.shotball.project.activities.ProductActivity;
 import com.shotball.project.models.Message;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,17 +46,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.FormBody;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-
-import static com.shotball.project.utils.HTTPRequests.post;
+import static com.shotball.project.utils.FCM.sendPush;
 
 public class ChatFragment extends Fragment {
 
@@ -206,38 +191,6 @@ public class ChatFragment extends Fragment {
         message.timestamp = ServerValue.TIMESTAMP;
 
         sendMessageToDatabase(message);
-        sendPush(msg);
-    }
-
-
-
-    private void sendPush(String msg) {
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("title", "New message");
-            jsonObject.put("message", msg);
-            jsonObject.put("token", interlocutor.getFcm());
-            jsonObject.put("imageUrl", interlocutor.getImage());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        post(Config.FCM_SERVER_URL + "/notification/token", jsonObject.toString(), new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.d(TAG, e.toString());
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    String responseStr = response.body().string();
-                    Log.d(TAG, responseStr);
-                } else {
-                    Log.d(TAG, "not");
-                }
-            }
-        });
     }
 
     private void sendMessageToDatabase(Message message) {
@@ -254,7 +207,7 @@ public class ChatFragment extends Fragment {
         mDatabase.child("rooms").child(roomID).child("messages").push().setValue(message).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                //sendGCM();
+                sendPush("New message", message.getMsg(), interlocutor.getFcm(), interlocutor.getImage());
                 sendButton.setEnabled(true);
             }
         });

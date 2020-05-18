@@ -35,6 +35,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/cat_card_single_spacing"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:text="Title" />
 
             <TextView
@@ -44,6 +46,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/cat_card_double_spacing"
                 android:singleLine="true"
+                android:maxLines="1"
+                android:ellipsize="end"
                 android:text="Description" />
 
             <View
@@ -88,6 +92,8 @@
                     android:id="@+id/to_product_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:ellipsize="end"
                     android:text="To product title" />
 
             </LinearLayout>

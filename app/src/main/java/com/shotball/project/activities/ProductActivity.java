@@ -61,6 +61,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static com.shotball.project.utils.FCM.sendPush;
+
 public class ProductActivity extends AppCompatActivity {
 
     private static final String TAG = "ProductActivity";
@@ -422,7 +424,8 @@ public class ProductActivity extends AppCompatActivity {
         exchReference.child(key).setValue(exchange).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
-                Log.d(TAG, "Ecxhange was successfully added in the database!");
+                Log.d(TAG, "Exchange was successfully added in the database!");
+                sendPush("New exchange!", "You were offered to exchange goods", mSeller.getFcm(), mSeller.getImage());
                 Snackbar.make(mainContainer, R.string.dialog_exchange_added_success, Snackbar.LENGTH_LONG).show();
             }
         }).addOnFailureListener(new OnFailureListener() {

@@ -34,9 +34,9 @@ import com.shotball.project.R;
 import com.shotball.project.activities.ChatActivity;
 import com.shotball.project.interfaces.IsAvailableCallback;
 import com.shotball.project.models.ExchangeModel;
-import com.shotball.project.models.Product;
 import com.shotball.project.models.User;
 import com.shotball.project.viewHolders.ExchangeViewHolder;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,7 +58,7 @@ public abstract class ExchangesFragment extends Fragment {
     public ExchangesFragment() {}
 
     @Override
-    public View onCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView (@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         rootView = inflater.inflate(R.layout.fragment_offers, container, false);
         initComponents();
@@ -243,7 +243,7 @@ public abstract class ExchangesFragment extends Fragment {
         });
     }
 
-    public void incExchanges(String uid) {
+    private void incExchanges(String uid) {
         DatabaseReference reference = mDatabase.child("users").child(uid);
         reference.runTransaction(new Transaction.Handler() {
             @NonNull
