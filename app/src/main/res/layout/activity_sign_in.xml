@@ -5,6 +5,8 @@
     android:id="@+id/sing_in_activity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/home_background"
+    android:fitsSystemWindows="true"
     tools:context=".activities.MainActivity">
 
     <LinearLayout
@@ -42,8 +44,8 @@
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:src="@drawable/ic_launcher_round"
-                        android:tint="@color/blue_grey_800" />
+                        android:src="@drawable/exchange_icon"
+                        android:tint="@color/colorPrimary" />
 
                     <View
                         android:layout_width="0dp"
@@ -54,15 +56,14 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_medium"
                         android:text="@string/app_name"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5"
-                        android:textStyle="bold" />
+                        android:textAppearance="?attr/textAppearanceHeadline6" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_medium"
                         android:text="Sign in with your account"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                        android:textAppearance="?attr/textAppearanceSubtitle1"
                         android:textColor="@color/grey_500" />
 
 
@@ -118,9 +119,10 @@
                     android:id="@+id/forgot_password"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_small"
                     android:clickable="true"
                     android:text="Forgot Password?"
-                    android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                    android:textAppearance="?attr/textAppearanceSubtitle1"
                     android:textColor="@color/colorPrimary"
                     android:textStyle="bold" />
 
@@ -149,7 +151,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="New user? "
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                        android:textAppearance="?attr/textAppearanceSubtitle1"
                         android:textColor="@color/blue_grey_300" />
 
                     <TextView
@@ -158,7 +160,7 @@
                         android:layout_height="wrap_content"
                         android:clickable="true"
                         android:text="Sign Up"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                        android:textAppearance="?attr/textAppearanceSubtitle1"
                         android:textColor="@color/colorPrimary"
                         android:textStyle="bold" />
 
@@ -166,7 +168,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text=" or "
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
+                        android:textAppearance="?attr/textAppearanceSubtitle1"
                         android:textColor="@color/blue_grey_300" />
 
                     <com.google.android.gms.common.SignInButton

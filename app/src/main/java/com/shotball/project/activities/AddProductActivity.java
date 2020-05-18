@@ -48,8 +48,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -62,6 +66,7 @@ import com.shotball.project.helpers.StartSnapHelper;
 import com.shotball.project.models.Categories;
 import com.shotball.project.models.Image;
 import com.shotball.project.models.Product;
+import com.shotball.project.models.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -306,6 +311,7 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "Product was successfully recorded in the database!");
                 mDialog.dismiss();
+                incProducts(mProduct.getUser());
                 mDialog = new MaterialAlertDialogBuilder(AddProductActivity.this)
                         .setTitle(R.string.dialog_success)
                         .setMessage(R.string.dialog_publication_success)
@@ -327,6 +333,28 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
             public void onFailure(@NonNull Exception e) {
                 mDialog.dismiss();
                 Snackbar.make(mainContainer, R.string.error_publish_product, Snackbar.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void incProducts(String uid) {
+        DatabaseReference reference = mDatabase.child("users").child(uid);
+        reference.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                User user = mutableData.getValue(User.class);
+                if (user == null) {
+                    return Transaction.success(mutableData);
+                }
+                user.setExhibited(user.getExhibited() + 1);
+                mutableData.setValue(user);
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                Log.d(TAG, "incExchangesTransaction:onComplete: " + databaseError);
             }
         });
     }

@@ -12,6 +12,7 @@ public class User {
     public String username;
     public String email;
     public String image;
+    public int exhibited;
     public int exchanges;
     public String fcm;
 
@@ -61,6 +62,14 @@ public class User {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public int getExhibited() {
+        return exhibited;
+    }
+
+    public void setExhibited(int exhibited) {
+        this.exhibited = exhibited;
     }
 
     public int getExchanges() {

@@ -61,6 +61,8 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+import static com.shotball.project.utils.HTTPRequests.post;
+
 public class ChatFragment extends Fragment {
 
     private static final String TAG = "ChatFragment";
@@ -207,20 +209,7 @@ public class ChatFragment extends Fragment {
         sendPush(msg);
     }
 
-    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
-    OkHttpClient client = new OkHttpClient();
-
-    Call post(String url, String json, Callback callback) {
-        RequestBody body = RequestBody.create(JSON, json);
-        Request request = new Request.Builder()
-                .url(url)
-                .post(body)
-                .build();
-        Call call = client.newCall(request);
-        call.enqueue(callback);
-        return call;
-    }
 
     private void sendPush(String msg) {
         JSONObject jsonObject = new JSONObject();
@@ -229,7 +218,6 @@ public class ChatFragment extends Fragment {
             jsonObject.put("message", msg);
             jsonObject.put("token", interlocutor.getFcm());
             jsonObject.put("imageUrl", interlocutor.getImage());
-
         } catch (JSONException e) {
             e.printStackTrace();
         }

@@ -78,6 +78,10 @@ public class Product {
         this.exchange_category = exchange_category;
     }
 
+    public String getUser() {
+        return user;
+    }
+
     public void setUser(String user) {
         this.user = user;
     }

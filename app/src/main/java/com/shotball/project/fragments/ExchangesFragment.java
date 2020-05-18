@@ -17,19 +17,24 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.firebase.ui.database.SnapshotParser;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.shotball.project.R;
 import com.shotball.project.activities.ChatActivity;
 import com.shotball.project.interfaces.IsAvailableCallback;
 import com.shotball.project.models.ExchangeModel;
+import com.shotball.project.models.Product;
 import com.shotball.project.models.User;
 import com.shotball.project.viewHolders.ExchangeViewHolder;
 
@@ -166,14 +171,20 @@ public abstract class ExchangesFragment extends Fragment {
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                moveFirebaseRecord(mDatabase.child("products").child(model.getWhat_exchange()), mDatabase.child("exchanged_products").child(model.getWhat_exchange()));
+                                moveFirebaseRecord(mDatabase.child("products").child(model.getExchange_for()), mDatabase.child("exchanged_products").child(model.getExchange_for()));
+                                model.setStatus(3);
+                                mDatabase.child("exchanges").child("completed").child(model.getKey()).setValue(model).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        mDatabase.child("exchanges").child("accepted").child(model.getKey()).removeValue();
+                                    }
+                                });
+                                incExchanges(model.getWho());
+                                incExchanges(model.getWhom());
 
                             }
-                        }).setNeutralButton("No", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-
-                            }
-                        })
+                        }).setNeutralButton("No", null)
                         .show();
             }
         };
@@ -228,6 +239,68 @@ public abstract class ExchangesFragment extends Fragment {
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
+            }
+        });
+    }
+
+    public void incExchanges(String uid) {
+        DatabaseReference reference = mDatabase.child("users").child(uid);
+        reference.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                User user = mutableData.getValue(User.class);
+                if (user == null) {
+                    return Transaction.success(mutableData);
+                }
+                user.setExchanges(user.getExchanges() + 1);
+                mutableData.setValue(user);
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                Log.d(TAG, "incExchangesTransaction:onComplete: " + databaseError);
+            }
+        });
+    }
+
+    private void moveFirebaseRecord(DatabaseReference fromPath, final DatabaseReference toPath) {
+        ValueEventListener valueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                toPath.setValue(dataSnapshot.getValue()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isComplete()) {
+                            removeReference(fromPath);
+                            Log.d(TAG, "Success!");
+                        } else {
+                            Log.d(TAG, "Copy failed!");
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {}
+        };
+
+        fromPath.addListenerForSingleValueEvent(valueEventListener);
+    }
+
+    private void removeReference(DatabaseReference databaseReference) {
+        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot appleSnapshot: dataSnapshot.getChildren()) {
+                    appleSnapshot.getRef().removeValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e(TAG, "onCancelled", databaseError.toException());
             }
         });
     }

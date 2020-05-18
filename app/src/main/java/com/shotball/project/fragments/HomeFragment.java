@@ -97,7 +97,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     private static boolean filtersUpdated;
 
     private static boolean loading = false;
-    private static final int item_per_display = 4;
+    private static final int item_per_display = 10;
     private final List<Product> productsList = new ArrayList<>();
     private HashSet<String> productsKeys;
     private int counter = 0;

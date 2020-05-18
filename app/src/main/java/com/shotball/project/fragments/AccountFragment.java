@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,7 +32,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.shotball.project.R;
 import com.shotball.project.activities.ExchangeActivity;
@@ -50,6 +51,7 @@ public class AccountFragment extends Fragment {
     private View rootView;
     private CoordinatorLayout mainContainer;
     private ImageView userImageView;
+    private TextView exhibitCount;
     private TextView exchangesCount;
     private RecyclerView recyclerView;
     private FirebaseRecyclerAdapter mAdapter;
@@ -73,6 +75,7 @@ public class AccountFragment extends Fragment {
         mainContainer = rootView.findViewById(R.id.account_fragment);
         mainContainer.setVisibility(View.GONE);
         userImageView = rootView.findViewById(R.id.account_image);
+        exhibitCount = rootView.findViewById(R.id.exhibit_count);
         exchangesCount = rootView.findViewById(R.id.exchanges_count);
 
         LinearLayout proposedExchangesButton = rootView.findViewById(R.id.proposed_ecxhanges_button);
@@ -129,10 +132,9 @@ public class AccountFragment extends Fragment {
                     .load(mUser.getImage())
                     .apply(RequestOptions.circleCropTransform())
                     .into(userImageView);
+            exhibitCount.setText(String.valueOf(mUser.getExhibited()));
             exchangesCount.setText(String.valueOf(mUser.getExchanges()));
-
             ViewAnimation.showIn(mainContainer);
-
             initRecycler();
         } else {
             //TODO: error
@@ -188,6 +190,7 @@ public class AccountFragment extends Fragment {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         deleteProduct(productKey);
+                                        decProducts(model.getUser());
                                     }
                                 })
                                 .show();
@@ -208,6 +211,28 @@ public class AccountFragment extends Fragment {
             public void onFailure(@NonNull Exception e) {
                 Snackbar snackbar = Snackbar.make(mainContainer, "An error occurred while deleting the product", Snackbar.LENGTH_LONG);
                 snackbar.setAnchorView(getActivity().findViewById(R.id.bottom_navigation));
+            }
+        });
+    }
+
+    private void decProducts(String uid) {
+        DatabaseReference reference = mDatabase.child("users").child(uid);
+        reference.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                User user = mutableData.getValue(User.class);
+                if (user == null) {
+                    return Transaction.success(mutableData);
+                }
+                user.setExhibited(user.getExhibited() - 1);
+                mutableData.setValue(user);
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                Log.d(TAG, "incExchangesTransaction:onComplete: " + databaseError);
             }
         });
     }
