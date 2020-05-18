@@ -102,6 +102,10 @@ public class Product {
         this.available = available;
     }
 
+    public int getDistance() {
+        return distance;
+    }
+
     public void setDistance(int distance) {
         this.distance = distance;
     }

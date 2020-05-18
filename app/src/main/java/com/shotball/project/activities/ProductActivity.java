@@ -174,7 +174,10 @@ public class ProductActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
                 mProduct = dataSnapshot.getValue(Product.class);
-                mProduct.setKey(dataSnapshot.getKey());
+
+                if (mProduct != null) {
+                    mProduct.setKey(dataSnapshot.getKey());
+                }
                 initProduct();
             }
 

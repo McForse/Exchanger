@@ -6,11 +6,16 @@ import androidx.viewpager2.widget.ViewPager2;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.location.Location;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.util.Log;
 import android.view.MenuItem;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -20,6 +25,7 @@ import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.shotball.project.R;
 import com.shotball.project.adapters.FragmentViewPagerAdapter;
+import com.shotball.project.utils.Preferences;
 
 public class MainActivity extends BaseActivity {
 
@@ -34,6 +40,7 @@ public class MainActivity extends BaseActivity {
         checkAuthState();
         setContentView(R.layout.activity_main);
         initComponents();
+        initGeolocation();
     }
 
     private void initComponents() {
@@ -47,6 +54,18 @@ public class MainActivity extends BaseActivity {
         viewPager.setCurrentItem(current_page, false);
 
         new BottomNavigationHandler(this, viewPager);
+    }
+
+    private void initGeolocation() {
+        FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        mFusedLocationClient.getLastLocation().addOnSuccessListener(MainActivity.this, new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if (location != null) {
+                    Preferences.saveLocation(MainActivity.this, location);
+                }
+            }
+        });
     }
 
     private void checkAuthState() {

@@ -21,6 +21,7 @@ public class MyProductViewHolder extends RecyclerView.ViewHolder {
 
     private TextView title;
     private ImageView image;
+    private TextView likes;
     private Button deleteProduct;
 
     public MyProductViewHolder(View itemView) {
@@ -28,18 +29,19 @@ public class MyProductViewHolder extends RecyclerView.ViewHolder {
 
         title = itemView.findViewById(R.id.product_title);
         image = itemView.findViewById(R.id.product_image);
+        likes = itemView.findViewById(R.id.product_likes);
         deleteProduct = itemView.findViewById(R.id.product_delete);
     }
 
     public void bind(final Context context, final Product product, AccountFragment.OnProductSelectedListener listener) {
-        title.setText(product.title);
-        String imageUrl = product.images.get(0);
+        title.setText(product.getTitle());
+        likes.setText(String.valueOf(product.likeCount));
+        String imageUrl = product.getImages().get(0);
 
         try {
             if (TextUtil.isUrl(imageUrl)) {
                 //TODO: placeholder and error
                 Glide.with(context).load(product.images.get(0)).centerCrop().into(image);
-                //Glide.with(context).load(product.imageurl).placeholder(R.mipmap.ic_launcher).error(R.mipmap.ic_launcher).into(productImageView);
             } else {
                 StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("images").child(product.getKey()).child(imageUrl);
                 Glide.with(context).load(storageReference).centerCrop().into(image);

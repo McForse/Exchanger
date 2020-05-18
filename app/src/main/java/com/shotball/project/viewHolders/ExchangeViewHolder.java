@@ -54,7 +54,7 @@ public class ExchangeViewHolder extends RecyclerView.ViewHolder {
         tookPlaceButton = itemView.findViewById(R.id.product_exchange_complete);
     }
 
-    public void bind(final Context ctx, final ExchangeModel model, final ExchangesFragment.OnButtonClickListener listener) {
+    public void bind(final Context ctx, final ExchangeModel model, String myUid, final ExchangesFragment.OnButtonClickListener listener) {
         this.ctx = ctx;
         LinearLayout offersActions = itemView.findViewById(R.id.product_exchange_offers_actions);
         LinearLayout acceptActions = itemView.findViewById(R.id.product_exchange_accept_actions);
@@ -63,6 +63,9 @@ public class ExchangeViewHolder extends RecyclerView.ViewHolder {
             offersActions.setVisibility(View.GONE);
             if (model.getStatus() == 1) {
                 acceptActions.setVisibility(View.VISIBLE);
+                if (model.getWhom().equals(myUid)) {
+                    tookPlaceButton.setEnabled(false);
+                }
             }
         }
 

@@ -41,7 +41,6 @@ import com.shotball.project.activities.ProductActivity;
 import com.shotball.project.models.Product;
 import com.shotball.project.models.User;
 import com.shotball.project.utils.ViewAnimation;
-import com.shotball.project.viewHolders.FavoriteProductViewHolder;
 import com.shotball.project.viewHolders.MyProductViewHolder;
 
 public class AccountFragment extends Fragment {

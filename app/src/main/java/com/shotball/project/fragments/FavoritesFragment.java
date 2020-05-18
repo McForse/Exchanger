@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -39,6 +40,7 @@ import com.shotball.project.activities.ProductActivity;
 import com.shotball.project.helpers.RecyclerItemTouchHelper;
 import com.shotball.project.interfaces.IsAvailableCallback;
 import com.shotball.project.models.Product;
+import com.shotball.project.utils.Preferences;
 import com.shotball.project.utils.ViewAnimation;
 import com.shotball.project.viewHolders.FavoriteProductViewHolder;
 
@@ -62,6 +64,8 @@ public class FavoritesFragment extends Fragment implements RecyclerItemTouchHelp
     private IsAvailableCallback isAvailableCallback;
     private boolean onUndoClicked;
 
+    private Location myLocation;
+
     @Nullable
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -84,6 +88,7 @@ public class FavoritesFragment extends Fragment implements RecyclerItemTouchHelp
         swipeContainer = rootView.findViewById(R.id.swipe_container);
         mAdapter = new FavouriteProductsAdapter();
         mManager = new LinearLayoutManager(rootView.getContext());
+        myLocation = Preferences.getLocation(rootView.getContext());
 
         recyclerView = rootView.findViewById(R.id.productGrid);
         recyclerView.setVisibility(View.GONE);
@@ -95,7 +100,6 @@ public class FavoritesFragment extends Fragment implements RecyclerItemTouchHelp
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-
             @Override
             public void onRefresh() {
                 resetRecyclerView();
@@ -127,17 +131,14 @@ public class FavoritesFragment extends Fragment implements RecyclerItemTouchHelp
         recyclerView.setAdapter(mAdapter);
 
         isAvailableCallback = new IsAvailableCallback() {
-
             @Override
             public void onAvailableCallback(boolean isAvailable) {
                 if (!isAvailable) {
                     recyclerView.setVisibility(View.GONE);
                     ViewAnimation.fadeInAnimation(noItemPage);
-                    //noItemPage.setVisibility(View.VISIBLE);
                     swipeContainer.setRefreshing(false);
                 } else {
                     noItemPage.setVisibility(View.GONE);
-                    //recyclerView.setVisibility(View.VISIBLE);
                     ViewAnimation.fadeInAnimation(recyclerView);
                     swipeContainer.setRefreshing(false);
                 }
@@ -148,9 +149,9 @@ public class FavoritesFragment extends Fragment implements RecyclerItemTouchHelp
     }
 
     private void loadData(final IsAvailableCallback callback) {
+        myLocation = Preferences.getLocation(rootView.getContext());
         final boolean[] isAvailable = {false};
         productsListener = new ValueEventListener() {
-
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot item : dataSnapshot.getChildren()) {
@@ -161,6 +162,17 @@ public class FavoritesFragment extends Fragment implements RecyclerItemTouchHelp
                         isAvailable[0] = true;
                         String key = item.getKey();
                         product.setKey(key);
+                        int distance = -1;
+                        if (!isLocationNull(myLocation)) {
+                            Location locationA = new Location("point A");
+                            locationA.setLatitude(myLocation.getLatitude());
+                            locationA.setLongitude(myLocation.getLongitude());
+                            Location locationB = new Location("point B");
+                            locationB.setLatitude(product.getLatitude());
+                            locationB.setLongitude(product.getLongitude());
+                            distance = (int) locationA.distanceTo(locationB);
+                        }
+                        product.setDistance(distance);
                         mAdapter.insertItem(product);
                         swipeContainer.setRefreshing(false);
                     }
@@ -258,6 +270,10 @@ public class FavoritesFragment extends Fragment implements RecyclerItemTouchHelp
         }
     }
 
+    private boolean isLocationNull(Location location) {
+        return location == null || location.getLatitude() == 0.0 && location.getLongitude() == 0.0;
+    }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -337,27 +353,27 @@ public class FavoritesFragment extends Fragment implements RecyclerItemTouchHelp
             return items.size();
         }
 
-        public Product getItem(int position) {
+        Product getItem(int position) {
             return items.get(position);
         }
 
-        public void insertItem(Product item) {
+        void insertItem(Product item) {
             items.add(item);
             notifyItemInserted(getItemCount());
         }
 
-        public void removeItem(int position) {
+        void removeItem(int position) {
             items.remove(position);
             notifyItemRemoved(position);
         }
 
-        public void restoreItem(Product item, int position) {
+        void restoreItem(Product item, int position) {
             items.add(position, item);
             notifyItemInserted(position);
             recyclerView.smoothScrollToPosition(position);
         }
 
-        public void clear() {
+        void clear() {
             items.clear();
             notifyDataSetChanged();
         }

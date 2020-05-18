@@ -49,7 +49,7 @@ public enum Categories {
         return 0;
     }
 
-    public static String[] getStringArray() {
+    public static ArrayList<String> getStringArray() {
         ArrayList<String> res = new ArrayList<>();
         Context ctx = MyApplication.getAppContext();
 
@@ -57,7 +57,7 @@ public enum Categories {
             res.add(ctx.getString(category.getName()));
         }
 
-        return res.toArray(new String[getCount()]);
+        return res;
     }
 
 }

@@ -54,13 +54,17 @@ public class FavoriteProductViewHolder extends RecyclerView.ViewHolder {
 
         }
 
-        int product_distance = round10(product.distance);
-
-        if (product_distance < 1000) {
-            distance.setText(String.valueOf(product_distance));
+        if (product.distance < 0) {
+            distance.setText("-");
         } else {
-            distance.setText(String.valueOf((float) product_distance / 1000));
-            distanceUnit.setText(R.string.kilometers);
+            int product_distance = round10(product.distance);
+
+            if (product_distance < 1000) {
+                distance.setText(String.valueOf(product_distance));
+            } else {
+                distance.setText(String.valueOf((float) product_distance / 1000));
+                distanceUnit.setText(R.string.kilometers);
+            }
         }
 
         viewForeground.setOnClickListener(OnProductSelectedListener);

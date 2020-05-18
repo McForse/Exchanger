@@ -8,19 +8,25 @@
 
     <LinearLayout
         android:id="@+id/divider"
-        android:layout_width="match_parent"
-        android:layout_height="16dp"
-        android:gravity="center"
-        android:layout_margin="@dimen/spacing_small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/spacing_medium"
         android:orientation="horizontal">
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rectangle_rounded"
+            android:padding="@dimen/spacing_medium">
         <TextView
             android:id="@+id/divider_date"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textAlignment="center"
-            android:text="01.01.2020" />
+            android:text="01.01.2020"
+            android:textAppearance="?attr/textAppearanceSubtitle2" />
+
+        </LinearLayout>
 
     </LinearLayout>
 

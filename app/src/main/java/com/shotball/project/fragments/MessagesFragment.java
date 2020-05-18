@@ -113,14 +113,13 @@ public class MessagesFragment extends Fragment {
         private List<ChatRoomModel> roomList = new ArrayList<>();
         private Map<String, User> userList = new HashMap<>();
         private String myUid;
-        private StorageReference storageReference;
 
         private ValueEventListener listenerUsers;
         private ValueEventListener listenerRegistration;
 
         ChatsRecyclerViewAdapter() {
             myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            storageReference  = FirebaseStorage.getInstance().getReference();
+            StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
             listenerUsers = new ValueEventListener() {
                 @Override
@@ -300,8 +299,7 @@ public class MessagesFragment extends Fragment {
         for (ResolveInfo resolveInfo : resolveInfos) {
             String pkgName = resolveInfo.activityInfo.applicationInfo.packageName;
             if (pkgName.equalsIgnoreCase(context.getPackageName())) {
-                String className = resolveInfo.activityInfo.name;
-                return className;
+                return resolveInfo.activityInfo.name;
             }
         }
         return null;

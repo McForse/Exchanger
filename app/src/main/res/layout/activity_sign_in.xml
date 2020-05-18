@@ -42,7 +42,7 @@
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:src="@drawable/ic_dashboard"
+                        android:src="@drawable/ic_launcher_round"
                         android:tint="@color/blue_grey_800" />
 
                     <View
@@ -116,7 +116,6 @@
 
                 <TextView
                     android:id="@+id/forgot_password"
-                    style="@style/Base.Widget.MaterialComponents.TextInputEditText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:clickable="true"

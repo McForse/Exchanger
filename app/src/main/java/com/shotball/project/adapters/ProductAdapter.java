@@ -105,6 +105,10 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         super.onAttachedToRecyclerView(recyclerView);
     }
 
+    public void addItem(Product item) {
+        items.add(item);
+    }
+
     public void insertData(List<Product> items) {
         setLoaded();
         final int positionStart = getItemCount();
@@ -123,12 +127,17 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
-    public void setLoading() {
+    public void setLoading(RecyclerView recyclerView) {
         if (getItemCount() != 0) {
-            items.add(new Product(true));
-            // Triggers a warning
-            notifyItemInserted(getItemCount() - 1);
-            loading = true;
+            recyclerView.post(new Runnable() {
+                @Override
+                public void run() {
+                    items.add(new Product(true));
+                    // Triggers a warning
+                    notifyItemInserted(getItemCount() - 1);
+                    loading = true;
+                }
+            });
         }
     }
 

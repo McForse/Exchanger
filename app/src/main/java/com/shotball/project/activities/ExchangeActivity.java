@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import com.google.android.material.tabs.TabLayout;
 import com.shotball.project.R;
 import com.shotball.project.fragments.AcceptedExchangesFragment;
+import com.shotball.project.fragments.MyExchangesFragment;
 import com.shotball.project.fragments.OffersExchangesFragment;
 import com.shotball.project.fragments.RefusedExchangesFragment;
 
@@ -48,13 +49,15 @@ public class ExchangeActivity extends BaseActivity {
             private final Fragment[] mFragments = new Fragment[] {
                     new OffersExchangesFragment(),
                     new AcceptedExchangesFragment(),
-                    new RefusedExchangesFragment()
+                    new RefusedExchangesFragment(),
+                    new MyExchangesFragment()
             };
 
             private final String[] mFragmentNames = new String[] {
                     getString(R.string.tab_offers),
                     getString(R.string.tab_accepted),
-                    getString(R.string.tab_refused)
+                    getString(R.string.tab_refused),
+                    getString(R.string.tab_my)
             };
 
             @Override

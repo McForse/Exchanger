@@ -94,8 +94,8 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
     private EditText productDescription;
 
     private Product mProduct;
-
     private AlertDialog mDialog;
+    private ArrayList<String> categories;
 
     public static final byte MAX_IMAGES = 10;
 
@@ -138,14 +138,16 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
         recyclerView.setOnFlingListener(null);
         recyclerView.setAdapter(mAdapter);
         new StartSnapHelper().attachToRecyclerView(recyclerView);
+        categories = Categories.getStringArray();
         mAdapter.addButton();
 
-        ArrayAdapter adapter = new ArrayAdapter<CharSequence>(this, R.layout.dropdown_product_category, Categories.getStringArray());
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_product_category, new ArrayList<>(categories.subList(1, categories.size())));
         productCategory = findViewById(R.id.product_category);
         productCategory.setAdapter(adapter);
 
+        ArrayAdapter<String> adapter2 = new ArrayAdapter<>(this, R.layout.dropdown_product_category, categories);
         productExchangeCategory = findViewById(R.id.product_exchange_category);
-        productExchangeCategory.setAdapter(adapter);
+        productExchangeCategory.setAdapter(adapter2);
 
         productCategoryInputLayout = findViewById(R.id.product_category_input_layout);
         productTitleInputLayout = findViewById(R.id.product_title_input_layout);
@@ -292,6 +294,8 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
         mProduct.setAvailable(true);
         mProduct.setTitle(productTitle.getText().toString());
         mProduct.setDescription(productDescription.getText().toString());
+        mProduct.setCategory(categories.indexOf(productCategory.getText().toString()));
+        mProduct.setExchange_category(categories.indexOf(productExchangeCategory.getText().toString()));
         mProduct.setUser(getUid());
         mProduct.setKey(key);
         mProduct.g = geoHash.getGeoHashString();

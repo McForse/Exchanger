@@ -72,7 +72,6 @@
                 android:padding="@dimen/spacing_large">
 
                 <TextView
-                    style="@style/TextAppearance.MaterialComponents.Headline5"
                     android:id="@+id/title"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -80,8 +79,8 @@
                     android:text="Title"
                     android:layout_weight="1"
                     android:maxLines="1"
-                    app:fontFamily="sans-serif-medium"
-                    android:transitionName="product_title" />
+                    android:ellipsize="end"
+                    android:textAppearance="?attr/textAppearanceHeadline6" />
 
                 <View
                     android:layout_width="match_parent"
@@ -112,13 +111,13 @@
                         android:orientation="vertical">
 
                         <TextView
-                            style="@style/TextAppearance.MaterialComponents.Subtitle1"
                             android:id="@+id/seller_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Name"
                             android:textColor="@color/grey_60"
-                            app:fontFamily="sans-serif-medium" />
+                            android:textSize="15sp"
+                            android:textAppearance="?attr/textAppearanceSubtitle2"/>
 
                     </LinearLayout>
 
@@ -174,12 +173,12 @@
                 </LinearLayout>
 
                 <TextView
-                    style="@style/TextAppearance.MaterialComponents.Subtitle1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_middle"
                     android:text="Description"
-                    app:fontFamily="sans-serif-medium" />
+                    android:textSize="15sp"
+                    android:textAppearance="?attr/textAppearanceSubtitle2" />
 
                 <TextView
                     android:id="@+id/description"
@@ -187,8 +186,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_middle"
                     android:text="Description"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:textColor="@color/grey_60" />
+                    android:textColor="@color/grey_60"
+                    android:textAppearance="?attr/textAppearanceBody1" />
 
                 <View
                     android:layout_width="match_parent"
@@ -198,13 +197,13 @@
                     android:background="@color/grey_10" />
 
                 <TextView
-                    style="@style/TextAppearance.MaterialComponents.Subtitle1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_middle"
                     android:layout_marginBottom="@dimen/spacing_middle"
                     android:text="Exchange to"
-                    app:fontFamily="sans-serif-medium" />
+                    android:textSize="15sp"
+                    android:textAppearance="?attr/textAppearanceSubtitle2" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/product_exchange_category_chip"
@@ -220,13 +219,13 @@
                     android:background="@color/grey_10" />
 
                 <TextView
-                    style="@style/TextAppearance.MaterialComponents.Subtitle1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_middle"
                     android:layout_marginBottom="@dimen/spacing_middle"
                     android:text="Location"
-                    app:fontFamily="sans-serif-medium" />
+                    android:textSize="15sp"
+                    android:textAppearance="?attr/textAppearanceSubtitle2" />
 
                 <RelativeLayout
                     android:id="@+id/map_layout"

@@ -42,12 +42,14 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TimeZone;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -74,7 +76,7 @@ public class ChatFragment extends Fragment {
     private DatabaseReference databaseReference;
     private ValueEventListener valueEventListener;
 
-    private DateFormat dateFormat;
+    private SimpleDateFormat dateFormat;
 
     private String roomID;
     private String myUid;
@@ -143,8 +145,8 @@ public class ChatFragment extends Fragment {
         }
 
         mDatabase = FirebaseDatabase.getInstance().getReference();
-
-        dateFormat = android.text.format.DateFormat.getDateFormat(getContext());
+        dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        dateFormat.setTimeZone(TimeZone.getDefault());
     }
 
     void getInterlocutor() {
@@ -158,6 +160,7 @@ public class ChatFragment extends Fragment {
                 if (user != null) {
                     user.setUid(dataSnapshot.getKey());
                     interlocutor = user;
+
                 }
             }
 
@@ -220,16 +223,17 @@ public class ChatFragment extends Fragment {
     }
 
     private void sendPush(String msg) {
-
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("title", "New message");
             jsonObject.put("message", msg);
-            jsonObject.put("token", "etO0heftQrC-zAe00daqTr:APA91bEjQHpxf-Sw-P8xKaMLZ5GCfm9zKtxgvmZ2YXZEX3RJx8_2xVp81aoS5mMm7qD_JE0-8G3nIPxtYVXRYZzJDcw6l0FaHgtZr8tYAqjLpMi2mgvmWzj78T6vM78OpvRd22wm1paX");
+            jsonObject.put("token", interlocutor.getFcm());
+            jsonObject.put("imageUrl", interlocutor.getImage());
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
         post(Config.FCM_SERVER_URL + "/notification/token", jsonObject.toString(), new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {

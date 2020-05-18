@@ -13,7 +13,6 @@ import android.os.Handler;
 import android.os.Parcelable;
 import android.provider.Settings;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,7 +22,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,7 +29,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
-import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -41,6 +38,9 @@ import com.firebase.geofire.GeoFire;
 import com.firebase.geofire.GeoLocation;
 import com.firebase.geofire.GeoQuery;
 import com.firebase.geofire.GeoQueryDataEventListener;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.google.firebase.database.DataSnapshot;
@@ -57,9 +57,11 @@ import com.shotball.project.activities.SignInActivity;
 import com.shotball.project.adapters.ProductAdapter;
 import com.shotball.project.models.Filters;
 import com.shotball.project.models.Product;
+import com.shotball.project.utils.Preferences;
 import com.shotball.project.utils.ViewAnimation;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -95,13 +97,13 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     private static boolean filtersUpdated;
 
     private static boolean loading = false;
-    private static final int item_per_display = 8;
+    private static final int item_per_display = 4;
     private final List<Product> productsList = new ArrayList<>();
     private HashSet<String> productsKeys;
     private int counter = 0;
 
     private static final double[] MY_LOCATION = { 55.936354, 37.494034 };
-    public static Location myLocation;
+    private Location myLocation;
 
     @Nullable
     @Override
@@ -109,7 +111,6 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         Log.d(TAG, "onCreateView");
         rootView = inflater.inflate(R.layout.fragment_home, container, false);
         initComponents();
-        checkPermissionsAndGps();
         initToolbar();
         return rootView;
     }
@@ -156,6 +157,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     }
 
     private boolean checkPermissionsAndGps() {
+        Log.d(TAG_GEO, "checkPermissionsAndGps");
         if (!mLocationPermissionGranted) {
             if (ContextCompat.checkSelfPermission(mActivity,
                     Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -190,32 +192,42 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
                 }
             });
         } else {
+            myLocation = Preferences.getLocation(mActivity);
+            if (myLocation.getLatitude() == 0.0 && myLocation.getLongitude() == 0.0) {
+                initGeolocation();
+                return false;
+            }
             geolocationContainer.setVisibility(View.GONE);
-            myLocation = new Location("1");
-            myLocation.setLatitude(MY_LOCATION[0]);
-            myLocation.setLongitude(MY_LOCATION[1]);
-            setMyLocation(myLocation);
+            Log.d(TAG, "User location: " + myLocation.getLatitude() + " " + myLocation.getLongitude());
             recyclerView.setVisibility(View.VISIBLE);
             setReferences();
-            /*FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mActivity);
-            mFusedLocationClient.getLastLocation().addOnSuccessListener(MainActivity.this, new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    if (location != null) {
-                        myLocation = location;
-                    }
-                }
-            });*/
             return true;
         }
 
         return false;
     }
 
+    private void initGeolocation() {
+        FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mActivity);
+        mFusedLocationClient.getLastLocation().addOnSuccessListener(mActivity, new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if (location != null) {
+                    Preferences.saveLocation(mActivity, location);
+                    if (checkPermissionsAndGps()) {
+                        startSearch();
+                    }
+                }
+            }
+        });
+    }
+
     private void setReferences() {
+        Log.d(TAG_GEO, "setReferences");
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                Log.d(TAG_GEO, "onRefresh swipeContainer");
                 stopGeoQueryListener();
                 resetRecycleView();
                 if (checkPermissionsAndGps()) {
@@ -283,38 +295,37 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
                 Log.e(TAG_GEO, "onGeoQueryError: " + error);
             }
         };
-
-        startSearch();
     }
 
-    private void setMyLocation(Location location) {
-        myLocation = location;
-    }
-
-    private void loadNextData() {
+    private synchronized void loadNextData() {
         Log.d(TAG, "loadNextData");
-        mAdapter.setLoading();
-        counter = 0;
-        startSearch();
+        if (!loading) {
+            mAdapter.setLoading(recyclerView);
+            counter = 0;
+            startSearch();
+        }
     }
 
-    private void startSearch() {
+    private synchronized void startSearch() {
+        Log.d(TAG, "startSearch");
         loading = true;
-        //searchNearby(location.getLatitude(), location.getLongitude(), (double) mFilters.getDistance() / 1000);
-        searchNearby(MY_LOCATION[0], MY_LOCATION[1], (double) mFilters.getDistance() / 1000);
+        searchNearby(myLocation.getLatitude(), myLocation.getLongitude(), (double) mFilters.getDistance() / 1000);
     }
 
     private void searchNearby(double latitude, double longitude, double radius) {
+        Log.d(TAG_GEO, "searchNearby");
         geoQuery = geoFire.queryAtLocation(new GeoLocation(latitude, longitude), radius);
         geoQuery.addGeoQueryDataEventListener(geoQueryListener);
     }
 
-    private void stopGeoQueryListener() {
+    private synchronized void stopGeoQueryListener() {
+        Log.d(TAG_GEO, "stopGeoQueryListener");
         if (loading) {
             loading = false;
             progressBar.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
             Log.d(TAG, "stopGeoQueryListener: " + productsList.size());
+            geoQuery.removeGeoQueryEventListener(geoQueryListener);
             geoQuery.removeAllListeners();
             if (productsList.isEmpty() && mAdapter.getItemCount() < item_per_display) {
                 mAdapter.setOnLoadMoreListener(null);
@@ -322,6 +333,12 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
                     ViewAnimation.fadeInAnimation(noItemPage);
                 }
             }
+            productsList.sort(new Comparator<Product>() {
+                @Override
+                public int compare(Product o1, Product o2) {
+                    return Integer.compare(o1.getDistance(), o2.getDistance());
+                }
+            });
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -338,11 +355,11 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         recyclerView.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);
         noItemPage.setVisibility(View.GONE);
+        loading = false;
+        mAdapter.clear();
         counter = 0;
         productsKeys.clear();
         filtersUpdated = false;
-        mAdapter.clear();
-        loading = false;
     }
 
     @Override
@@ -418,6 +435,9 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     public void onStart() {
         super.onStart();
         Log.d(TAG, "onStart");
+        if (!mLocationPermissionGranted && checkPermissionsAndGps()) {
+            startSearch();
+        }
     }
 
     @Override
@@ -430,7 +450,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     public void onPause() {
         super.onPause();
         Log.d(TAG, "onPause");
-
+        stopGeoQueryListener();
         mBundleRecyclerViewState = new Bundle();
         mListState = Objects.requireNonNull(recyclerView.getLayoutManager()).onSaveInstanceState();
         mBundleRecyclerViewState.putParcelable(KEY_RECYCLER_STATE, mListState);
@@ -443,7 +463,6 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
 
         if (mBundleRecyclerViewState != null) {
             new Handler().postDelayed(new Runnable() {
-
                 @Override
                 public void run() {
                     mListState = mBundleRecyclerViewState.getParcelable(KEY_RECYCLER_STATE);
@@ -453,6 +472,7 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         }
 
         if (filtersUpdated) {
+            Log.d(TAG, "filtersUpdated");
             swipeContainer.setRefreshing(true);
             stopGeoQueryListener();
             resetRecycleView();
@@ -469,7 +489,6 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
 
         if (mBundleRecyclerViewState != null) {
             new Handler().postDelayed(new Runnable() {
-
                 @Override
                 public void run() {
                     mListState = mBundleRecyclerViewState.getParcelable(KEY_RECYCLER_STATE);
@@ -503,7 +522,6 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         Log.d(TAG, "onSaveInstanceState");
-
         mListState = Objects.requireNonNull(recyclerView.getLayoutManager()).onSaveInstanceState();
         mBundleRecyclerViewState.putParcelable(KEY_RECYCLER_STATE, mListState);
     }

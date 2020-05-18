@@ -82,4 +82,5 @@
     <string name="tab_accepted">Accepted</string>
     <string name="tab_refused">Refused</string>
     <string name="reset_password_email_send">Password reset email has been sent to your email</string>
+    <string name="tab_my">My</string>
 </resources>

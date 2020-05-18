@@ -23,11 +23,6 @@ public class MyApplication extends Application {
         super.onConfigurationChanged(newConfig);
     }
 
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-    }
-
     public static Context getAppContext() {
         return MyApplication.context;
     }

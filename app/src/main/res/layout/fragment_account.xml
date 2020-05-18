@@ -120,17 +120,17 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="12"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
                         android:textColor="@color/grey_90"
-                        android:textStyle="bold" />
+                        android:textSize="16sp"
+                        android:textAppearance="?attr/textAppearanceSubtitle2" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_small"
                         android:text="Exhibited"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                        android:textColor="@color/grey_40" />
+                        android:textColor="@color/grey_40"
+                        android:textAppearance="?attr/textAppearanceSubtitle1" />
 
                 </LinearLayout>
 
@@ -146,17 +146,17 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
                         android:textColor="@color/grey_90"
-                        android:textStyle="bold" />
+                        android:textSize="16sp"
+                        android:textAppearance="?attr/textAppearanceSubtitle2" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_small"
                         android:text="Exchanges"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                        android:textColor="@color/grey_40" />
+                        android:textColor="@color/grey_40"
+                        android:textAppearance="?attr/textAppearanceSubtitle1" />
 
                 </LinearLayout>
 
@@ -201,6 +201,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginBottom="@dimen/spacing_middle"
+                android:layout_marginTop="@dimen/spacing_large"
+                android:background="@color/grey_10" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="My products"
+                android:textAppearance="?attr/textAppearanceSubtitle1" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
                 android:layout_marginTop="@dimen/spacing_large"
                 android:background="@color/grey_10" />
 
