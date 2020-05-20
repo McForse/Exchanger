@@ -4,12 +4,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -20,6 +22,7 @@ import com.shotball.project.fragments.ChatFragment;
 import com.shotball.project.interfaces.IsAvailableCallback;
 import com.shotball.project.services.MyFirebaseMessagingService;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class ChatActivity extends BaseActivity {
@@ -59,31 +62,37 @@ public class ChatActivity extends BaseActivity {
         productKey = getIntent().getStringExtra("productKey");
         productTitle = getIntent().getStringExtra("productTitle");
 
-        if (roomTitle != null) {
-            roomTitleTextView.setText(roomTitle);
-        }
-
-        if (roomImage != null && !roomImage.equals("")) {
-            Glide.with(this)
-                    .load(roomImage)
-                    .into(roomImageView);
+        if (toUid == null || TextUtils.isEmpty(toUid)) {
+            roomTitleTextView.setText(":)");
         } else {
-            Glide.with(this)
-                    .load(R.drawable.img_user)
-                    .into(roomImageView);
-        }
+            if (roomTitle != null) {
+                roomTitleTextView.setText(roomTitle);
+            }
 
-        if (roomId == null) {
-            findChatRoom(toUid, new IsAvailableCallback() {
-                @Override
-                public void onAvailableCallback(boolean isAvailable) {
-                    if (isAvailable) {
-                        startFragment();
+            if (roomImage != null && !roomImage.equals("")) {
+                Glide.with(this)
+                        .load(roomImage)
+                        .into(roomImageView);
+            } else {
+                Glide.with(this)
+                        .load(R.drawable.img_user)
+                        .into(roomImageView);
+            }
+
+            if (roomId == null) {
+                findChatRoom(toUid, new IsAvailableCallback() {
+                    @Override
+                    public void onAvailableCallback(boolean isAvailable) {
+                        if (isAvailable) {
+                            startFragment();
+                        } else {
+                            createChatRoom();
+                        }
                     }
-                }
-            });
-        } else {
-            startFragment();
+                });
+            } else {
+                startFragment();
+            }
         }
     }
 
@@ -110,6 +119,21 @@ public class ChatActivity extends BaseActivity {
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Log.d(TAG, "onCancelled findChatRoom: " + databaseError.getMessage());
                 callback.onAvailableCallback(isAvailable[0]);
+            }
+        });
+    }
+
+    private void createChatRoom() {
+        DatabaseReference mDatabase = FirebaseDatabase.getInstance().getReference();
+        Map<String, String> selectedUsers = new HashMap<>();
+        selectedUsers.put(getUid(), "i");
+        selectedUsers.put(toUid, "i");
+        roomId = mDatabase.child("rooms").push().getKey();
+
+        mDatabase.child("rooms").child(roomId).child("users").setValue(selectedUsers).addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                startFragment();
             }
         });
     }

@@ -30,9 +30,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.shotball.project.R;
 import com.shotball.project.activities.ExchangeActivity;
@@ -210,28 +208,6 @@ public class AccountFragment extends BaseFragment {
             public void onFailure(@NonNull Exception e) {
                 Snackbar snackbar = Snackbar.make(mainContainer, R.string.delete_product_error, Snackbar.LENGTH_LONG);
                 snackbar.setAnchorView(getActivity().findViewById(R.id.bottom_navigation));
-            }
-        });
-    }
-
-    private void decProducts(String uid) {
-        DatabaseReference reference = mDatabase.child("users").child(uid);
-        reference.runTransaction(new Transaction.Handler() {
-            @NonNull
-            @Override
-            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
-                User user = mutableData.getValue(User.class);
-                if (user == null) {
-                    return Transaction.success(mutableData);
-                }
-                user.setExhibited(user.getExhibited() - 1);
-                mutableData.setValue(user);
-                return Transaction.success(mutableData);
-            }
-
-            @Override
-            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-                Log.d(TAG, "incExchangesTransaction:onComplete: " + databaseError);
             }
         });
     }

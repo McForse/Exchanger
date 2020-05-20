@@ -162,5 +162,6 @@
     <string name="exchange_refused">Your exchange refused</string>
     <string name="new_message">New message</string>
     <string name="use_last_know_location">Use last know location</string>
+    <string name="exchange_confirmed">Your exchange is confirmed</string>
 
 </resources>

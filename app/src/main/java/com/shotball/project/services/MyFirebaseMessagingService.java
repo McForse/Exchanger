@@ -1,6 +1,5 @@
 package com.shotball.project.services;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -15,7 +14,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -30,14 +28,11 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.shotball.project.R;
 import com.shotball.project.activities.ChatActivity;
-import com.shotball.project.activities.MainActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import static androidx.core.app.NotificationCompat.BADGE_ICON_SMALL;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
@@ -113,7 +108,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             notificationBuilder.setLargeIcon(bitmap);
         }
 
-        if (username != null && from != null) {
+        if (username != null && from != null && !TextUtils.isEmpty(username) && !TextUtils.isEmpty(from)) {
             Intent intent = new Intent(this, ChatActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.putExtra("toUid", from);

@@ -30,15 +30,12 @@ import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.shotball.project.R;
 import com.shotball.project.activities.ChatActivity;
-import com.shotball.project.interfaces.IsAvailableCallback;
 import com.shotball.project.models.ExchangeModel;
 import com.shotball.project.models.Notification;
 import com.shotball.project.models.Product;
 import com.shotball.project.models.User;
 import com.shotball.project.viewHolders.ExchangeViewHolder;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 import static com.shotball.project.utils.FCM.sendPush;
@@ -49,7 +46,6 @@ public abstract class ExchangesFragment extends BaseFragment {
 
     protected DatabaseReference mDatabase;
     private OnButtonClickListener listener;
-    private String roomId;
 
     private FirebaseRecyclerAdapter<ExchangeModel, ExchangeViewHolder> mAdapter;
     private RecyclerView mRecycler;
@@ -149,26 +145,7 @@ public abstract class ExchangesFragment extends BaseFragment {
 
             @Override
             public void messageButton(ExchangeModel model, String exchangeProductTitle) {
-                findChatRoom(model.getWho(), new IsAvailableCallback() {
-                    @Override
-                    public void onAvailableCallback(boolean isAvailable) {
-                        if (isAvailable) {
-                            openChat(model, exchangeProductTitle);
-                        } else {
-                            Map<String, String> selectedUsers = new HashMap<>();
-                            selectedUsers.put(getUid(), "i");
-                            selectedUsers.put(model.getWho(), "i");
-                            final String room_id = mDatabase.child("rooms").push().getKey();
-
-                            mDatabase.child("rooms/" + room_id).child("users").setValue(selectedUsers).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    openChat(model, exchangeProductTitle);
-                                }
-                            });
-                        }
-                    }
-                });
+                openChat(model, exchangeProductTitle);
             }
 
             @Override
@@ -179,6 +156,8 @@ public abstract class ExchangesFragment extends BaseFragment {
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                Notification notification = new Notification(getString(R.string.new_exchange), getString(R.string.exchange_confirmed));
+                                sendNotification("xnkeEHL5p9QccyGCkWFyDiWWI0h2", notification);
                                 moveFirebaseRecord(mDatabase.child("products").child(model.getWhat_exchange()), mDatabase.child("exchanged_products").child(model.getWhat_exchange()));
                                 moveFirebaseRecord(mDatabase.child("products").child(model.getExchange_for()), mDatabase.child("exchanged_products").child(model.getExchange_for()));
                                 model.setStatus(3);
@@ -195,7 +174,8 @@ public abstract class ExchangesFragment extends BaseFragment {
                                 removeReference(dependencies.orderByChild("what_exchange").equalTo(model.getExchange_for()));
                                 removeReference(dependencies.orderByChild("exchange_for").equalTo(model.getWhat_exchange()));
                                 removeReference(dependencies.orderByChild("what_exchange").equalTo(model.getWhat_exchange()));
-
+                                decProducts(model.getWho());
+                                decProducts(model.getWhom());
                             }
                         }).setNeutralButton("No", null)
                         .show();
@@ -203,50 +183,22 @@ public abstract class ExchangesFragment extends BaseFragment {
         };
     }
 
-    private void findChatRoom(final String toUid, final IsAvailableCallback callback) {
-        final boolean[] isAvailable = {false};
-        mDatabase.child("rooms").orderByChild("users/" + getUid()).equalTo("i").addListenerForSingleValueEvent(new ValueEventListener() {
-
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot item: dataSnapshot.getChildren()) {
-                    Map<String, String> users = (Map<String, String>) item.child("users").getValue();
-
-                    if (users.size() == 2 & users.get(toUid) != null) {
-                        roomId = item.getKey();
-                        isAvailable[0] = true;
-                        break;
-                    }
-                }
-
-                callback.onAvailableCallback(isAvailable[0]);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.d(TAG, "onCancelled findChatRoom: " + databaseError.getMessage());
-                callback.onAvailableCallback(isAvailable[0]);
-            }
-        });
-    }
-
     private void openChat(ExchangeModel model, String exchangeProductTitle) {
-        mDatabase.child("users").child(model.getWho()).addListenerForSingleValueEvent(new ValueEventListener() {
+        String toUid = (model.getWho().equals(getUid())) ? model.getWhom() : model.getWho();
+        mDatabase.child("users").child(toUid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 User seller = dataSnapshot.getValue(User.class);
 
                 if (seller != null) {
                     Intent intent = new Intent(rootView.getContext(), ChatActivity.class);
-                    intent.putExtra("toUid", model.getWho());
-                    intent.putExtra("roomID", roomId);
+                    intent.putExtra("toUid", toUid);
                     intent.putExtra("roomTitle", seller.getUsername());
                     intent.putExtra("roomImage", seller.getImage());
                     intent.putExtra("productKey", model.getWhat_exchange());
                     intent.putExtra("productTitle", exchangeProductTitle);
                     startActivity(intent);
                 }
-
             }
 
             @Override
