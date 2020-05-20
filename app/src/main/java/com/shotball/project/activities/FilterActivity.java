@@ -109,9 +109,9 @@ public class FilterActivity extends AppCompatActivity {
     private void setSeekBarProgress(int progress) {
         int distance = progress * 100;
         if (distance <= 1000) {
-            distanceMaxTextView.setText(String.valueOf(distance) + " meters");
+            distanceMaxTextView.setText(String.format(getString(R.string.distance_meters), distance));
         } else {
-            distanceMaxTextView.setText(String.valueOf((float)distance / 1000) + " km");
+            distanceMaxTextView.setText(String.format(getString(R.string.distance_km), (float)distance / 1000));
         }
     }
 

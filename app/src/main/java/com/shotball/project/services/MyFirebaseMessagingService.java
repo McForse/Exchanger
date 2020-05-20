@@ -15,7 +15,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.os.Build;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -81,17 +81,16 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private void sendNotification(RemoteMessage remoteMessage) {
         String title = Objects.requireNonNull(remoteMessage.getNotification()).getTitle();
         String messageBody = remoteMessage.getNotification().getBody();
-        String url = Objects.requireNonNull(remoteMessage.getNotification().getImageUrl()).toString();
+        Uri uri = remoteMessage.getNotification().getImageUrl();
         String username = remoteMessage.getData().get("username");
         Log.d(TAG, String.valueOf(remoteMessage.getNotification().getImageUrl()));
-        Bitmap bitmap = getCircleBitmap(getBitmapFromURL(url));
 
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
         String channelId = getString(R.string.default_notification_channel_id);
 
-        if (title.equals("New message")) {
+        if (title != null && title.equals("New message")) {
             title = username;
         }
 
@@ -100,17 +99,25 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         .setContentTitle(title)
                         .setContentText(messageBody)
                         .setSmallIcon(R.drawable.ic_notifications)
-                        .setLargeIcon(bitmap)
                         .setAutoCancel(true)
                         .setContentIntent(pendingIntent);
+
+        if (uri != null) {
+            String url = uri.toString();
+            Bitmap bitmap = getCircleBitmap(getBitmapFromURL(url));
+            notificationBuilder.setLargeIcon(bitmap);
+        }
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         NotificationChannel channel = new NotificationChannel(channelId,
                     "Exchanges messages", NotificationManager.IMPORTANCE_HIGH);
-        notificationManager.createNotificationChannel(channel);
-        notificationManager.notify(notificationID++ /* ID of notification */, notificationBuilder.build());
+
+        if (notificationManager != null) {
+            notificationManager.createNotificationChannel(channel);
+            notificationManager.notify(notificationID++ /* ID of notification */, notificationBuilder.build());
+        }
     }
 
     public Bitmap getBitmapFromURL(String strURL) {

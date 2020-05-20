@@ -47,7 +47,7 @@ import com.shotball.project.viewHolders.FavoriteProductViewHolder;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FavoritesFragment extends Fragment implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
+public class FavoritesFragment extends BaseFragment implements RecyclerItemTouchHelper.RecyclerItemTouchHelperListener {
 
     private static final String TAG = "FavoritesFragment";
 
@@ -246,7 +246,7 @@ public class FavoritesFragment extends Fragment implements RecyclerItemTouchHelp
             final int deletedIndex = viewHolder.getAdapterPosition();
             mAdapter.removeItem(viewHolder.getAdapterPosition());
             
-            Snackbar snackbar = Snackbar.make(mainContainer, "Product removed from favorites", Snackbar.LENGTH_LONG);
+            Snackbar snackbar = Snackbar.make(mainContainer, R.string.favourite_remove, Snackbar.LENGTH_LONG);
             snackbar.setAnchorView(getActivity().findViewById(R.id.bottom_navigation));
             snackbar.addCallback(new Snackbar.Callback() {
                 @Override
@@ -259,7 +259,7 @@ public class FavoritesFragment extends Fragment implements RecyclerItemTouchHelp
                     onUndoClicked = false;
                 }
             });
-            snackbar.setAction("UNDO", new View.OnClickListener() {
+            snackbar.setAction(R.string.undo, new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     onUndoClicked = true;
@@ -313,14 +313,6 @@ public class FavoritesFragment extends Fragment implements RecyclerItemTouchHelp
         } else if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             noItems.getLayoutParams().width = minSize;
             noItems.getLayoutParams().height = minSize;
-        }
-    }
-
-    private String getUid() {
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            return FirebaseAuth.getInstance().getCurrentUser().getUid();
-        } else {
-            return null;
         }
     }
 

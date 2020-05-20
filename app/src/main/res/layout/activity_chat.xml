@@ -18,7 +18,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/white"
             app:contentInsetStartWithNavigation="0dp"
-            android:elevation="@dimen/design_appbar_elevation"
+            android:elevation="@dimen/appbar_elevation"
             android:theme="@style/Toolbar.Light"
             app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light">
 
@@ -32,7 +32,7 @@
                     android:id="@+id/room_image"
                     android:layout_width="36dp"
                     android:layout_height="36dp"
-                    android:src="@drawable/image_user"
+                    android:src="@drawable/img_user"
                     app:civ_border="true"
                     app:civ_border_color="#075E54"
                     app:civ_border_width="0dp"
@@ -66,7 +66,7 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <FrameLayout
-        android:id="@+id/mainFragment"
+        android:id="@+id/chat_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/home_background" />

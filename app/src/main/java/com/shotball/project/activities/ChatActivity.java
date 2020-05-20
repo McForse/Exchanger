@@ -17,11 +17,6 @@ public class ChatActivity extends AppCompatActivity {
 
     private static final String TAG = "ChatActivity";
 
-    private ChatFragment chatFragment;
-    private Toolbar toolbar;
-    private TextView roomTitleTextView;
-    private ImageView roomImageView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,15 +26,15 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void initToolbar() {
-        toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(null);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     private void initComponents() {
-        roomTitleTextView = findViewById(R.id.room_title);
-        roomImageView = findViewById(R.id.room_image);
+        TextView roomTitleTextView = findViewById(R.id.room_title);
+        ImageView roomImageView = findViewById(R.id.room_image);
 
         String toUid = getIntent().getStringExtra("toUid");
         final String roomID = getIntent().getStringExtra("roomID");
@@ -57,26 +52,24 @@ public class ChatActivity extends AppCompatActivity {
                     .load(roomImage)
                     .into(roomImageView);
         } else {
-            Glide.with(this).load(R.drawable.image_user)
+            Glide.with(this).load(R.drawable.img_user)
                     .into(roomImageView);
         }
 
-        chatFragment = ChatFragment.getInstance(toUid, roomID, productKey, productTitle);
+        ChatFragment chatFragment = ChatFragment.getInstance(toUid, roomID, productKey, productTitle);
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.mainFragment, chatFragment )
+                .replace(R.id.chat_fragment, chatFragment)
                 .commit();
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

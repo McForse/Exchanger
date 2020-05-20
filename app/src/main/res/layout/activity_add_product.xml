@@ -18,7 +18,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/white"
             app:contentInsetStartWithNavigation="0dp"
-            android:elevation="@dimen/design_appbar_elevation"
+            android:elevation="@dimen/appbar_elevation"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             app:theme="@style/Toolbar.Light" />
 
@@ -44,7 +44,7 @@
                 android:layout_marginTop="@dimen/spacing_large"
                 android:layout_marginBottom="@dimen/spacing_middle"
                 android:layout_marginStart="@dimen/spacing_large"
-                android:text="Product images"
+                android:text="@string/product_images"
                 android:textAppearance="?attr/textAppearanceSubtitle2" />
 
             <LinearLayout
@@ -84,7 +84,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Category"
+                    android:hint="@string/category"
                     app:errorEnabled="true"
                     app:helperTextEnabled="true"
                     app:helperText="@string/required">
@@ -94,7 +94,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="none"
-                        android:editable="false"/>
+                        android:editable="false"
+                        tools:ignore="Deprecated,LabelFor" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -107,7 +108,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Title"
+                    android:hint="@string/title"
                     app:errorEnabled="true"
                     app:helperTextEnabled="true"
                     app:helperText="@string/required">
@@ -132,7 +133,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Product description"
+                    android:hint="@string/product_description"
                     app:errorEnabled="true"
                     app:helperTextEnabled="true"
                     app:helperText="@string/required"
@@ -156,11 +157,11 @@
                     android:layout_height="@dimen/spacing_mlarge" />
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/product_exchage_category_input_layout"
+                    android:id="@+id/product_exchange_category_input_layout"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Exchange for"
+                    android:hint="@string/exchange_for"
                     app:errorEnabled="true"
                     app:helperTextEnabled="true"
                     app:helperText="@string/required">
@@ -170,7 +171,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="none"
-                        android:editable="false"/>
+                        android:editable="false"
+                        tools:ignore="Deprecated,LabelFor" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -186,7 +188,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_medium"
                     android:layout_marginBottom="@dimen/spacing_middle"
-                    android:text="Product location"
+                    android:text="@string/product_location"
                     android:textAppearance="?attr/textAppearanceSubtitle2" />
 
                 <RelativeLayout
@@ -205,7 +207,8 @@
                         android:id="@+id/transparent_image"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:src="@android:color/transparent" />
+                        android:src="@android:color/transparent"
+                        android:contentDescription="@string/map_container" />
 
                 </RelativeLayout>
 

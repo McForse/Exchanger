@@ -157,7 +157,7 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
         productCategoryInputLayout = findViewById(R.id.product_category_input_layout);
         productTitleInputLayout = findViewById(R.id.product_title_input_layout);
         productDescriptionInputLayout = findViewById(R.id.product_description_input_layout);
-        productExchangeCategoryInputLayout = findViewById(R.id.product_exchage_category_input_layout);
+        productExchangeCategoryInputLayout = findViewById(R.id.product_exchange_category_input_layout);
         productTitle = findViewById(R.id.product_title);
         productDescription = findViewById(R.id.product_description);
 
@@ -380,8 +380,7 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
                     @Override
                     public void onSuccess(Location location) {
                         if (location != null) {
-                            Log.d(TAG, "Latitude: " + location.getLatitude());
-                            Log.d(TAG, "Longitude: " + location.getLongitude());
+                            Log.d(TAG, "User location: " + location.getLatitude() + " " + location.getLongitude());
                             onLocationChanged(location);
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
@@ -390,7 +389,7 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
                 });
             }
         } catch (Exception e) {
-            Log.e("Exception: %s", e.getMessage());
+            Log.e("Exception: ", e.toString());
         }
     }
 
@@ -411,11 +410,9 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         mLocationPermissionGranted = false;
 
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    mLocationPermissionGranted = true;
-                }
+        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                mLocationPermissionGranted = true;
             }
         }
     }
@@ -428,7 +425,7 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
-        markerOptions.title("Current Position");
+        markerOptions.title(getString(R.string.current_position));
         mMarker = mMap.addMarker(markerOptions);
         if (mLastKnownLocation == null) mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
         else mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
@@ -448,7 +445,7 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                Location location = new Location("Selected Position");
+                Location location = new Location(getString(R.string.selected_position));
                 location.setLatitude(latLng.latitude);
                 location.setLongitude(latLng.longitude);
                 onLocationChanged(location);
@@ -485,7 +482,7 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
 
     @Override
     public void onProductImageClick(final Image image, final int position) {
-        String[] options = { "Remove", "Make the main" };
+        String[] options = { getString(R.string.remove), getString(R.string.make_main) };
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Options")
                 .setItems(options, new DialogInterface.OnClickListener() {
@@ -500,7 +497,7 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
                         }
                     }
                 })
-                .setPositiveButton("Cancel", null)
+                .setPositiveButton(R.string.cancel, null)
                 .show();
     }
 
@@ -510,18 +507,18 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
                 .setImageAdapter(new GlideAdapter())
                 .setMaxCount(MAX_IMAGES - mAdapter.getItemCount() + 1)
                 .setPickerSpanCount(4)
-                .setActionBarColor(Color.parseColor("#ffffff"), Color.parseColor("#ffffff"), true)
-                .setActionBarTitleColor(Color.parseColor("#000000"))
+                .setActionBarColor(Color.WHITE, Color.WHITE, true)
+                .setActionBarTitleColor(ContextCompat.getColor(this, R.color.black))
                 .setAlbumSpanCount(1, 2)
                 .setButtonInAlbumActivity(true)
                 .setCamera(false)
                 .setReachLimitAutomaticClose(false)
                 .setHomeAsUpIndicatorDrawable(ContextCompat.getDrawable(AddProductActivity.this, R.drawable.ic_chevron_left))
                 .setDoneButtonDrawable(ContextCompat.getDrawable(AddProductActivity.this, R.drawable.ic_done))
-                .setAllViewTitle("All of your photos")
-                .setActionBarTitle("Selected photos")
-                .textOnImagesSelectionLimitReached("You can't select any more.")
-                .textOnNothingSelected("I need a photo!")
+                .setAllViewTitle(getString(R.string.all_photos))
+                .setActionBarTitle(getString(R.string.selected_photos))
+                .textOnImagesSelectionLimitReached(getString(R.string.photos_limit))
+                .textOnNothingSelected(getString(R.string.only_photos))
                 .setCamera(true)
                 .startAlbum();
     }

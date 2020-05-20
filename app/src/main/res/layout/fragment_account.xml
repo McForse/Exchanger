@@ -9,7 +9,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appbar"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="@dimen/account_collapsing_toolbar_height"
         android:background="@android:color/white"
         android:theme="@style/AppTheme.AppBarOverlay">
 
@@ -18,10 +18,10 @@
             android:layout_height="match_parent"
             app:contentScrim="@android:color/white"
             app:expandedTitleGravity="top"
-            app:expandedTitleMarginTop="40dp"
-            app:expandedTitleMarginStart="90dp"
-            app:expandedTitleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-            app:collapsedTitleTextAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+            app:expandedTitleMarginTop="@dimen/account_title_margin_top"
+            app:expandedTitleMarginStart="@dimen/account_title_margin_start"
+            app:expandedTitleTextAppearance="?attr/textAppearanceHeadline6"
+            app:collapsedTitleTextAppearance="?attr/textAppearanceHeadline6"
             app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
 
             <LinearLayout
@@ -36,37 +36,10 @@
 
                 <ImageView
                     android:id="@+id/account_image"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_margin="@dimen/spacing_xsmall" />
-
-                <View
-                    android:layout_width="@dimen/spacing_large"
-                    android:layout_height="0dp" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <!--<TextView
-                            android:id="@+id/account_name"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Name"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                            android:textColor="@android:color/black"
-                            app:fontFamily="sans-serif-medium" />-->
-
-                    </LinearLayout>
-
-                </LinearLayout>
+                    android:layout_width="@dimen/account_image_size"
+                    android:layout_height="@dimen/account_image_size"
+                    android:layout_margin="@dimen/spacing_xsmall"
+                    android:contentDescription="@string/username" />
 
             </LinearLayout>
 
@@ -107,7 +80,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:baselineAligned="false">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -120,7 +94,7 @@
                         android:id="@+id/exhibit_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="12"
+                        android:text="@string/text_zero"
                         android:textColor="@color/grey_90"
                         android:textSize="16sp"
                         android:textAppearance="?attr/textAppearanceSubtitle2" />
@@ -129,7 +103,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_small"
-                        android:text="Exhibited"
+                        android:text="@string/exhibited"
                         android:textColor="@color/grey_40"
                         android:textAppearance="?attr/textAppearanceSubtitle1" />
 
@@ -146,7 +120,7 @@
                         android:id="@+id/exchanges_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0"
+                        android:text="@string/text_zero"
                         android:textColor="@color/grey_90"
                         android:textSize="16sp"
                         android:textAppearance="?attr/textAppearanceSubtitle2" />
@@ -155,7 +129,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_small"
-                        android:text="Exchanges"
+                        android:text="@string/exchanges"
                         android:textColor="@color/grey_40"
                         android:textAppearance="?attr/textAppearanceSubtitle1" />
 
@@ -171,7 +145,7 @@
                 android:background="@color/grey_10" />
 
             <LinearLayout
-                android:id="@+id/proposed_ecxhanges_button"
+                android:id="@+id/proposed_exchanges_button"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/spacing_xxxlarge"
                 android:background="?attr/selectableItemBackground"
@@ -185,7 +159,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:background="@android:color/transparent"
-                    app:srcCompat="@drawable/ic_shopping_cart" />
+                    app:srcCompat="@drawable/ic_shopping_cart"
+                    android:contentDescription="@string/exchange_title" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -209,7 +184,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="My products"
+                android:text="@string/my_products"
                 android:textAppearance="?attr/textAppearanceSubtitle1" />
 
             <View
@@ -221,7 +196,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginBottom="56dp"
+                android:layout_marginBottom="@dimen/bottom_navigation_bar_height"
                 android:background="@color/home_background">
 
                 <androidx.recyclerview.widget.RecyclerView

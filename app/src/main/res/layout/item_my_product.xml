@@ -2,6 +2,7 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/product_favourite_card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -26,7 +27,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/cat_card_double_spacing"
-                android:paddingBottom="@dimen/cat_card_single_spacing">
+                android:paddingBottom="@dimen/cat_card_single_spacing"
+                android:baselineAligned="false">
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -34,7 +36,8 @@
                     android:layout_weight="1.0"
                     android:layout_marginEnd="@dimen/cat_card_single_spacing"
                     android:paddingTop="@dimen/cat_card_single_spacing"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    tools:ignore="UselessParent">
 
                     <TextView
                         style="?attr/textAppearanceHeadline6"
@@ -43,7 +46,7 @@
                         android:layout_height="wrap_content"
                         android:maxLines="1"
                         android:ellipsize="end"
-                        android:text="Title" />
+                        android:text="@string/text_title" />
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -58,21 +61,23 @@
                             android:layout_marginEnd="@dimen/spacing_medium"
                             app:srcCompat="@drawable/ic_favorite"
                             android:textAppearance="?attr/textAppearanceBody2"
-                            android:textColor="?android:attr/textColorSecondary" />
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:contentDescription="@string/likes_count" />
 
                         <TextView
                             android:id="@+id/product_likes"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="5"
+                            android:text="@string/text_zero"
                             android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:paddingStart="@dimen/spacing_small"
-                            android:text="added to favourite"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+                            android:text="@string/added_to_favourite"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Caption"
+                            tools:ignore="RtlSymmetry" />
 
                     </LinearLayout>
 
@@ -93,7 +98,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="@dimen/cat_card_single_spacing"
-                    android:text="Delete" />
+                    android:text="@string/delete" />
 
                 <ImageButton
                     android:id="@+id/product_like"
@@ -105,7 +110,8 @@
                     android:background="@drawable/state_pressed_ripple"
                     android:src="@drawable/ic_favorite_border"
                     android:clickable="true"
-                    android:visibility="gone" />
+                    android:visibility="gone"
+                    android:contentDescription="@string/add_to_favourite" />
 
             </LinearLayout>
 
@@ -115,7 +121,8 @@
             android:id="@+id/product_image"
             android:layout_width="148dp"
             android:layout_height="148dp"
-            android:scaleType="centerCrop" />
+            android:scaleType="centerCrop"
+            android:contentDescription="@string/image" />
 
     </LinearLayout>
 

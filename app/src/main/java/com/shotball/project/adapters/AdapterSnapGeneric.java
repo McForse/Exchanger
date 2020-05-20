@@ -141,9 +141,9 @@ public class AdapterSnapGeneric extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     public static class OriginalViewHolder extends RecyclerView.ViewHolder {
         public ImageView image;
-        public View lyt_parent;
+        View lyt_parent;
 
-        public OriginalViewHolder(View v) {
+        OriginalViewHolder(View v) {
             super(v);
             image = v.findViewById(R.id.image);
             lyt_parent = v.findViewById(R.id.lyt_parent);
@@ -151,7 +151,7 @@ public class AdapterSnapGeneric extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     public static class AddButtonViewHolder extends RecyclerView.ViewHolder {
-        public ImageButton imagesAddButton;
+        ImageButton imagesAddButton;
 
         AddButtonViewHolder(View v) {
             super(v);

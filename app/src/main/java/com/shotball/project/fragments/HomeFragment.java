@@ -66,7 +66,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
-public class HomeFragment extends Fragment implements ProductAdapter.OnProductSelectedListener {
+public class HomeFragment extends BaseFragment implements ProductAdapter.OnProductSelectedListener {
 
     private static final String TAG = "HomeFragment";
     private static final String TAG_GEO = "GeoListener";
@@ -418,14 +418,6 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
         }
     };
 
-    private String getUid() {
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            return FirebaseAuth.getInstance().getCurrentUser().getUid();
-        } else {
-            return null;
-        }
-    }
-
     private void getLocationPermission() {
         requestPermissions(new String[]{
                 Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
@@ -444,13 +436,13 @@ public class HomeFragment extends Fragment implements ProductAdapter.OnProductSe
     public void onStop() {
         super.onStop();
         Log.d(TAG, "onStop");
+        stopGeoQueryListener();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         Log.d(TAG, "onPause");
-        stopGeoQueryListener();
         mBundleRecyclerViewState = new Bundle();
         mListState = Objects.requireNonNull(recyclerView.getLayoutManager()).onSaveInstanceState();
         mBundleRecyclerViewState.putParcelable(KEY_RECYCLER_STATE, mListState);

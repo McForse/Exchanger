@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 
+import java.util.Objects;
+
 public class StartSnapHelper extends LinearSnapHelper {
 
     private OrientationHelper mVerticalHelper, mHorizontalHelper;
@@ -16,10 +18,6 @@ public class StartSnapHelper extends LinearSnapHelper {
 
     public interface SnapPositionListener {
         void position(View view, int position);
-    }
-
-    public void setSnapPositionListener(SnapPositionListener snapPositionListener) {
-        this.snapPositionListener = snapPositionListener;
     }
 
     public StartSnapHelper() {
@@ -36,7 +34,7 @@ public class StartSnapHelper extends LinearSnapHelper {
                 super.onScrolled(recyclerView, dx, dy);
                 View view = findSnapView(recyclerView.getLayoutManager());
                 if (view != null && snapPositionListener != null) {
-                    int pos = recyclerView.getLayoutManager().getPosition(view);
+                    int pos = Objects.requireNonNull(recyclerView.getLayoutManager()).getPosition(view);
                     snapPositionListener.position(view, pos);
                 }
             }

@@ -2,6 +2,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -12,21 +13,15 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_margin="@dimen/spacing_medium"
-        android:orientation="horizontal">
+        android:background="@drawable/shape_rectangle_rounded"
+        android:padding="@dimen/spacing_medium">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/rectangle_rounded"
-            android:padding="@dimen/spacing_medium">
         <TextView
             android:id="@+id/divider_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="01.01.2020"
+            android:text="@string/text_date"
             android:textAppearance="?attr/textAppearanceSubtitle2" />
-
-        </LinearLayout>
 
     </LinearLayout>
 
@@ -34,9 +29,8 @@
         android:id="@+id/lyt_parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="end|right"
+        android:gravity="end"
         android:orientation="horizontal"
-        android:layout_marginLeft="@dimen/spacing_xlarge"
         android:layout_marginStart="@dimen/spacing_xlarge"
         android:paddingBottom="1dp"
         android:paddingLeft="@dimen/spacing_middle"
@@ -64,12 +58,12 @@
                 android:paddingTop="@dimen/spacing_medium">
 
                 <TextView
-                    android:id="@+id/msg_item"
+                    android:id="@+id/message_item"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/spacing_medium"
                     android:layout_marginRight="@dimen/spacing_medium"
-                    android:text="Message content"
+                    android:text="@string/text_message"
                     android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
                     android:textColor="@android:color/black"
                     android:textStyle="normal" />
@@ -85,7 +79,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="02:30 AM"
+                        android:text="@string/text_time"
                         android:textColor="#58B346"
                         android:textSize="12sp" />
 
@@ -98,7 +92,8 @@
                         android:layout_width="@dimen/spacing_large"
                         android:layout_height="@dimen/spacing_large"
                         android:tint="@color/unread_message"
-                        app:srcCompat="@drawable/ic_done_all" />
+                        app:srcCompat="@drawable/ic_done_all"
+                        android:contentDescription="@string/reading_status" />
 
                 </LinearLayout>
 

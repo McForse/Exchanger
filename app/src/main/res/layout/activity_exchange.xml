@@ -19,7 +19,6 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/white"
             app:contentInsetStartWithNavigation="0dp"
-
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             app:theme="@style/Toolbar.Light" />
 
@@ -33,7 +32,6 @@
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/tabs" />
+        android:layout_height="match_parent" />
 
 </LinearLayout>

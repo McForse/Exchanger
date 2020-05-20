@@ -5,24 +5,25 @@
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/spacing_medium"
     app:cardCornerRadius="4dp"
-    app:cardElevation="@dimen/cardview_default_elevation">
+    app:cardElevation="@dimen/cardview_elevation">
 
     <RelativeLayout
         android:id="@+id/lyt_parent"
         android:layout_width="match_parent"
-        android:layout_height="110dp"
+        android:layout_height="@dimen/small_cardview_height"
         android:orientation="vertical">
 
         <ImageButton
             android:id="@+id/images_add_button"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:layout_marginTop="@dimen/spacing_medium"
             android:layout_marginEnd="@dimen/spacing_medium"
             android:background="@drawable/state_pressed_ripple"
             android:clickable="true"
-            android:src="@drawable/ic_add_a_photo" />
+            android:src="@drawable/ic_add_a_photo"
+            android:contentDescription="@string/add_images" />
 
     </RelativeLayout>
 

@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/album_item_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -34,12 +33,12 @@
         android:maxLines="1"
         android:ellipsize="end"
         android:textAppearance="?attr/textAppearanceHeadline6"
+        android:text="@string/text_name"
         app:layout_constraintBottom_toTopOf="@+id/last_msg"
         app:layout_constraintEnd_toStartOf="@id/last_time"
         app:layout_constraintStart_toEndOf="@id/room_image"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed"
-        tools:text="Username" />
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
         android:id="@+id/last_msg"
@@ -49,17 +48,17 @@
         android:maxLines="1"
         android:ellipsize="end"
         android:textAppearance="?attr/textAppearanceBody2"
+        android:text="@string/text_message"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/last_time"
         app:layout_constraintStart_toEndOf="@id/room_image"
-        app:layout_constraintTop_toBottomOf="@+id/room_title"
-        tools:text="Gallant" />
+        app:layout_constraintTop_toBottomOf="@+id/room_title" />
 
     <TextView
         android:id="@+id/last_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="10:20"
+        android:text="@string/text_time"
         app:layout_constraintBottom_toTopOf="@+id/unread_count"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -70,7 +69,7 @@
         android:layout_height="20dp"
         android:background="@drawable/shape_circle_red"
         android:gravity="center"
-        android:text="0"
+        android:text="@string/text_zero"
         android:textAlignment="center"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"

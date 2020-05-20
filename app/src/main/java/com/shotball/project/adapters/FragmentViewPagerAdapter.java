@@ -19,11 +19,8 @@ public class FragmentViewPagerAdapter extends FragmentStateAdapter {
 
     private static final int NUM_PAGES = 4;
 
-    private Context ctx;
-
-    public FragmentViewPagerAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle, Context context) {
+    public FragmentViewPagerAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle) {
         super(fragmentManager, lifecycle);
-        ctx = context;
     }
 
     @Override
@@ -48,16 +45,4 @@ public class FragmentViewPagerAdapter extends FragmentStateAdapter {
         return new HomeFragment();
     }
 
-    /*private MaterialFadeThrough createTransition() {
-        MaterialFadeThrough fadeThrough = MaterialFadeThrough.create(ctx);
-
-        // Add targets for this transition to explicitly run transitions only on these views. Without
-        // targeting, a MaterialFadeThrough would be run for every view in the Fragment's layout.
-        fadeThrough.addTarget(R.id.home_fragment);
-        fadeThrough.addTarget(R.id.favourites_fragment);
-        fadeThrough.addTarget(R.id.messages_fragment);
-        fadeThrough.addTarget(R.id.account_fragment);
-
-        return fadeThrough;
-    }*/
 }

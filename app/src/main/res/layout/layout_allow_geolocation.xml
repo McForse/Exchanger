@@ -15,14 +15,15 @@
         android:src="@drawable/img_no_geolocation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="@string/turn_on_your_location" />
 
     <TextView
         android:id="@+id/textView3"
         style="?attr/textAppearanceHeadline6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Turn On Your Location"
+        android:text="@string/turn_on_your_location"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/no_geolocation_image" />
@@ -34,7 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:gravity="center"
-        android:text="Allow access to your location to start exchanging products!"
+        android:text="@string/allow_access_to_your_location"
         android:textColor="@color/grey_40"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -45,7 +46,7 @@
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Allow"
+        android:text="@string/allow"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView4" />

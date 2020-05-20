@@ -45,7 +45,7 @@ public class MainActivity extends BaseActivity {
 
     private void initComponents() {
         viewPager = findViewById(R.id.view_pager);
-        FragmentViewPagerAdapter adapter = new FragmentViewPagerAdapter(getSupportFragmentManager(), getLifecycle(), this);
+        FragmentViewPagerAdapter adapter = new FragmentViewPagerAdapter(getSupportFragmentManager(), getLifecycle());
         viewPager.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
         viewPager.setOffscreenPageLimit(1);
         viewPager.setUserInputEnabled(false);

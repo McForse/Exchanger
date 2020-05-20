@@ -42,7 +42,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public abstract class ExchangesFragment extends Fragment {
+public abstract class ExchangesFragment extends BaseFragment {
 
     private static final String TAG = "ExchangesFragment";
 
@@ -97,6 +97,7 @@ public abstract class ExchangesFragment extends Fragment {
                 .build();
 
         mAdapter = new FirebaseRecyclerAdapter<ExchangeModel, ExchangeViewHolder>(options) {
+            @NonNull
             @Override
             public ExchangeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 View view = LayoutInflater.from(parent.getContext())
@@ -182,6 +183,11 @@ public abstract class ExchangesFragment extends Fragment {
                                 });
                                 incExchanges(model.getWho());
                                 incExchanges(model.getWhom());
+                                DatabaseReference dependencies = mDatabase.child("exchanges").child("proposed");
+                                removeReference(dependencies.orderByChild("exchange_for").equalTo(model.getExchange_for()));
+                                removeReference(dependencies.orderByChild("what_exchange").equalTo(model.getExchange_for()));
+                                removeReference(dependencies.orderByChild("exchange_for").equalTo(model.getWhat_exchange()));
+                                removeReference(dependencies.orderByChild("what_exchange").equalTo(model.getWhat_exchange()));
 
                             }
                         }).setNeutralButton("No", null)
@@ -274,7 +280,7 @@ public abstract class ExchangesFragment extends Fragment {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isComplete()) {
                             removeReference(fromPath);
-                            Log.d(TAG, "Success!");
+                            Log.d(TAG, "Copy success!");
                         } else {
                             Log.d(TAG, "Copy failed!");
                         }
@@ -289,7 +295,7 @@ public abstract class ExchangesFragment extends Fragment {
         fromPath.addListenerForSingleValueEvent(valueEventListener);
     }
 
-    private void removeReference(DatabaseReference databaseReference) {
+    private void removeReference(Query databaseReference) {
         databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -318,14 +324,6 @@ public abstract class ExchangesFragment extends Fragment {
         super.onStop();
         if (mAdapter != null) {
             mAdapter.stopListening();
-        }
-    }
-
-    public String getUid() {
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            return FirebaseAuth.getInstance().getCurrentUser().getUid();
-        } else {
-            return null;
         }
     }
 

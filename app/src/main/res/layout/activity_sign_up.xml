@@ -21,7 +21,7 @@
             android:theme="@style/Toolbar.Light"
             app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light"
             android:fitsSystemWindows="true"
-            android:elevation="@dimen/design_appbar_elevation" />
+            android:elevation="@dimen/appbar_elevation" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -45,7 +45,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Email"
+                android:hint="@string/email"
                 app:startIconDrawable="@drawable/ic_mail"
                 app:errorEnabled="true"
                 app:helperTextEnabled="true"
@@ -71,7 +71,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Password"
+                android:hint="@string/password"
                 app:startIconDrawable="@drawable/ic_vpn_key"
                 app:errorEnabled="true"
                 app:helperTextEnabled="true"
@@ -94,18 +94,18 @@
                 android:layout_height="@dimen/spacing_mlarge" />
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayoutRePassword"
+                android:id="@+id/text_input_layout_re_password"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Re-type Password"
+                android:hint="@string/re_type_password"
                 app:errorEnabled="true"
                 app:helperTextEnabled="true"
                 app:helperText="@string/required"
                 app:endIconMode="clear_text">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/fieldRePassword"
+                    android:id="@+id/field_re_password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
@@ -120,17 +120,17 @@
                 android:layout_height="@dimen/spacing_mlarge" />
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayoutUsername"
+                android:id="@+id/text_input_layout_username"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Username"
+                android:hint="@string/username"
                 app:startIconDrawable="@drawable/ic_person"
                 app:helperTextEnabled="true"
                 app:helperText="Optional">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/fieldUsername"
+                    android:id="@+id/field_username"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPersonName"
@@ -145,7 +145,7 @@
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/signUpButton"
+        android:id="@+id/sign_up_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

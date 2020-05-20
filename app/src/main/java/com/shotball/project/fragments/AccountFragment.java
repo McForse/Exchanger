@@ -15,7 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,7 +26,6 @@ import com.firebase.ui.database.SnapshotParser;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -44,7 +42,7 @@ import com.shotball.project.models.User;
 import com.shotball.project.utils.ViewAnimation;
 import com.shotball.project.viewHolders.MyProductViewHolder;
 
-public class AccountFragment extends Fragment {
+public class AccountFragment extends BaseFragment {
 
     private static final String TAG = "AccountFragment";
 
@@ -78,7 +76,7 @@ public class AccountFragment extends Fragment {
         exhibitCount = rootView.findViewById(R.id.exhibit_count);
         exchangesCount = rootView.findViewById(R.id.exchanges_count);
 
-        LinearLayout proposedExchangesButton = rootView.findViewById(R.id.proposed_ecxhanges_button);
+        LinearLayout proposedExchangesButton = rootView.findViewById(R.id.proposed_exchanges_button);
         proposedExchangesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -162,6 +160,7 @@ public class AccountFragment extends Fragment {
                         .build();
 
         mAdapter = new FirebaseRecyclerAdapter<Product, MyProductViewHolder>(options) {
+            @NonNull
             @Override
             public MyProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 View view = LayoutInflater.from(parent.getContext())
@@ -183,8 +182,8 @@ public class AccountFragment extends Fragment {
                     @Override
                     public void onDeleteClicked(String productKey) {
                         new MaterialAlertDialogBuilder(rootView.getContext())
-                                .setTitle("Delete product")
-                                .setMessage("Are you sure you want to remove the product?")
+                                .setTitle(R.string.delete_product)
+                                .setMessage(R.string.delte_product_confirmation)
                                 .setNegativeButton(R.string.cancel, null)
                                 .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                                     @Override
@@ -209,7 +208,7 @@ public class AccountFragment extends Fragment {
         mDatabase.child("products").child(productKey).removeValue().addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Snackbar snackbar = Snackbar.make(mainContainer, "An error occurred while deleting the product", Snackbar.LENGTH_LONG);
+                Snackbar snackbar = Snackbar.make(mainContainer, R.string.delete_product_error, Snackbar.LENGTH_LONG);
                 snackbar.setAnchorView(getActivity().findViewById(R.id.bottom_navigation));
             }
         });
@@ -258,14 +257,6 @@ public class AccountFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-    }
-
-    private String getUid() {
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            return FirebaseAuth.getInstance().getCurrentUser().getUid();
-        } else {
-            return null;
-        }
     }
 
     public interface OnProductSelectedListener {

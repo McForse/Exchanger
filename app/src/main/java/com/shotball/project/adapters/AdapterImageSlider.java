@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import androidx.annotation.NonNull;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
@@ -37,7 +38,6 @@ public class AdapterImageSlider extends PagerAdapter {
         this.onItemClickListener = onItemClickListener;
     }
 
-    // constructor
     public AdapterImageSlider(Activity activity, List<String> items, String key) {
         this.act = activity;
         this.items = items;
@@ -59,12 +59,13 @@ public class AdapterImageSlider extends PagerAdapter {
     }
 
     @Override
-    public boolean isViewFromObject(View view, Object object) {
-        return view == ((RelativeLayout) object);
+    public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
+        return view == object;
     }
 
+    @NonNull
     @Override
-    public Object instantiateItem(ViewGroup container, int position) {
+    public Object instantiateItem(@NonNull ViewGroup container, int position) {
         final String o = items.get(position);
         LayoutInflater inflater = (LayoutInflater) act.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = inflater.inflate(R.layout.item_slider_image, container, false);
@@ -75,19 +76,17 @@ public class AdapterImageSlider extends PagerAdapter {
             //TODO: placeholder and error
             Glide.with(act).load(o).centerCrop().into(image);
         } else {
-            Log.d("HHH", String.valueOf("images/" + key + "/" + o));
             StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("images/" + key + "/" + o);
             Glide.with(act).load(storageReference).centerCrop().into(image);
         }
 
-        ((ViewPager) container).addView(v);
+        container.addView(v);
 
         return v;
     }
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
-        ((ViewPager) container).removeView((RelativeLayout) object);
-
+        container.removeView((RelativeLayout) object);
     }
 }

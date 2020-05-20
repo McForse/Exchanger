@@ -19,7 +19,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/white"
             app:contentInsetStartWithNavigation="0dp"
-            android:elevation="@dimen/design_appbar_elevation"
+            android:elevation="@dimen/appbar_elevation"
             android:theme="@style/Toolbar.Light"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
@@ -30,7 +30,7 @@
         android:layout_height="match_parent">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/chats_recyclerView"
+            android:id="@+id/chats_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 

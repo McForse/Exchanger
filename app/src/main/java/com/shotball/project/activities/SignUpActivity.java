@@ -72,14 +72,14 @@ public class SignUpActivity extends BaseActivity {
     private void initComponents() {
         mTextInputLayoutEmail = findViewById(R.id.text_input_layout_email);
         mTextInputLayoutPassword = findViewById(R.id.text_input_layout_password);
-        mTextInputLayoutRePassword = findViewById(R.id.textInputLayoutRePassword);
+        mTextInputLayoutRePassword = findViewById(R.id.text_input_layout_re_password);
 
         mEmailField = findViewById(R.id.field_email);
         mPasswordField = findViewById(R.id.field_password);
-        mRePasswordField = findViewById(R.id.fieldRePassword);
-        mUsernameField = findViewById(R.id.fieldUsername);
+        mRePasswordField = findViewById(R.id.field_re_password);
+        mUsernameField = findViewById(R.id.field_username);
 
-        FloatingActionButton myFab = findViewById(R.id.signUpButton);
+        FloatingActionButton myFab = findViewById(R.id.sign_up_button);
         myFab.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (!validateForm()) {

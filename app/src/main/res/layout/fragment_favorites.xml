@@ -20,7 +20,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/white"
             app:contentInsetStartWithNavigation="0dp"
-            android:elevation="16dp"
+            android:elevation="@dimen/appbar_elevation"
             android:theme="@style/Toolbar.Light"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 

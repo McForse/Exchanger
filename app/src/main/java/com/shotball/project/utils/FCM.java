@@ -4,7 +4,9 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.Gson;
 import com.shotball.project.Config;
+import com.shotball.project.models.Notification;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,19 +23,13 @@ public class FCM {
 
     private static final String TAG = "FCM";
 
-    public static void sendPush(String title, String message, String token, String image) {
-        JSONObject jsonObject = new JSONObject();
+    public static void sendPush(Notification notification) {
+        Gson gson = new Gson();
+        send(gson.toJson(notification));
+    }
 
-        try {
-            jsonObject.put("title", title);
-            jsonObject.put("message", message);
-            jsonObject.put("token", token);
-            jsonObject.put("imageUrl", image);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        post(Config.FCM_SERVER_URL + "/notification/token", jsonObject.toString(), new Callback() {
+    private static void send(String jsonObject) {
+        post(Config.FCM_SERVER_URL + "/notification/token", jsonObject, new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 Log.d(TAG, e.toString());

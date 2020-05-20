@@ -19,8 +19,8 @@ public class ExampleUnitTest {
 
     @Test
     public void emailChecker() {
-        assertTrue(TextUtil.validateEmail("danilvda@gmail.com"));
-        assertTrue(TextUtil.validateEmail("danilvda@yandex.ru"));
-        assertFalse(TextUtil.validateEmail("danilvda@yandex"));
+        assertTrue(TextUtil.validateEmail("example@gmail.com"));
+        assertTrue(TextUtil.validateEmail("example@yandex.ru"));
+        assertFalse(TextUtil.validateEmail("example@yandex"));
     }
 }

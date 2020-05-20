@@ -105,10 +105,6 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         super.onAttachedToRecyclerView(recyclerView);
     }
 
-    public void addItem(Product item) {
-        items.add(item);
-    }
-
     public void insertData(List<Product> items) {
         setLoaded();
         final int positionStart = getItemCount();

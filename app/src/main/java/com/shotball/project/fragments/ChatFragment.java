@@ -1,5 +1,6 @@
 package com.shotball.project.fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,14 +15,12 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,6 +30,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.shotball.project.R;
+import com.shotball.project.models.Notification;
 import com.shotball.project.models.User;
 import com.shotball.project.utils.TextUtil;
 import com.shotball.project.activities.ProductActivity;
@@ -48,7 +48,7 @@ import java.util.TimeZone;
 
 import static com.shotball.project.utils.FCM.sendPush;
 
-public class ChatFragment extends Fragment {
+public class ChatFragment extends BaseFragment {
 
     private static final String TAG = "ChatFragment";
 
@@ -71,7 +71,7 @@ public class ChatFragment extends Fragment {
     private String productKey;
     private String productTitle;
 
-    private User interlocutor;
+    private ArrayList<User> users;
 
     public static ChatFragment getInstance(String toUid, String roomID, String productKey, String productTitle) {
         ChatFragment chatFragment = new ChatFragment();
@@ -89,8 +89,10 @@ public class ChatFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_chat, container, false);
         initComponents();
-        myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        getInterlocutor();
+        users = new ArrayList<>();
+        myUid = getUid();
+        getUser(myUid);
+        getUser(toUid);
 
         mAdapter = new RecyclerViewAdapter();
         recyclerView.setAdapter(mAdapter);
@@ -115,13 +117,14 @@ public class ChatFragment extends Fragment {
         return rootView;
     }
 
+    @SuppressLint("SimpleDateFormat")
     private void initComponents() {
-        recyclerView = rootView.findViewById(R.id.chat_recyclerView);
+        recyclerView = rootView.findViewById(R.id.chat_recycler_view);
         linearLayoutManager = new LinearLayoutManager(rootView.getContext());
         linearLayoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(linearLayoutManager);
         messageInput = rootView.findViewById(R.id.message_input);
-        sendButton = rootView.findViewById(R.id.btn_send);
+        sendButton = rootView.findViewById(R.id.button_send);
         sendButton.setOnClickListener(sendButtonClickListener);
 
         if (getArguments() != null) {
@@ -136,9 +139,8 @@ public class ChatFragment extends Fragment {
         dateFormat.setTimeZone(TimeZone.getDefault());
     }
 
-    void getInterlocutor() {
-        Log.d(TAG, "getUserInfoFromServer: " + toUid);
-        mDatabase.child("users").child(toUid).addListenerForSingleValueEvent(new ValueEventListener() {
+    private void getUser(String uid) {
+        mDatabase.child("users").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
 
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -146,8 +148,7 @@ public class ChatFragment extends Fragment {
 
                 if (user != null) {
                     user.setUid(dataSnapshot.getKey());
-                    interlocutor = user;
-
+                    users.add(user);
                 }
             }
 
@@ -199,20 +200,17 @@ public class ChatFragment extends Fragment {
             return;
         }
 
-        // save last message
         mDatabase.child("rooms").child(roomID).child("lastmessage").setValue(message);
-
-        // save message
         message.readUsers.put(myUid, true);
         mDatabase.child("rooms").child(roomID).child("messages").push().setValue(message).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                sendPush("New message", message.getMsg(), interlocutor.getFcm(), interlocutor.getImage());
+                Notification notification = new Notification("New message", message.getMsg(), users.get(0).getImage(), users.get(0).getUsername(), users.get(1).getFcm());
+                sendPush(notification);
                 sendButton.setEnabled(true);
             }
         });
 
-        // inc unread message count
         mDatabase.child("rooms").child(roomID).child("users").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -271,7 +269,6 @@ public class ChatFragment extends Fragment {
             beforeDay = null;
             messagesList.clear();
 
-            // get messages from server
             databaseReference = mDatabase.child("rooms").child(roomID).child("messages");
             valueEventListener = databaseReference.addValueEventListener(new ValueEventListener() {
 
@@ -280,7 +277,6 @@ public class ChatFragment extends Fragment {
                     beforeDay = null;
                     messagesList.clear();
 
-                    // Update number of messages unread to 0 => read all
                     mDatabase.child("rooms").child(roomID).child("unread").child(myUid).setValue(0);
                     Map<String, Object> unreadMessages = new HashMap<>();
 
@@ -410,14 +406,14 @@ public class ChatFragment extends Fragment {
 
             MessageViewHolder(View view) {
                 super(view);
-                msg_item = view.findViewById(R.id.msg_item);
+                msg_item = view.findViewById(R.id.message_item);
                 timestamp = view.findViewById(R.id.timestamp);
                 read_counter = view.findViewById(R.id.read_counter);
                 divider = view.findViewById(R.id.divider);
                 divider_date = view.findViewById(R.id.divider_date);
             }
 
-            public void bind(final Message message) {
+            void bind(final Message message) {
                 String time = DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date((long) message.timestamp));
                 timestamp.setText(time);
                 msg_item.setText(message.msg);
@@ -436,19 +432,17 @@ public class ChatFragment extends Fragment {
                 openButton = view.findViewById(R.id.product_open_button);
             }
 
-            public void bind(final Message message) {
-                title.setText(message.msg);
-
-                mDatabase.child("products").child(message.uid).child("images/0").addListenerForSingleValueEvent(new ValueEventListener() {
-
+            void bind(final Message message) {
+                title.setText(message.getMsg());
+                mDatabase.child("products").child(message.getUid()).child("images/0").addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         String imageUrl = (String) dataSnapshot.getValue();
-                        if (TextUtil.isUrl(imageUrl)) {
+                        if (imageUrl != null && TextUtil.isUrl(imageUrl)) {
                             //TODO: placeholder and error
                             Glide.with(rootView.getContext()).load(imageUrl).centerCrop().into(image);
                         } else {
-                            StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("images/" + message.uid + "/" + imageUrl);
+                            StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("images").child(message.getUid()).child("0");
                             Glide.with(rootView.getContext()).load(storageReference).centerCrop().into(image);
                         }
                     }
@@ -463,7 +457,7 @@ public class ChatFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent(getActivity(), ProductActivity.class);
-                        intent.putExtra(ProductActivity.EXTRA_PRODUCT_KEY, message.uid);
+                        intent.putExtra(ProductActivity.EXTRA_PRODUCT_KEY, message.getUid());
                         startActivity(intent);
                     }
                 });

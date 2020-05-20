@@ -3,8 +3,8 @@ package com.shotball.project.activities;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.viewpager.widget.ViewPager;
 
@@ -12,8 +12,6 @@ import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -52,6 +50,7 @@ import com.shotball.project.adapters.AdapterImageSlider;
 import com.shotball.project.interfaces.IsAvailableCallback;
 import com.shotball.project.models.Categories;
 import com.shotball.project.models.ExchangeModel;
+import com.shotball.project.models.Notification;
 import com.shotball.project.models.Product;
 import com.shotball.project.models.User;
 import com.shotball.project.utils.ViewAnimation;
@@ -71,6 +70,7 @@ public class ProductActivity extends AppCompatActivity {
 
     private Toolbar toolbar;
     private NestedScrollView mainContainer;
+    private ConstraintLayout noItem;
     private LinearLayout actionsContainer;
     private ImageView image;
     private TextView title;
@@ -98,11 +98,12 @@ public class ProductActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product);
         initToolbar();
+        noItem = findViewById(R.id.lyt_item_deleted);
 
         Bundle bundle = getIntent().getExtras();
 
         if (bundle == null || bundle.getString(EXTRA_PRODUCT_KEY) == null) {
-            //TODO: error
+            ViewAnimation.showIn(noItem);
         } else {
             PRODUCT_KEY = bundle.getString(EXTRA_PRODUCT_KEY);
             initComponents();
@@ -161,13 +162,6 @@ public class ProductActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(null);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        Drawable drawable = toolbar.getOverflowIcon();
-        if (drawable != null) {
-            drawable = DrawableCompat.wrap(drawable);
-            DrawableCompat.setTint(drawable.mutate(), getColor(R.color.red_400));
-            toolbar.setOverflowIcon(drawable);
-            toolbar.getOverflowIcon().setColorFilter(new PorterDuffColorFilter(getColor(R.color.red_400), PorterDuff.Mode.SRC_ATOP));
-        }
     }
 
     private void getProduct() {
@@ -246,7 +240,7 @@ public class ProductActivity extends AppCompatActivity {
             initMapFragment();
             invalidateOptionsMenu();
         } else {
-            //TODO: error
+            ViewAnimation.showIn(noItem);
         }
     }
 
@@ -280,7 +274,7 @@ public class ProductActivity extends AppCompatActivity {
                                 selectedUsers.put(mSeller.getUid(), "i");
                                 roomId = mDatabase.child("rooms").push().getKey();
 
-                                mDatabase.child("rooms/" + roomId).child("users").setValue(selectedUsers).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                mDatabase.child("rooms").child(roomId).child("users").setValue(selectedUsers).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
                                         openChat();
@@ -350,8 +344,6 @@ public class ProductActivity extends AppCompatActivity {
 
             sendMessageButton.setOnClickListener(sendMessageOnClickListener);
             exchangeButton.setOnClickListener(exchangeOnClickListener);
-        } else {
-            //TODO: error
         }
     }
 
@@ -392,7 +384,7 @@ public class ProductActivity extends AppCompatActivity {
                     ExchangeModel exchange = item.getValue(ExchangeModel.class);
 
                     if (exchange != null && exchange.exchange_for.equals(mProduct.getKey())) {
-                        Log.d(TAG, "findExistExchange: what_exchange - " + myProductKey + " ; exchange_for - " + exchange.exchange_for);
+                        Log.d(TAG, "findExistExchange: what_exchange - " + myProductKey + "; exchange_for - " + exchange.exchange_for);
                         isAvailable[0] = true;
                         break;
                     }
@@ -425,7 +417,7 @@ public class ProductActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "Exchange was successfully added in the database!");
-                sendPush("New exchange!", "You were offered to exchange goods", mSeller.getFcm(), mSeller.getImage());
+                sendPush(new Notification(getString(R.string.new_exchange), getString(R.string.new_exchange_message), mSeller.getFcm()));
                 Snackbar.make(mainContainer, R.string.dialog_exchange_added_success, Snackbar.LENGTH_LONG).show();
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -476,7 +468,7 @@ public class ProductActivity extends AppCompatActivity {
                     public boolean onMarkerClick(Marker marker) {
                         try {
                             googleMap.animateCamera(zoomingLocation());
-                        } catch (Exception e) {
+                        } catch (Exception ignored) {
                         }
                         return true;
                     }
@@ -558,8 +550,6 @@ public class ProductActivity extends AppCompatActivity {
 
         if (i == android.R.id.home) {
             finish();
-        } else if (i == R.id.action_like) {
-
         }
 
         return super.onOptionsItemSelected(item);

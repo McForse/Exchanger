@@ -49,7 +49,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
-public class MessagesFragment extends Fragment {
+public class MessagesFragment extends BaseFragment {
 
     private static final String TAG = "MessagesFragment";
 
@@ -80,7 +80,7 @@ public class MessagesFragment extends Fragment {
     private void initComponents() {
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        recyclerView = rootView.findViewById(R.id.chats_recyclerView);
+        recyclerView = rootView.findViewById(R.id.chats_recycler_view);
         int verticalPadding = rootView.getContext().getResources().getDimensionPixelSize(R.dimen.item_list_padding_vertical);
         recyclerView.setPadding(0, verticalPadding, 0, verticalPadding);
         recyclerView.setClipToPadding(false);
@@ -118,9 +118,7 @@ public class MessagesFragment extends Fragment {
         private ValueEventListener listenerRegistration;
 
         ChatsRecyclerViewAdapter() {
-            myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-
+            myUid = getUid();
             listenerUsers = new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -157,7 +155,7 @@ public class MessagesFragment extends Fragment {
                             chatRoomModel.setLastDatetime(simpleDateFormat.format(new Date(sortKey)));
 
                             switch (message.msgtype) {
-                                case 1: chatRoomModel.setLastMsg("Product"); break;
+                                case 1: chatRoomModel.setLastMsg(getString(R.string.product)); break;
                                 default:  chatRoomModel.setLastMsg(message.msg);
                             }
                         }
@@ -225,7 +223,7 @@ public class MessagesFragment extends Fragment {
             roomViewHolder.last_time.setText(chatRoomModel.getLastDatetime());
 
             if (chatRoomModel.getPhoto().equals("") || chatRoomModel.getPhoto() == null) {
-                Glide.with(rootView.getContext()).load(R.drawable.image_user)
+                Glide.with(rootView.getContext()).load(R.drawable.img_user)
                         .apply(requestOptions)
                         .into(roomViewHolder.room_image);
             } else {

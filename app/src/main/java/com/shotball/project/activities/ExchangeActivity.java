@@ -6,7 +6,6 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.android.material.tabs.TabLayout;
@@ -19,9 +18,6 @@ import com.shotball.project.fragments.RefusedExchangesFragment;
 public class ExchangeActivity extends BaseActivity {
 
     private static final String TAG = "ExchangeActivity";
-
-    private TabLayout tabLayout;
-    private ViewPager viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,8 +36,8 @@ public class ExchangeActivity extends BaseActivity {
     }
 
     private void initComponent() {
-        tabLayout = findViewById(R.id.tabs);
-        viewPager = findViewById(R.id.view_pager);
+        TabLayout tabLayout = findViewById(R.id.tabs);
+        ViewPager viewPager = findViewById(R.id.view_pager);
         viewPager.setOffscreenPageLimit(1);
 
         FragmentPagerAdapter mPagerAdapter = new FragmentPagerAdapter(getSupportFragmentManager(),
@@ -88,12 +84,6 @@ public class ExchangeActivity extends BaseActivity {
     @Override
     public void onStop() {
         super.onStop();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_exchange, menu);
-        return super.onCreateOptionsMenu(menu);
     }
 
     @Override

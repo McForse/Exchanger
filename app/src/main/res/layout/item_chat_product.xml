@@ -12,7 +12,7 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/mtrl_card_spacing"
+        android:layout_margin="@dimen/card_spacing"
         android:clickable="true"
         android:focusable="true"
         android:minHeight="@dimen/cat_card_rich_media_demo_min_height">
@@ -42,7 +42,9 @@
                         android:id="@+id/product_message_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Title" />
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:text="@string/text_title" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -50,7 +52,7 @@
                         android:layout_marginTop="@dimen/cat_card_single_spacing"
                         android:ellipsize="end"
                         android:maxLines="2"
-                        android:text="Discussed product" />
+                        android:text="@string/discussed_product" />
 
                 </LinearLayout>
 
@@ -61,7 +63,8 @@
                     android:layout_marginStart="@dimen/cat_card_single_spacing"
                     android:background="@android:color/transparent"
                     app:backgroundTint="@color/material_on_surface_emphasis_medium"
-                    app:backgroundTintMode="add" />
+                    app:backgroundTintMode="add"
+                    android:contentDescription="@string/product_images" />
 
             </LinearLayout>
 
@@ -78,7 +81,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="@dimen/cat_card_single_spacing"
-                    android:text="Open product" />
+                    android:text="@string/open_product" />
 
             </LinearLayout>
 

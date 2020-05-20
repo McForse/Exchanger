@@ -13,7 +13,7 @@
         android:layout_weight="1">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/chat_recyclerView"
+            android:id="@+id/chat_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
@@ -33,26 +33,26 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@android:color/white"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/spacing_xxlarge"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:background="@android:color/white">
 
             <EditText
                 android:id="@+id/message_input"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:hint="Message"
+                android:background="@android:color/white"
+                android:hint="@string/message"
                 android:imeOptions="actionSearch"
                 android:padding="@dimen/spacing_middle" />
 
             <ImageView
-                android:id="@+id/btn_send"
+                android:id="@+id/button_send"
                 android:layout_width="@dimen/spacing_xxlarge"
                 android:layout_height="@dimen/spacing_xxlarge"
                 android:background="?attr/selectableItemBackground"
@@ -64,4 +64,5 @@
         </LinearLayout>
 
     </LinearLayout>
+
 </LinearLayout>

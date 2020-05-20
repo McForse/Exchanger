@@ -20,7 +20,8 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:tint="@android:color/white"
-            app:srcCompat="@drawable/ic_mail_outline" />
+            app:srcCompat="@drawable/ic_mail_outline"
+            android:contentDescription="@string/email" />
 
         <TextView
             android:id="@+id/title"
@@ -66,7 +67,7 @@
             android:layout_height="wrap_content"
             android:paddingLeft="@dimen/spacing_mlarge"
             android:paddingRight="@dimen/spacing_mlarge"
-            android:text="Back"
+            android:text="@string/back"
             android:textColor="@android:color/white" />
 
     </LinearLayout>

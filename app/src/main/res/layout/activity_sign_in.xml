@@ -21,11 +21,10 @@
             android:layout_height="@dimen/spacing_middle" />
 
         <com.google.android.material.card.MaterialCardView
-            style="@style/Widget.MaterialComponents.CardView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="10dp"
-            app:cardElevation="1dp"
+            app:cardElevation="@dimen/cardview_elevation"
             app:strokeColor="#E0E0E0"
             app:strokeWidth="1dp">
 
@@ -44,8 +43,9 @@
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:src="@drawable/exchange_icon"
-                        android:tint="@color/colorPrimary" />
+                        android:src="@drawable/img_exchange_icon"
+                        android:tint="@color/colorPrimary"
+                        android:contentDescription="@string/app_name" />
 
                     <View
                         android:layout_width="0dp"
@@ -62,7 +62,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/spacing_medium"
-                        android:text="Sign in with your account"
+                        android:text="@string/sign_in_with_your_account"
                         android:textAppearance="?attr/textAppearanceSubtitle1"
                         android:textColor="@color/grey_500" />
 
@@ -78,7 +78,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Email"
+                    android:hint="@string/email"
                     app:errorEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -101,7 +101,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Password"
+                    android:hint="@string/password"
                     app:errorEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -121,7 +121,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_small"
                     android:clickable="true"
-                    android:text="Forgot Password?"
+                    android:text="@string/forgot_password"
                     android:textAppearance="?attr/textAppearanceSubtitle1"
                     android:textColor="@color/colorPrimary"
                     android:textStyle="bold" />
@@ -134,7 +134,7 @@
                     android:id="@+id/signin_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Login" />
+                    android:text="@string/login" />
 
                 <View
                     android:layout_width="0dp"
@@ -150,7 +150,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="New user? "
+                        android:text="@string/new_user"
                         android:textAppearance="?attr/textAppearanceSubtitle1"
                         android:textColor="@color/blue_grey_300" />
 
@@ -158,8 +158,10 @@
                         android:id="@+id/create_account_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/spacing_medium"
+                        android:layout_marginEnd="@dimen/spacing_medium"
                         android:clickable="true"
-                        android:text="Sign Up"
+                        android:text="@string/sign_up"
                         android:textAppearance="?attr/textAppearanceSubtitle1"
                         android:textColor="@color/colorPrimary"
                         android:textStyle="bold" />
@@ -167,12 +169,13 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text=" or "
+                        android:layout_marginEnd="@dimen/spacing_medium"
+                        android:text="@string/or"
                         android:textAppearance="?attr/textAppearanceSubtitle1"
                         android:textColor="@color/blue_grey_300" />
 
                     <com.google.android.gms.common.SignInButton
-                        android:id="@+id/google_signin_button"
+                        android:id="@+id/google_sign_in_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
 

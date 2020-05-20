@@ -75,6 +75,7 @@ public class ExchangeViewHolder extends RecyclerView.ViewHolder {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Product product = dataSnapshot.getValue(Product.class);
                 if (product == null) return;
+                product.setKey(dataSnapshot.getKey());
                 exchangeProductTitle[0] = product.getTitle();
                 productTitle.setText(product.getTitle());
                 productDescription.setText(product.getDescription());
@@ -85,6 +86,7 @@ public class ExchangeViewHolder extends RecyclerView.ViewHolder {
                         //TODO: placeholder and error
                         Glide.with(ctx).load(image).centerCrop().into(productImage);
                     } else {
+                        Log.d(TAG, "Image loading from storage: " + product.getKey());
                         StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("images").child(product.getKey()).child(image);
                         Glide.with(ctx).load(storageReference).centerCrop().into(productImage);
                     }
@@ -102,6 +104,7 @@ public class ExchangeViewHolder extends RecyclerView.ViewHolder {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Product product = dataSnapshot.getValue(Product.class);
                 if (product == null) return;
+                product.setKey(dataSnapshot.getKey());
                 toProductTitle.setText(product.getTitle());
                 String image = product.getImages().get(0);
 

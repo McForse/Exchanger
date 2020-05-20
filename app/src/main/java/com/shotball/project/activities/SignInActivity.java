@@ -4,9 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
-import android.app.Dialog;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -38,6 +36,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.shotball.project.R;
+import com.shotball.project.utils.Preferences;
 import com.shotball.project.utils.TextUtil;
 import com.shotball.project.models.User;
 
@@ -92,7 +91,7 @@ public class SignInActivity extends BaseActivity implements View.OnClickListener
         findViewById(R.id.signin_button).setOnClickListener(this);
         findViewById(R.id.forgot_password).setOnClickListener(this);
         findViewById(R.id.create_account_button).setOnClickListener(this);
-        findViewById(R.id.google_signin_button).setOnClickListener(this);
+        findViewById(R.id.google_sign_in_button).setOnClickListener(this);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
                 .setTitle("Reset password")
@@ -314,7 +313,7 @@ public class SignInActivity extends BaseActivity implements View.OnClickListener
             startActivity(intent);
         } else if (i == R.id.signin_button) {
             signIn(mEmailField.getText().toString(), mPasswordField.getText().toString());
-        } else if (i == R.id.google_signin_button) {
+        } else if (i == R.id.google_sign_in_button) {
             signInGoogle();
         }
     }

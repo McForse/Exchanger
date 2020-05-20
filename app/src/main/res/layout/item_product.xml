@@ -7,8 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/item_list_margin"
-    app:cardElevation="@dimen/cardview_default_elevation"
-    tools:ignore="PrivateResource"
+    app:cardElevation="@dimen/cardview_elevation"
     android:clickable="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -43,7 +42,8 @@
                 android:padding="1dp"
                 android:background="@drawable/state_pressed_ripple"
                 android:src="@drawable/ic_favorite_border"
-                android:clickable="true" />
+                android:clickable="true"
+                android:contentDescription="@string/add_to_favourite" />
 
         </RelativeLayout>
 
@@ -80,7 +80,8 @@
                 android:layout_marginEnd="@dimen/spacing_medium"
                 android:textAppearance="?attr/textAppearanceBody2"
                 android:textColor="?android:attr/textColorSecondary"
-                app:srcCompat="@drawable/ic_place" />
+                app:srcCompat="@drawable/ic_place"
+                android:contentDescription="@string/distance_range" />
 
             <TextView
                 android:id="@+id/product_distance"
@@ -95,7 +96,8 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="@dimen/spacing_small"
                 android:textAppearance="?attr/textAppearanceBody2"
-                tools:text="meters" />
+                tools:text="meters"
+                tools:ignore="RtlSymmetry" />
 
         </LinearLayout>
 
