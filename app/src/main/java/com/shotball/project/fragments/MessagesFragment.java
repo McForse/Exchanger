@@ -16,7 +16,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,14 +24,14 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.firebase.auth.FirebaseAuth;
+import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.material.bottomnavigation.BottomNavigationItemView;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.shotball.project.R;
 import com.shotball.project.activities.ChatActivity;
 import com.shotball.project.models.ChatRoomModel;
@@ -48,6 +47,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
+
+import static com.google.android.material.bottomnavigation.LabelVisibilityMode.LABEL_VISIBILITY_AUTO;
 
 public class MessagesFragment extends BaseFragment {
 
@@ -154,7 +155,7 @@ public class MessagesFragment extends BaseFragment {
                             sortKey = (long) message.timestamp;
                             chatRoomModel.setLastDatetime(simpleDateFormat.format(new Date(sortKey)));
 
-                            switch (message.msgtype) {
+                            switch (message.type) {
                                 case 1: chatRoomModel.setLastMsg(getString(R.string.product)); break;
                                 default:  chatRoomModel.setLastMsg(message.msg);
                             }
@@ -182,8 +183,8 @@ public class MessagesFragment extends BaseFragment {
                     for(Map.Entry<Long,ChatRoomModel> entry : sortRoomList.entrySet()) {
                         roomList.add(entry.getValue());
                     }
-                    notifyDataSetChanged();
                     setBadge(rootView.getContext(), unreadTotal);
+                    notifyDataSetChanged();
                 }
 
                 @Override

@@ -7,7 +7,7 @@ public class Message {
 
     public String uid;
     public String msg;
-    public int msgtype;
+    public int type;
     public Object timestamp;
     public Map<String, Object> readUsers = new HashMap<>();
 
@@ -27,12 +27,12 @@ public class Message {
         this.msg = msg;
     }
 
-    public int getMsgtype() {
-        return msgtype;
+    public int getType() {
+        return type;
     }
 
-    public void setMsgtype(int msgtype) {
-        this.msgtype = msgtype;
+    public void setType(int type) {
+        this.type = type;
     }
 
     public Object getTimestamp() {

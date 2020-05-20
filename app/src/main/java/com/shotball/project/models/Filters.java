@@ -59,7 +59,7 @@ public class Filters {
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        return distance == ((Filters) obj).getDistance() && categories.equals(((Filters) obj).getCategories());
+        return distance == ((Filters) obj).distance && categories.equals(((Filters) obj).categories);
     }
 
 }

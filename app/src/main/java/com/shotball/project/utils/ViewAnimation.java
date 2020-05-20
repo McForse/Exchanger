@@ -30,6 +30,22 @@ public class ViewAnimation {
         v.startAnimation(fadeIn);
     }
 
+    public static void fadeOut(final View v) {
+        if (v.getVisibility() != View.GONE) {
+            v.setAlpha(1.0f);
+            v.animate()
+                    .setDuration(500)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            v.setVisibility(View.GONE);
+                        }
+                    })
+                    .alpha(0.0f);
+        }
+    }
+
     public static void showIn(final View v) {
         v.setVisibility(View.VISIBLE);
         v.setAlpha(0f);

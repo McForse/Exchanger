@@ -65,7 +65,7 @@ public class ChatFragment extends BaseFragment {
 
     private SimpleDateFormat dateFormat;
 
-    private String roomID;
+    private String roomId;
     private String myUid;
     private String toUid;
     private String productKey;
@@ -73,11 +73,11 @@ public class ChatFragment extends BaseFragment {
 
     private ArrayList<User> users;
 
-    public static ChatFragment getInstance(String toUid, String roomID, String productKey, String productTitle) {
+    public static ChatFragment getInstance(String toUid, String roomId, String productKey, String productTitle) {
         ChatFragment chatFragment = new ChatFragment();
         Bundle bundle = new Bundle();
         bundle.putString("toUid", toUid);
-        bundle.putString("roomID", roomID);
+        bundle.putString("roomId", roomId);
         bundle.putString("productKey", productKey);
         bundle.putString("productTitle", productTitle);
         chatFragment.setArguments(bundle);
@@ -94,11 +94,18 @@ public class ChatFragment extends BaseFragment {
         getUser(myUid);
         getUser(toUid);
 
+        return rootView;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
         mAdapter = new RecyclerViewAdapter();
         recyclerView.setAdapter(mAdapter);
+        Log.d(TAG, roomId);
 
         if (productKey != null) {
-            mDatabase.child("rooms").child(roomID).child("lastproduct").addListenerForSingleValueEvent(new ValueEventListener() {
+            mDatabase.child("rooms").child(roomId).child("lastproduct").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     Log.d(TAG, String.valueOf(dataSnapshot.getValue()));
@@ -113,8 +120,6 @@ public class ChatFragment extends BaseFragment {
                 }
             });
         }
-
-        return rootView;
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -128,7 +133,7 @@ public class ChatFragment extends BaseFragment {
         sendButton.setOnClickListener(sendButtonClickListener);
 
         if (getArguments() != null) {
-            roomID = getArguments().getString("roomID");
+            roomId = getArguments().getString("roomId");
             toUid = getArguments().getString("toUid");
             productKey = getArguments().getString("productKey");
             productTitle = getArguments().getString("productTitle");
@@ -171,10 +176,10 @@ public class ChatFragment extends BaseFragment {
         Message message = new Message();
         message.uid = productKey;
         message.msg = productTitle;
-        message.msgtype = 1;
+        message.type = 1;
         message.timestamp = ServerValue.TIMESTAMP;
 
-        mDatabase.child("rooms").child(roomID).child("lastproduct").setValue(productKey);
+        mDatabase.child("rooms").child(roomId).child("lastproduct").setValue(productKey);
         sendMessageToDatabase(message);
     }
 
@@ -188,43 +193,44 @@ public class ChatFragment extends BaseFragment {
         Message message = new Message();
         message.uid = myUid;
         message.msg = msg;
-        message.msgtype = 0;
+        message.type = 0;
         message.timestamp = ServerValue.TIMESTAMP;
 
         sendMessageToDatabase(message);
     }
 
     private void sendMessageToDatabase(Message message) {
-        if (roomID == null) {
+        if (roomId == null) {
             Objects.requireNonNull(getActivity()).finish();
             return;
         }
 
-        mDatabase.child("rooms").child(roomID).child("lastmessage").setValue(message);
+        mDatabase.child("rooms").child(roomId).child("lastmessage").setValue(message);
         message.readUsers.put(myUid, true);
-        mDatabase.child("rooms").child(roomID).child("messages").push().setValue(message).addOnCompleteListener(new OnCompleteListener<Void>() {
+        mDatabase.child("rooms").child(roomId).child("messages").push().setValue(message).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                Notification notification = new Notification("New message", message.getMsg(), users.get(0).getImage(), users.get(0).getUsername(), users.get(1).getFcm());
+                User me = users.get(0);
+                Notification notification = new Notification("New message", message.getMsg(), me.getImage(), me.getUsername(), me.getUid(), users.get(1).getFcm());
                 sendPush(notification);
                 sendButton.setEnabled(true);
             }
         });
 
-        mDatabase.child("rooms").child(roomID).child("users").addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabase.child("rooms").child(roomId).child("users").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (final DataSnapshot item : dataSnapshot.getChildren()) {
                     final String uid = item.getKey();
 
                     if (!myUid.equals(item.getKey())) {
-                        mDatabase.child("rooms").child(roomID).child("unread").child(item.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                        mDatabase.child("rooms").child(roomId).child("unread").child(item.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
 
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 Integer count = dataSnapshot.getValue(Integer.class);
                                 if (count == null) count = 0;
-                                mDatabase.child("rooms").child(roomID).child("unread").child(uid).setValue(count + 1);
+                                mDatabase.child("rooms").child(roomId).child("unread").child(uid).setValue(count + 1);
                             }
 
                             @Override
@@ -269,7 +275,7 @@ public class ChatFragment extends BaseFragment {
             beforeDay = null;
             messagesList.clear();
 
-            databaseReference = mDatabase.child("rooms").child(roomID).child("messages");
+            databaseReference = mDatabase.child("rooms").child(roomId).child("messages");
             valueEventListener = databaseReference.addValueEventListener(new ValueEventListener() {
 
                 @Override
@@ -277,7 +283,7 @@ public class ChatFragment extends BaseFragment {
                     beforeDay = null;
                     messagesList.clear();
 
-                    mDatabase.child("rooms").child(roomID).child("unread").child(myUid).setValue(0);
+                    mDatabase.child("rooms").child(roomId).child("unread").child(myUid).setValue(0);
                     Map<String, Object> unreadMessages = new HashMap<>();
 
                     for (DataSnapshot item: dataSnapshot.getChildren()) {
@@ -292,7 +298,7 @@ public class ChatFragment extends BaseFragment {
                     }
 
                     if (unreadMessages.size() > 0) {
-                        mDatabase.child("rooms").child(roomID).child("messages").updateChildren(unreadMessages).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        mDatabase.child("rooms").child(roomId).child("messages").updateChildren(unreadMessages).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 notifyDataSetChanged();
@@ -325,7 +331,7 @@ public class ChatFragment extends BaseFragment {
         public int getItemViewType(int position) {
             Message message = messagesList.get(position);
 
-            if (message.msgtype == 0) {
+            if (message.type == 0) {
                 if (message.uid.equals(myUid)) {
                     return VIEW_MESSAGE_ME;
                 } else {

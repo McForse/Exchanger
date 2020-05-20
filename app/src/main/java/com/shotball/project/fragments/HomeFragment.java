@@ -29,7 +29,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -84,6 +83,7 @@ public class HomeFragment extends BaseFragment implements ProductAdapter.OnProdu
     private StaggeredGridLayoutManager gridLayoutManager;
     private ProductAdapter mAdapter;
 
+    private FusedLocationProviderClient fusedLocationClient;
     private DatabaseReference mDatabase;
     private GeoFire geoFire;
     private GeoQuery geoQuery;
@@ -103,6 +103,7 @@ public class HomeFragment extends BaseFragment implements ProductAdapter.OnProdu
     private int counter = 0;
 
     private static final double[] MY_LOCATION = { 55.936354, 37.494034 };
+    private boolean use_last;
     private Location myLocation;
 
     @Nullable
@@ -140,6 +141,7 @@ public class HomeFragment extends BaseFragment implements ProductAdapter.OnProdu
         geolocationContainer.setVisibility(View.GONE);
         noItemPage.setVisibility(View.GONE);
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(mActivity);
         mDatabase = FirebaseDatabase.getInstance().getReference();
         progressBar = rootView.findViewById(R.id.home_progress_bar);
         recyclerView = rootView.findViewById(R.id.product_grid);
@@ -177,7 +179,7 @@ public class HomeFragment extends BaseFragment implements ProductAdapter.OnProdu
             return false;
         }
 
-        if (!mLocationPermissionGranted || !gpsEnabled) {
+        if (!use_last && (!mLocationPermissionGranted || !gpsEnabled)) {
             recyclerView.setVisibility(View.GONE);
             geolocationContainer.setVisibility(View.VISIBLE);
             Button allowLocationButton = rootView.findViewById(R.id.button_allow_location);
@@ -191,9 +193,23 @@ public class HomeFragment extends BaseFragment implements ProductAdapter.OnProdu
                     }
                 }
             });
+
+            if (Preferences.getLocation(mActivity) != null) {
+                Button useLastLocationButton = rootView.findViewById(R.id.button_use_last_location);
+                useLastLocationButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        myLocation = Preferences.getLocation(mActivity);
+                        use_last = true;
+                        if (checkPermissionsAndGps()) {
+                            startSearch();
+                        }
+                    }
+                });
+            }
         } else {
-            myLocation = Preferences.getLocation(mActivity);
-            if (myLocation.getLatitude() == 0.0 && myLocation.getLongitude() == 0.0) {
+            //myLocation = Preferences.getLocation(mActivity);
+            if (myLocation == null) {
                 initGeolocation();
                 return false;
             }
@@ -208,12 +224,15 @@ public class HomeFragment extends BaseFragment implements ProductAdapter.OnProdu
     }
 
     private void initGeolocation() {
-        FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mActivity);
-        mFusedLocationClient.getLastLocation().addOnSuccessListener(mActivity, new OnSuccessListener<Location>() {
+        geolocationContainer.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
+        fusedLocationClient.getLastLocation().addOnSuccessListener(mActivity, new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
                 if (location != null) {
+                    Log.d(TAG, "Location updated: " + location.getLatitude() + " " + location.getLongitude());
                     Preferences.saveLocation(mActivity, location);
+                    myLocation = location;
                     if (checkPermissionsAndGps()) {
                         startSearch();
                     }
@@ -297,7 +316,7 @@ public class HomeFragment extends BaseFragment implements ProductAdapter.OnProdu
         };
     }
 
-    private synchronized void loadNextData() {
+    private void loadNextData() {
         Log.d(TAG, "loadNextData");
         if (!loading) {
             mAdapter.setLoading(recyclerView);
@@ -306,7 +325,7 @@ public class HomeFragment extends BaseFragment implements ProductAdapter.OnProdu
         }
     }
 
-    private synchronized void startSearch() {
+    private void startSearch() {
         Log.d(TAG, "startSearch");
         loading = true;
         searchNearby(myLocation.getLatitude(), myLocation.getLongitude(), (double) mFilters.getDistance() / 1000);
@@ -318,11 +337,11 @@ public class HomeFragment extends BaseFragment implements ProductAdapter.OnProdu
         geoQuery.addGeoQueryDataEventListener(geoQueryListener);
     }
 
-    private synchronized void stopGeoQueryListener() {
+    private void stopGeoQueryListener() {
         Log.d(TAG_GEO, "stopGeoQueryListener");
         if (loading) {
             loading = false;
-            progressBar.setVisibility(View.GONE);
+            ViewAnimation.fadeOut(progressBar);
             recyclerView.setVisibility(View.VISIBLE);
             Log.d(TAG, "stopGeoQueryListener: " + productsList.size());
             geoQuery.removeGeoQueryEventListener(geoQueryListener);
@@ -353,7 +372,6 @@ public class HomeFragment extends BaseFragment implements ProductAdapter.OnProdu
     private void resetRecycleView() {
         Log.d(TAG, "resetRecycleView");
         recyclerView.setVisibility(View.GONE);
-        progressBar.setVisibility(View.VISIBLE);
         noItemPage.setVisibility(View.GONE);
         loading = false;
         mAdapter.clear();

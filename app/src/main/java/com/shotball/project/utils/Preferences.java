@@ -23,6 +23,11 @@ public class Preferences {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         location.setLatitude(prefs.getFloat(LATITUDE, 0));
         location.setLongitude(prefs.getFloat(LONGITUDE, 0));
+
+        if (location.getLatitude() == 0 && location.getLongitude() == 0) {
+            location = null;
+        }
+
         return location;
     }
 

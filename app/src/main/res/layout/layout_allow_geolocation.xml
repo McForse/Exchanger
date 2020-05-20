@@ -19,7 +19,7 @@
         android:contentDescription="@string/turn_on_your_location" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/no_location_title"
         style="?attr/textAppearanceHeadline6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -29,7 +29,7 @@
         app:layout_constraintTop_toBottomOf="@+id/no_geolocation_image" />
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/no_location_subtitle"
         style="?attr/textAppearanceBody1"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
@@ -39,7 +39,7 @@
         android:textColor="@color/grey_40"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+        app:layout_constraintTop_toBottomOf="@+id/no_location_title" />
 
     <Button
         android:id="@+id/button_allow_location"
@@ -49,6 +49,16 @@
         android:text="@string/allow"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView4" />
+        app:layout_constraintTop_toBottomOf="@+id/no_location_subtitle" />
+
+    <Button
+        android:id="@+id/button_use_last_location"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/use_last_know_location"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_allow_location" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

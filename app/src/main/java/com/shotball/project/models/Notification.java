@@ -6,11 +6,17 @@ public class Notification {
     public String message;
     public String imageUrl;
     public String username;
+    public String from;
     public String topic;
     public String token;
 
     public Notification() {
 
+    }
+
+    public Notification(String title, String message) {
+        this.title = title;
+        this.message = message;
     }
 
     public Notification(String title, String message, String token) {
@@ -19,11 +25,19 @@ public class Notification {
         this.token = token;
     }
 
-    public Notification(String title, String message, String imageUrl, String username, String token) {
+    public Notification(String title, String message, String imageUrl, String token) {
+        this.title = title;
+        this.message = message;
+        this.imageUrl = imageUrl;
+        this.token = token;
+    }
+
+    public Notification(String title, String message, String imageUrl, String username, String from, String token) {
         this.title = title;
         this.message = message;
         this.imageUrl = imageUrl;
         this.username = username;
+        this.from = from;
         this.token = token;
     }
 
@@ -57,6 +71,14 @@ public class Notification {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
     }
 
     public String getTopic() {

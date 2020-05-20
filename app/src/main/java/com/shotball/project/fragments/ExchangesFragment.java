@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,7 +20,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -34,13 +32,16 @@ import com.shotball.project.R;
 import com.shotball.project.activities.ChatActivity;
 import com.shotball.project.interfaces.IsAvailableCallback;
 import com.shotball.project.models.ExchangeModel;
+import com.shotball.project.models.Notification;
+import com.shotball.project.models.Product;
 import com.shotball.project.models.User;
 import com.shotball.project.viewHolders.ExchangeViewHolder;
-
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import static com.shotball.project.utils.FCM.sendPush;
 
 public abstract class ExchangesFragment extends BaseFragment {
 
@@ -127,6 +128,10 @@ public abstract class ExchangesFragment extends BaseFragment {
                         mDatabase.child("exchanges").child("proposed").child(model.getKey()).removeValue();
                     }
                 });
+                changeProductStatus(model.getExchange_for());
+                changeProductStatus(model.getWhat_exchange());
+                Notification notification = new Notification(getString(R.string.new_exchange), getString(R.string.exchange_accepted));
+                sendNotification(model.getWho(), notification);
             }
 
             @Override
@@ -138,6 +143,8 @@ public abstract class ExchangesFragment extends BaseFragment {
                         mDatabase.child("exchanges").child("proposed").child(model.getKey()).removeValue();
                     }
                 });
+                Notification notification = new Notification(getString(R.string.new_exchange), getString(R.string.exchange_refused));
+                sendNotification(model.getWho(), notification);
             }
 
             @Override
@@ -249,6 +256,25 @@ public abstract class ExchangesFragment extends BaseFragment {
         });
     }
 
+    private void sendNotification(String uid, Notification notification) {
+        mDatabase.child("users").child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                User user = dataSnapshot.getValue(User.class);
+
+                if (user != null) {
+                    notification.setToken(user.getFcm());
+                    sendPush(notification);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     private void incExchanges(String uid) {
         DatabaseReference reference = mDatabase.child("users").child(uid);
         reference.runTransaction(new Transaction.Handler() {
@@ -267,6 +293,28 @@ public abstract class ExchangesFragment extends BaseFragment {
             @Override
             public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
                 Log.d(TAG, "incExchangesTransaction:onComplete: " + databaseError);
+            }
+        });
+    }
+
+    private void changeProductStatus(String key) {
+        DatabaseReference reference = mDatabase.child("products").child(key);
+        reference.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                Product product = mutableData.getValue(Product.class);
+                if (product == null) {
+                    return Transaction.success(mutableData);
+                }
+                product.setAvailable(false);
+                mutableData.setValue(product);
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                Log.d(TAG, "changeProductStatusTransaction:onComplete: " + databaseError);
             }
         });
     }

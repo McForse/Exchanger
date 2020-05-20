@@ -68,11 +68,9 @@ public class ProductActivity extends AppCompatActivity {
     public static final String EXTRA_PRODUCT_KEY = "product_key";
     private String PRODUCT_KEY;
 
-    private Toolbar toolbar;
     private NestedScrollView mainContainer;
     private ConstraintLayout noItem;
     private LinearLayout actionsContainer;
-    private ImageView image;
     private TextView title;
     private TextView description;
     private ImageView sellerImage;
@@ -115,7 +113,7 @@ public class ProductActivity extends AppCompatActivity {
         mainContainer = findViewById(R.id.scroll_view);
         mainContainer.setVisibility(View.GONE);
         actionsContainer = findViewById(R.id.product_action_container);
-        image = findViewById(R.id.image);
+        ImageView image = findViewById(R.id.image);
         title = findViewById(R.id.title);
         description = findViewById(R.id.description);
         sellerImage = findViewById(R.id.seller_image);
@@ -158,7 +156,7 @@ public class ProductActivity extends AppCompatActivity {
     }
 
     private void initToolbar() {
-        toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(null);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -248,7 +246,7 @@ public class ProductActivity extends AppCompatActivity {
         stopDataListener();
 
         if (mSeller != null) {
-            if (mSeller.getUid().equals(getUid())) {
+            if (mSeller.getUid().equals(getUid()) || !mProduct.isAvailable()) {
                 actionsContainer.setVisibility(View.GONE);
             }
             //TODO: placeholder and error
@@ -350,7 +348,6 @@ public class ProductActivity extends AppCompatActivity {
     private void findChatRoom(final String toUid, final IsAvailableCallback callback) {
         final boolean[] isAvailable = {false};
         mDatabase.child("rooms").orderByChild("users/" + getUid()).equalTo("i").addListenerForSingleValueEvent(new ValueEventListener() {
-
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot item: dataSnapshot.getChildren()) {
@@ -507,7 +504,7 @@ public class ProductActivity extends AppCompatActivity {
     private void openChat() {
         Intent intent = new Intent(ProductActivity.this, ChatActivity.class);
         intent.putExtra("toUid", mSeller.getUid());
-        intent.putExtra("roomID", roomId);
+        intent.putExtra("roomId", roomId);
         intent.putExtra("roomTitle", mSeller.getUsername());
         intent.putExtra("roomImage", mSeller.getImage());
         intent.putExtra("productKey", mProduct.getKey());

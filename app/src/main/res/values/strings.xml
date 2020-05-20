@@ -158,5 +158,9 @@
     <string name="favourite_remove">Product removed from favorites</string>
     <string name="undo">UNDO</string>
     <string name="product">Product</string>
+    <string name="exchange_accepted">Your exchange accepted</string>
+    <string name="exchange_refused">Your exchange refused</string>
+    <string name="new_message">New message</string>
+    <string name="use_last_know_location">Use last know location</string>
 
 </resources>
