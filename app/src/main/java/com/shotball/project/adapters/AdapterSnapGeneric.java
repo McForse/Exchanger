@@ -65,7 +65,6 @@ public class AdapterSnapGeneric extends RecyclerView.Adapter<RecyclerView.ViewHo
         Image image = items.get(position);
         if (holder instanceof OriginalViewHolder) {
             OriginalViewHolder view = (OriginalViewHolder) holder;
-            //TODO: placeholder and error
             Glide.with(ctx).load(image.image).centerCrop().into(view.image);
             view.lyt_parent.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -121,6 +120,13 @@ public class AdapterSnapGeneric extends RecyclerView.Adapter<RecyclerView.ViewHo
     public void replaceItem(final Image newItem, final int position) {
         items.set(position, newItem);
         notifyItemChanged(position);
+    }
+
+    public List<Image> getItems() {
+        if (getItemViewType(items.size() - 1) == VIEW_ADD) {
+            return items.subList(0, items.size() - 1);
+        }
+        return items;
     }
 
     public void addButton() {

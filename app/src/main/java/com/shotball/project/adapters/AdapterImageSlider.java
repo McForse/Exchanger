@@ -73,7 +73,6 @@ public class AdapterImageSlider extends PagerAdapter {
         ImageView image = v.findViewById(R.id.image);
 
         if (TextUtil.isUrl(o)) {
-            //TODO: placeholder and error
             Glide.with(act).load(o).centerCrop().into(image);
         } else {
             StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("images/" + key + "/" + o);

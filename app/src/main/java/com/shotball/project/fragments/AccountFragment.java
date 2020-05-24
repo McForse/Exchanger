@@ -123,7 +123,6 @@ public class AccountFragment extends BaseFragment {
     private void initUser() {
         if (mUser != null) {
             initToolbar();
-            //TODO: placeholder and error
             Glide.with(this)
                     .load(mUser.getImage())
                     .apply(RequestOptions.circleCropTransform())
@@ -132,8 +131,6 @@ public class AccountFragment extends BaseFragment {
             exchangesCount.setText(String.valueOf(mUser.getExchanges()));
             ViewAnimation.showIn(mainContainer);
             initRecycler();
-        } else {
-            //TODO: error
         }
     }
 

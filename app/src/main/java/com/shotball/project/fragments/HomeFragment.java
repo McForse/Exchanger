@@ -97,7 +97,7 @@ public class HomeFragment extends BaseFragment implements ProductAdapter.OnProdu
     private static boolean filtersUpdated;
 
     private static boolean loading = false;
-    private static final int item_per_display = 10;
+    private static final int item_per_display = 6;
     private final List<Product> productsList = new ArrayList<>();
     private HashSet<String> productsKeys;
     private int counter = 0;
@@ -196,6 +196,7 @@ public class HomeFragment extends BaseFragment implements ProductAdapter.OnProdu
 
             if (Preferences.getLocation(mActivity) != null) {
                 Button useLastLocationButton = rootView.findViewById(R.id.button_use_last_location);
+                useLastLocationButton.setVisibility(View.VISIBLE);
                 useLastLocationButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -329,6 +330,7 @@ public class HomeFragment extends BaseFragment implements ProductAdapter.OnProdu
         Log.d(TAG, "startSearch");
         loading = true;
         searchNearby(myLocation.getLatitude(), myLocation.getLongitude(), (double) mFilters.getDistance() / 1000);
+        //searchNearby(MY_LOCATION[0], MY_LOCATION[1], (double) mFilters.getDistance() / 1000);
     }
 
     private void searchNearby(double latitude, double longitude, double radius) {

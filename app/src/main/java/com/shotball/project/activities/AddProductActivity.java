@@ -86,7 +86,6 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
     private boolean mLocationPermissionGranted;
 
     private NestedScrollView mainContainer;
-    private List<Image> imagesList;
     private AdapterSnapGeneric mAdapter;
 
     private TextInputLayout productCategoryInputLayout;
@@ -202,7 +201,7 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
     private boolean validateForm() {
         boolean valid = true;
 
-        if (imagesList == null || imagesList.size() == 0) {
+        if (mAdapter.getItems() == null || mAdapter.getItems().size() == 0) {
             valid = false;
         }
 
@@ -263,11 +262,12 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
 
     private void uploadImages(final String key) {
         StorageReference imagesRef = mStorage.child("images").child(key);
+        List<Image> imagesList = mAdapter.getItems();
         final ArrayList<String> productImages = new ArrayList<>();
 
         for (int i = 0; i < imagesList.size(); i++) {
             productImages.add(String.valueOf(i));
-            Uri file = imagesList.get(i).image;
+            Uri file = imagesList.get(i).getImage();
             StorageReference riversRef = imagesRef.child(String.valueOf(i));
             UploadTask uploadTask = riversRef.putFile(file);
 
@@ -466,7 +466,7 @@ public class AddProductActivity extends BaseActivity implements OnMapReadyCallba
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == Define.ALBUM_REQUEST_CODE) {
             if (resultCode == RESULT_OK && data != null) {
-                imagesList = new ArrayList<>();
+                List<Image> imagesList = new ArrayList<>();
                 ArrayList<Uri> path = data.getParcelableArrayListExtra(Define.INTENT_PATH);
 
                 if (path != null) {

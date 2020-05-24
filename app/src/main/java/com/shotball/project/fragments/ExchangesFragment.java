@@ -139,7 +139,7 @@ public abstract class ExchangesFragment extends BaseFragment {
                         mDatabase.child("exchanges").child("proposed").child(model.getKey()).removeValue();
                     }
                 });
-                Notification notification = new Notification(getString(R.string.new_exchange), getString(R.string.exchange_refused));
+                Notification notification = new Notification(getString(R.string.exchange_refused_title), getString(R.string.exchange_refused));
                 sendNotification(model.getWho(), notification);
             }
 
@@ -156,8 +156,8 @@ public abstract class ExchangesFragment extends BaseFragment {
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                Notification notification = new Notification(getString(R.string.new_exchange), getString(R.string.exchange_confirmed));
-                                sendNotification("xnkeEHL5p9QccyGCkWFyDiWWI0h2", notification);
+                                Notification notification = new Notification(getString(R.string.exchange_confirmed_title), getString(R.string.exchange_confirmed));
+                                sendNotification(model.getWhom(), notification);
                                 moveFirebaseRecord(mDatabase.child("products").child(model.getWhat_exchange()), mDatabase.child("exchanged_products").child(model.getWhat_exchange()));
                                 moveFirebaseRecord(mDatabase.child("products").child(model.getExchange_for()), mDatabase.child("exchanged_products").child(model.getExchange_for()));
                                 model.setStatus(3);

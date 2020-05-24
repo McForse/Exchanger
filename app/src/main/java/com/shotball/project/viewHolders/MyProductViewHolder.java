@@ -40,7 +40,6 @@ public class MyProductViewHolder extends RecyclerView.ViewHolder {
 
         try {
             if (TextUtil.isUrl(imageUrl)) {
-                //TODO: placeholder and error
                 Glide.with(context).load(product.images.get(0)).centerCrop().into(image);
             } else {
                 StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("images").child(product.getKey()).child(imageUrl);

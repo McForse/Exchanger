@@ -83,7 +83,6 @@ public class ExchangeViewHolder extends RecyclerView.ViewHolder {
 
                 try {
                     if (TextUtil.isUrl(image)) {
-                        //TODO: placeholder and error
                         Glide.with(ctx).load(image).centerCrop().into(productImage);
                     } else {
                         Log.d(TAG, "Image loading from storage: " + product.getKey());
@@ -110,7 +109,6 @@ public class ExchangeViewHolder extends RecyclerView.ViewHolder {
 
                 try {
                     if (TextUtil.isUrl(image)) {
-                        //TODO: placeholder and error
                         Glide.with(ctx).load(image).centerCrop().into(toProductImage);
                     } else {
                         StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("images").child(product.getKey()).child(image);

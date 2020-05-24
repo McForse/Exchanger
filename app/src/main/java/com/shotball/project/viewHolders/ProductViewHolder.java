@@ -42,7 +42,6 @@ public class ProductViewHolder extends RecyclerView.ViewHolder {
 
         try {
             if (TextUtil.isUrl(imageUrl)) {
-                //TODO: placeholder and error
                 Glide.with(context).load(product.images.get(0)).centerCrop().into(image);
                 //Glide.with(context).load(product.imageurl).placeholder(R.mipmap.ic_launcher).error(R.mipmap.ic_launcher).into(productImageView);
             } else {

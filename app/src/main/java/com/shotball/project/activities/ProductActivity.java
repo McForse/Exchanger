@@ -248,7 +248,6 @@ public class ProductActivity extends AppCompatActivity {
             if (mSeller.getUid().equals(getUid()) || !mProduct.isAvailable()) {
                 actionsContainer.setVisibility(View.GONE);
             }
-            //TODO: placeholder and error
             Glide.with(this)
                     .load(mSeller.image)
                     .apply(RequestOptions.circleCropTransform())

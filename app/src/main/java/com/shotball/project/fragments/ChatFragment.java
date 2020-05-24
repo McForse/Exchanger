@@ -211,7 +211,7 @@ public class ChatFragment extends BaseFragment {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 User me = users.get(0);
-                Notification notification = new Notification("New message", message.getMsg(), me.getImage(), me.getUsername(), me.getUid(), users.get(1).getFcm());
+                Notification notification = new Notification(getString(R.string.new_message), message.getMsg(), me.getImage(), me.getUsername(), me.getUid(), users.get(1).getFcm());
                 sendPush(notification);
                 sendButton.setEnabled(true);
             }
@@ -445,7 +445,6 @@ public class ChatFragment extends BaseFragment {
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         String imageUrl = (String) dataSnapshot.getValue();
                         if (imageUrl != null && TextUtil.isUrl(imageUrl)) {
-                            //TODO: placeholder and error
                             Glide.with(rootView.getContext()).load(imageUrl).centerCrop().into(image);
                         } else {
                             StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("images").child(message.getUid()).child("0");

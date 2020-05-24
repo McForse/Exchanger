@@ -159,9 +159,11 @@
     <string name="undo">UNDO</string>
     <string name="product">Product</string>
     <string name="exchange_accepted">Your exchange accepted</string>
+    <string name="exchange_refused_title">Exchange failed</string>
     <string name="exchange_refused">Your exchange refused</string>
     <string name="new_message">New message</string>
     <string name="use_last_know_location">Use last know location</string>
+    <string name="exchange_confirmed_title">Exchange complete</string>
     <string name="exchange_confirmed">Your exchange is confirmed</string>
 
 </resources>
