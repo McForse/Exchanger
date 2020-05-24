@@ -24,8 +24,6 @@ android {
 
         }
         release {
-            minifyEnabled true
-            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -61,8 +59,5 @@ dependencies {
     implementation 'com.mikhaellopez:circularimageview:4.2.0'
     implementation 'com.google.firebase:firebase-messaging:20.1.7'
     implementation 'android.arch.work:work-runtime:1.0.1'
-    implementation 'com.squareup.retrofit2:retrofit:2.7.1'
-    implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
-    implementation 'com.squareup.retrofit2:adapter-rxjava2:2.7.1'
     implementation "com.squareup.okhttp3:logging-interceptor:4.3.1"
 }
