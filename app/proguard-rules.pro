@@ -30,3 +30,5 @@
 }
 
 -keep class com.shotball.models.** { *; }
+
+-keep public class * extends android.app.Application

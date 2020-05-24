@@ -102,7 +102,7 @@ public class HomeFragment extends BaseFragment implements ProductAdapter.OnProdu
     private HashSet<String> productsKeys;
     private int counter = 0;
 
-    private static final double[] MY_LOCATION = { 55.936354, 37.494034 };
+    private static final double[] MY_LOCATION = { 55.9343183, 37.4972967 };
     private boolean use_last;
     private Location myLocation;
 
